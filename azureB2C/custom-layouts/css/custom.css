@@ -1,0 +1,72 @@
+:root {
+  --brand-color: #189ad6;
+}
+
+a {
+  color: var(--brand-color);
+}
+
+button {
+  border-radius: 0.5rem;
+}
+
+input,
+select {
+  width: 100%;
+  border: 1px solid gray;
+  padding: 1.5rem;
+  border-radius: 0.5rem;
+}
+
+.container .entry .entry-item {
+  text-align: left;
+  margin-bottom: 2.5rem;
+}
+
+.heading h1 {
+  display: none;
+}
+
+.self_asserted_container .row .panel-default .panel-body img.companyLogo {
+  margin-bottom: 3rem;
+  width: 150px;
+  height: auto;
+}
+
+.buttons button, .buttons #continue {
+  width: 100%;
+  padding: 1.5rem;
+  color: white;
+  font-size: 1.75rem;
+  background: var(--brand-color);
+}
+
+#attributeVerification .buttons {
+	margin-top: 0;
+}
+
+#forgotPassword, .error.itemLevel {
+  display: block;
+  padding: 0.5rem;
+  padding-left: 0;
+}
+
+.error.itemLevel p {
+	color: red;
+}
+
+
+#attributeList ul li {
+	text-align: left;
+}
+
+#attributeList ul li label {
+	float: none;
+	display: block !important;
+}
+
+#attributeList ul li input {
+	text-indent: 0;
+	line-height: normal;
+}
+

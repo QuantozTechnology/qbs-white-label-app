@@ -1,0 +1,44 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <TargetFramework>net7.0</TargetFramework>
+        <AzureFunctionsVersion>v4</AzureFunctionsVersion>
+
+        <!--
+        We have some culture-aware methods like string parsing.
+        This can cause some issues translating string to Stellar units.
+        Thereforce we force the invariant culture.
+        -->
+        <PredefinedCulturesOnly>true</PredefinedCulturesOnly>
+        <InvariantGlobalization>true</InvariantGlobalization>
+    </PropertyGroup>
+    <ItemGroup>
+        <PackageReference Include="Azure.Security.KeyVault.Secrets" Version="4.3.0" />
+        <PackageReference Include="FluentResults" Version="3.8.0" />
+        <PackageReference Include="Microsoft.Data.Sqlite" Version="7.0.3" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="7.0.3">
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="Microsoft.NET.Sdk.Functions" Version="4.1.1" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.3" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="7.0.3" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Proxies" Version="7.0.3" />
+        <PackageReference Include="Microsoft.Azure.Functions.Extensions" Version="1.1.0" />
+        <PackageReference Include="SecurityCodeScan.VS2019" Version="5.6.3" PrivateAssets="all" />
+    </ItemGroup>
+    <ItemGroup>
+      <ProjectReference Include="..\SigningService.HDWallet\SigningService.HDWallet.csproj" />
+    </ItemGroup>
+
+  <ItemGroup>
+        <None Update="host.json">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+        <None Update="local.settings.json">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+            <CopyToPublishDirectory>Never</CopyToPublishDirectory>
+            <Generator>SettingsSingleFileGenerator</Generator>
+            <LastGenOutput>local.settings.Designer.cs</LastGenOutput>
+        </None>
+    </ItemGroup>
+</Project>

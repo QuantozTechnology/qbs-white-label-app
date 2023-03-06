@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+	<title>Sign up</title>
+
+	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<link href="https://ajax.aspnetcdn.com/ajax/bootstrap/3.3.5/css/bootstrap.min.css" rel="stylesheet"
+		type="text/css" />
+
+	<link href="https://yourstore.blob.core.windows.net/root/css/assets.css" rel="stylesheet"
+		type="text/css" />
+	<link href="https://yourstore.blob.core.windows.net/root/css/common.css" rel="stylesheet"
+		type="text/css" />
+	<link href="https://yourstore.blob.core.windows.net/root/css/selfasserted.css" rel="stylesheet"
+		type="text/css" />
+	<link href="https://yourstore.blob.core.windows.net/root/css/custom.css" rel="stylesheet"
+		type="text/css" />
+</head>
+
+<body>
+	<div class="container self_asserted_container">
+		<div class="row">
+			<div class="col-lg-6">
+				<div class="panel panel-default">
+					<div class="panel-body">
+						<img
+                alt="Company Logo"
+                class="companyLogo"
+                src="https://yourstore.blob.core.windows.net/root/images/qpa-logo-light.png"
+              />
+						<div id="api"></div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<script>
+		function waitForDOMToHaveLoadedElement(targetToBeLoaded, callback) {
+			// Wait for the DOM to be ready
+			$(document).ready(function () {
+				const localAccountForm = $(targetToBeLoaded);
+				if (localAccountForm.length) {
+				// The target element is present - execute the callback
+				callback();
+				} else {
+				// The target element is not present - set up an interval to check again
+				let intervalId = setInterval(function () {
+					const localAccountForm = $(targetToBeLoaded);
+					if (localAccountForm.length) {
+					// The target element is present - stop the interval and execute the callback
+					clearInterval(intervalId);
+					callback();
+					}
+				}, 10);
+				}
+			});
+		}
+		
+		waitForDOMToHaveLoadedElement("#localAccountForm", function(){
+			// move all input validation error fields below their inputs
+			$('.entry-item input').each(function() {
+				$(this).prev('.error.itemLevel').insertAfter($(this));
+			});
+			// only way for some reason to make the error messages red (css does not work)
+			$('.error.itemLevel p').css("color", "red")
+
+			// Move forgot password
+			const forgotPassword = $("#forgotPassword");
+			const passwordEntryItem = forgotPassword.closest(".entry-item");
+			passwordEntryItem.append(forgotPassword);
+		})
+    </script>
+</body>
+
+</html>

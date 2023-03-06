@@ -1,0 +1,9 @@
+﻿{
+  "IsEncrypted": false,
+  "Values": {
+    "SigningDbContext": "",
+    "WalletOptions": {
+      "KeyVaultUrl": ""
+    }
+  }
+}

@@ -1,0 +1,50 @@
+stages:
+  - build
+  - test
+
+build:
+  stage: build
+  script:
+    - npm -v
+    - node -v
+    - echo "Starting build"
+    - dotnet tool restore
+    - dotnet fake build -t BuildRelease
+  artifacts:
+    expire_in: 24 hours
+    
+backend_tests:
+  stage: test
+  script:
+    - echo "starting tests"
+    - dotnet tool restore
+    - dotnet fake build -t RunTests
+  dependencies:
+    - build
+  artifacts:
+    when: always
+    paths:
+      - ./artifacts/*test-result.xml
+    reports:
+      junit:
+        - ./artifacts/*test-result.xml
+
+frontend_tests:
+  before_script:
+    - cd mobile
+    - npm install --legacy-peer-deps
+    - cd ..
+  stage: test
+  script:
+    - cd mobile
+    - echo "Start JS tests for mobile"
+    - npm run ci-test
+    - cd ..
+  allow_failure: false
+  artifacts:
+    when: always
+    paths:
+      - ./mobile/junit.xml
+    reports:
+      junit:
+        - ./mobile/junit.xml

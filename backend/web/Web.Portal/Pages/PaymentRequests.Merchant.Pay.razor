@@ -1,0 +1,225 @@
+﻿@*When changing this url remember to also change Core.Presentation.Models.Responses.PaymentRequestResponses.MerchantPaymentRequestResponse*@
+@page "/paymentrequests/merchant/{code}/pay"
+
+@using QRCoder;
+@using Web.SDK.Services.Interfaces;
+@using Web.SDK.Services.Models.Responses;
+@using System.Web;
+
+@attribute [AllowAnonymous]
+@inject IMerchantService _merchantService;
+@inject NavigationManager Navigation
+@implements IDisposable
+
+<div class="container py-5">
+    <Loading IsLoading="@IsLoading">
+        <div class="row d-flex justify-content-center align-items-center">
+            @if (Response != null)
+            {
+                <div class="col">
+                    <div class="card my-4 shadow rounded">
+                        <div class="row g-0">
+                            <div class="col-xl-6 d-xl-block bg-image">
+                                @if (QRCode != null)
+                                {
+                                    <img class="img-thumbnail img-fluid" src="data:image/png;base64,@Convert.ToBase64String(QRCode)" alt="QR Code">
+                                }
+                            </div>
+                            <div class="col-xl-6">
+                                <div class="card-body p-md-5 text-black">
+                                    <h3 class="mb-4">Please scan the QR Code to pay.</h3>
+                                    <p>
+                                        You can scan the QR Code by clicking on the Send button in the QBS app. If you are on your phone and have the app installed,
+                                        you can <a @onclick="OpenMobile" style="color: #189ad8">click here</a> to pay without scanning.
+                                        Please also verify that the information shown in the QBS app matches the information displayed on this screen.
+                                    </p>
+                                    @if (!string.IsNullOrWhiteSpace(Response.Options?.Name))
+                                    {
+                                        <div class="row">
+                                            <div class="mb-4">
+                                                <div class="form-outline">
+                                                    <label class="form-label" for="form3Example1m">Name:</label>
+                                                    <input class="form-control" id="disabledInput" type="text" placeholder="@Response.Options?.Name" disabled>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+                                    <div class="row">
+                                        <div class="col-md-6 mb-4">
+                                            <div class="form-outline">
+                                                <label class="form-label" for="form3Example1m">Amount:</label>
+                                                <input class="form-control" id="disabledInput" type="text" placeholder="@Response.RequestedAmount.ToString("F2")" disabled>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6 mb-4">
+                                            <label class="form-label" for="form3Example1m">Token Code:</label>
+                                            <input class="form-control" id="disabledInput" type="text" placeholder="@Response.TokenCode" disabled>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="mb-4">
+                                            <label class="form-label" for="form3Example1m">Created On:</label>
+                                            <input class="form-control" id="disabledInput" type="text" placeholder="@UnixToString(Response.CreatedOn)" disabled>
+                                        </div>
+                                    </div>
+
+                                    @if (Response.Options?.ExpiresOn != null && Response.Options.ExpiresOn.HasValue)
+                                    {
+                                        <div class="row">
+                                            <div class="mb-4">
+                                                <label class="form-label" for="form3Example1m">Expires:</label>
+                                                <input class="form-control" id="disabledInput" type="text" placeholder="@UnixToString(Response.Options.ExpiresOn.Value)" disabled>
+                                            </div>
+                                        </div>
+                                    }
+
+                                    @if (Response.Options?.Memo != null)
+                                    {
+                                        <div class="row">
+                                            <div class="mb-4">
+                                                <label class="form-label" for="form3Example1m">Memo / Reference:</label>
+                                                <input class="form-control" id="disabledInput" type="text" placeholder="@Response.Options?.Memo" disabled>
+                                            </div>
+                                        </div>
+                                    }
+
+                                    <div class="d-flex justify-content-end pt-3">
+                                        <button type="button" @onclick="Cancel" class="btn btn-success btn-lg ms-2"
+                                            style="background-color: #189ad8">
+                                            Cancel
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </Loading>
+</div>
+
+@code {
+
+    [Parameter]
+    public string? Code { get; set; }
+
+    private MerchantPaymentRequestResponse? Response { get; set; }
+    private Timer? Timer { get; set; }
+
+    private string? ErrorMessage { get; set; }
+    private bool IsLoading { get; set; } = true;
+    private byte[]? QRCode { get; set; }
+
+    protected async override Task OnInitializedAsync()
+    {
+        if (!string.IsNullOrWhiteSpace(Code))
+        {
+            var result = await _merchantService.GetPaymentRequestAsync(Code);
+
+            if (result.IsSuccess)
+            {
+                IsLoading = false;
+
+                Response = result.Value;
+
+                if (Response.Status != "Open")
+                {
+                    var url = BuildRedirectUrl(Response.MerchantSettings.ReturnUrl, false, $"The payment request for  for {Response.RequestedAmount.ToString("F2")} {Response.TokenCode} is no longer open");
+                    Navigation.NavigateTo(url);
+                }
+
+                QRCode = GenerateQRCodeImage(Response.Code);
+                StartTimer();
+            }
+            else
+            {
+                ErrorMessage = "An unexpected error has occured loading this payment request. Please refresh the page.";
+            }
+        }
+    }
+
+    private void Cancel()
+    {
+        if (Response != null)
+        {
+            var url = BuildRedirectUrl(Response.MerchantSettings.ReturnUrl, false, $"The payment request for {Response.RequestedAmount.ToString("F2")} {Response.TokenCode} was manually cancelled");
+            Navigation.NavigateTo(url);
+        }
+    }
+
+    private void OpenMobile()
+    {
+        if (!string.IsNullOrWhiteSpace(Code))
+        {
+            Navigation.NavigateTo($"/deeplinks/paymentrequests/{Code}");
+        }
+    }
+
+    private void StartTimer()
+    {
+        if (!string.IsNullOrWhiteSpace(Code))
+        {
+            Timer = new Timer(async (object? stateInfo) =>
+               {
+                   var result = await _merchantService.GetPaymentRequestAsync(Code);
+
+                   if (result.IsSuccess)
+                   {
+                       var response = result.Value;
+
+                       if (response.Status == "Paid")
+                       {
+                           var url = BuildRedirectUrl(response.MerchantSettings.ReturnUrl, true, $"The payment request for {response.RequestedAmount.ToString("F2")} {response.TokenCode} was processed successfully");
+                           Navigation.NavigateTo(url);
+                       }
+
+                       if (response.Status == "Cancelled")
+                       {
+                           var url = BuildRedirectUrl(response.MerchantSettings.ReturnUrl, false, $"The payment request  for {response.RequestedAmount.ToString("F2")} {response.TokenCode} is no longer open");
+                           Navigation.NavigateTo(url);
+                       }
+                   }
+                   else
+                   {
+                       ErrorMessage = "An unexpected error has occured loading this payment request. Please refresh this page and try again.";
+                   }
+
+                   await InvokeAsync(StateHasChanged);
+
+               }, new AutoResetEvent(false), 2000, 2000); // fire every 2000 milliseconds
+        }
+    }
+
+    private string BuildRedirectUrl(string url, bool success, string reason)
+    {
+        UriBuilder builder = new UriBuilder(url);
+        string existingQuery = builder.Query;
+
+        builder.Query = existingQuery.Length > 1
+            ? $"{existingQuery}&success={success}&reason={reason}"
+            : $"success={success}&reason={reason}";
+
+        return builder.ToString();
+    }
+
+    private byte[] GenerateQRCodeImage(string text)
+    {
+        var generator = new QRCodeGenerator();
+        var data = generator.CreateQrCode(text, QRCodeGenerator.ECCLevel.Q);
+        var code = new PngByteQRCode(data);
+
+        return code.GetGraphic(20);
+    }
+
+    private string UnixToString(long unix)
+    {
+        return DateTimeOffset.FromUnixTimeMilliseconds(unix).ToLocalTime().ToString("d/M/yyyy HH:mm:ss");
+    }
+
+    public void Dispose()
+    {
+        Timer?.Dispose();
+    }
+}

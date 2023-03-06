@@ -1,0 +1,34 @@
+﻿@page "/"
+@attribute [AllowAnonymous]
+@inject NavigationManager Navigation
+
+<div class="container py-5">
+    <div class="row d-flex justify-content-center align-items-center">
+        <div class="col">
+            <div class="card my-4 shadow rounded">
+                <div class="row g-0">
+                    <div class="p-5 text-center">
+                        <h1 class="mb-3">Welcome to the QBA Portal</h1>
+                            <div class="col-lg-3">
+                                <div type="button" @onclick="OpenPointOfSales" class="card">
+                                    <img class="card-img-top" src="paymentrequests.merchant.create@3x.png" alt="Card image cap">
+                                    <div class="card-body">
+                                        <h5 class="card-title">Point of Sales</h5>
+                                        <p class="card-text">Allow your customer's to directly pay peer to peer through simple scanning of a QR Code.</p>
+                                    </div>
+                                </div>
+                            </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@code {
+    private void OpenPointOfSales()
+    {
+        Navigation.NavigateTo($"/paymentrequests/merchant");
+    }
+}

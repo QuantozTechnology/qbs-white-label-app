@@ -1,0 +1,105 @@
+import { Ionicons } from "@expo/vector-icons";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { Icon } from "native-base";
+import { Transaction } from "../api/transactions/transactions.interface";
+import CustomNavigationHeader from "../components/CustomNavigationHeader";
+import CreatePaymentRequest from "../screens/CreatePaymentRequest";
+import Funding from "../screens/Funding";
+import PortfolioOverview from "../screens/PortfolioOverview";
+import SummaryPaymentRequest from "../screens/SummaryPaymentRequest";
+import TransactionDetails from "../screens/TransactionDetails";
+import Withdraw from "../screens/Withdraw";
+import SendStackNavigator from "./SendStack";
+
+export type PortfolioStackParamList = {
+  Portfolio: undefined;
+  TransactionDetails: {
+    transaction: Transaction;
+  };
+  CreatePaymentRequest: undefined;
+  SummaryPaymentRequest: {
+    stablecoin: string;
+    amount: string;
+    canChangeAmount?: boolean;
+    shareName?: boolean;
+    isOneOffPayment?: boolean;
+    qrCode: string;
+    message?: string | null;
+    expiresOn?: string;
+  };
+  SendStack: undefined;
+  Funding: undefined;
+  Withdraw: undefined;
+};
+
+const PortfolioStack = createNativeStackNavigator<PortfolioStackParamList>();
+
+export default function PortfolioStackNavigator() {
+  return (
+    <PortfolioStack.Navigator>
+      <PortfolioStack.Screen
+        name="Portfolio"
+        component={PortfolioOverview}
+        options={{ headerShown: false }}
+      />
+      <PortfolioStack.Screen
+        name="TransactionDetails"
+        component={TransactionDetails}
+        options={{
+          presentation: "modal",
+          title: "Transaction details",
+          header: (props) => (
+            <CustomNavigationHeader
+              {...props}
+              customIcon={
+                <Icon
+                  as={Ionicons}
+                  name="close"
+                  size="xl"
+                  color="primary.500"
+                />
+              }
+            />
+          ),
+        }}
+      />
+      <PortfolioStack.Screen
+        name="CreatePaymentRequest"
+        component={CreatePaymentRequest}
+        options={{
+          title: "Create request",
+          header: (props) => <CustomNavigationHeader {...props} />,
+        }}
+      />
+      <PortfolioStack.Screen
+        name="SummaryPaymentRequest"
+        component={SummaryPaymentRequest}
+        options={{
+          title: "Request summary",
+          header: (props) => <CustomNavigationHeader {...props} />,
+        }}
+      />
+      <PortfolioStack.Screen
+        name="SendStack"
+        component={SendStackNavigator}
+        options={{
+          headerShown: false,
+        }}
+      />
+      <PortfolioStack.Screen
+        name="Funding"
+        component={Funding}
+        options={{
+          header: (props) => <CustomNavigationHeader {...props} />,
+        }}
+      />
+      <PortfolioStack.Screen
+        name="Withdraw"
+        component={Withdraw}
+        options={{
+          header: (props) => <CustomNavigationHeader {...props} />,
+        }}
+      />
+    </PortfolioStack.Navigator>
+  );
+}
