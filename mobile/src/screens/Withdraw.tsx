@@ -1,4 +1,3 @@
-import { Ionicons } from "@expo/vector-icons";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
@@ -6,14 +5,10 @@ import {
   Box,
   Button,
   FormControl,
-  Icon,
-  IconButton,
   Input,
   KeyboardAvoidingView,
-  Modal,
   Pressable,
   ScrollView,
-  Text,
   Toast,
   useDisclose,
   VStack,
@@ -58,7 +53,6 @@ function Withdraw({ navigation }: Props) {
   const [errors, setErrors] = useState<{ [key: string]: string | undefined }>(
     {}
   );
-  const [showModal, setShowModal] = useState(false);
 
   const { status: balancesStatus, data: balances } = useBalances();
   const { status: limitsStatus, data: limits } = useCustomerLimits();
@@ -107,24 +101,6 @@ function Withdraw({ navigation }: Props) {
       });
     },
   });
-
-  useEffect(() => {
-    navigation.setOptions({
-      headerRight: () => (
-        <IconButton
-          icon={
-            <Icon
-              as={Ionicons}
-              name="information-circle-outline"
-              size="lg"
-              onPress={handleInfoButtonPress}
-              accessibilityLabel="info button"
-            />
-          }
-        />
-      ),
-    });
-  }, [navigation]);
 
   useEffect(() => {
     if (balances != null && selectedToken == null) {
@@ -204,128 +180,105 @@ function Withdraw({ navigation }: Props) {
 
   const hasReachedLimits =
     sceurToken.withdraw.used.monthly === sceurToken.withdraw.limit.monthly;
+  const hasBankAccount = customer.data.value.bankAccountNumber;
 
   return (
     <ScreenWrapper p={-4} flex={1}>
       <KeyboardAvoidingView
         behavior={getPlatformOS() === "ios" ? "padding" : "height"}
-        keyboardVerticalOffset={136}
+        keyboardVerticalOffset={88}
         flex={1}
       >
-        <ScrollView>
+        <ScrollView flex={1}>
           <VStack space={2} flex={1}>
             <CustomerLimitsProgress
               label="Monthly withdraw limits"
               operationType="withdraw"
             />
-            {!hasReachedLimits && (
-              <VStack px={4}>
-                {!customer.data.value.bankAccountNumber ? (
-                  <Notification
-                    title="No known bank account"
-                    message="Fund your account first, before being able to withdraw."
-                    variant="warning"
-                    actionButton={
-                      <Button
-                        bg="warning.600"
-                        _pressed={{ bg: "warning.700" }}
-                        onPress={handleRedirectFunding}
-                        py={2}
-                      >
-                        Fund account
-                      </Button>
-                    }
-                  />
-                ) : (
-                  <DataDisplayField
-                    label="Your bank account"
-                    value={customer.data.value.bankAccountNumber}
-                  />
-                )}
-                <Pressable onPress={onOpen}>
-                  <BalancesList
+            {!hasBankAccount ? (
+              <Box p={4} pt={2}>
+                <Notification
+                  title="No known bank account"
+                  message="Fund your account first, before being able to withdraw."
+                  variant="warning"
+                  actionButton={
+                    <Button
+                      bg="warning.600"
+                      _pressed={{ bg: "warning.700" }}
+                      onPress={handleRedirectFunding}
+                      py={2}
+                    >
+                      Fund account
+                    </Button>
+                  }
+                />
+              </Box>
+            ) : !hasReachedLimits ? (
+              <>
+                <DataDisplayField
+                  label="Your bank account"
+                  value={customer.data.value.bankAccountNumber}
+                />
+                <VStack p={4} py={1} space={2}>
+                  <Pressable onPress={onOpen}>
+                    <BalancesList
+                      selectedToken={selectedToken}
+                      setSelectedToken={setSelectedToken}
+                    />
+                  </Pressable>
+                  <FormControl isRequired isInvalid={errors["amount"] != null}>
+                    <FormControl.Label>Amount</FormControl.Label>
+                    <Input
+                      value={amount}
+                      onChangeText={handleAmountChange}
+                      keyboardType="numeric"
+                      accessibilityLabel="amount"
+                    />
+                    <FormControl.ErrorMessage accessibilityLabel="amount error">
+                      {errors["amount"]}
+                    </FormControl.ErrorMessage>
+                  </FormControl>
+                  <TokensSelection
+                    isOpen={isOpen}
+                    onClose={onClose}
                     selectedToken={selectedToken}
                     setSelectedToken={setSelectedToken}
+                    tokens={balances.value}
                   />
-                </Pressable>
-                <FormControl isRequired isInvalid={errors["amount"] != null}>
-                  <FormControl.Label>Amount</FormControl.Label>
-                  <Input
-                    value={amount}
-                    onChangeText={handleAmountChange}
-                    keyboardType="numeric"
-                    accessibilityLabel="amount"
-                  />
-                  <FormControl.ErrorMessage accessibilityLabel="amount error">
-                    {errors["amount"]}
-                  </FormControl.ErrorMessage>
-                </FormControl>
-                <TokensSelection
-                  isOpen={isOpen}
-                  onClose={onClose}
-                  selectedToken={selectedToken}
-                  setSelectedToken={setSelectedToken}
-                  tokens={balances.value}
-                />
-              </VStack>
-            )}
+                </VStack>
+              </>
+            ) : null}
+          </VStack>
+        </ScrollView>
+        <Box pt={4}>
+          {hasBankAccount && (
             <WithdrawFees
               tokenCode={
                 selectedToken?.tokenCode ?? balances.value[0].tokenCode
               }
               amount={amount}
             />
-          </VStack>
-        </ScrollView>
+          )}
 
-        <Box p={4}>
-          <Button
-            onPress={handleWithdrawRequest}
-            isDisabled={
-              isWithdrawing ||
-              hasReachedLimits ||
-              !customer?.data.value.bankAccountNumber
-            }
-            isLoading={isWithdrawing}
-            isLoadingText="Withdrawing..."
-            accessibilityLabel="withdraw button"
-          >
-            Withdraw
-          </Button>
+          <Box p={4}>
+            <Button
+              onPress={handleWithdrawRequest}
+              isDisabled={
+                isWithdrawing ||
+                hasReachedLimits ||
+                !customer?.data.value.bankAccountNumber
+              }
+              isLoading={isWithdrawing}
+              isLoadingText="Withdrawing..."
+              accessibilityLabel="withdraw button"
+            >
+              Withdraw
+            </Button>
+          </Box>
         </Box>
       </KeyboardAvoidingView>
-      <Modal isOpen={showModal} onClose={() => setShowModal(false)}>
-        <Modal.Content maxWidth="400px">
-          <Modal.CloseButton />
-          <Modal.Header accessibilityLabel="info modal title">
-            Withdrawing your funds
-          </Modal.Header>
-          <Modal.Body>
-            <Text accessibilityLabel="info modal text">
-              Here we will explain how withdraw works. Also mention that to
-              change bank account, they need to contact support. Maybe add a
-              button in this modal?
-            </Text>
-          </Modal.Body>
-          <Modal.Footer p={1}>
-            <Button
-              variant="ghost"
-              onPress={() => {
-                setShowModal(false);
-              }}
-              accessibilityLabel="close info modal"
-            >
-              Close
-            </Button>
-          </Modal.Footer>
-        </Modal.Content>
-      </Modal>
     </ScreenWrapper>
   );
-
-  function handleInfoButtonPress() {
-    setShowModal(true);
-  }
 
   function handleRedirectFunding() {
     navigation.replace("Funding");

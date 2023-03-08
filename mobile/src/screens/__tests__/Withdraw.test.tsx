@@ -2,7 +2,8 @@ import { rest } from "msw";
 import { Customer } from "../../api/customer/customer.interface";
 import { customerMocksDefaultResponse } from "../../api/customer/customer.mocks";
 import { APIError, ApiErrorCode } from "../../api/generic/error.interface";
-import { Limits } from "../../api/limits/limits.interface";
+import { Limits, LimitsDetails } from "../../api/limits/limits.interface";
+import { defaultLimitsMockResponse } from "../../api/limits/limits.mocks";
 import { GenericApiResponse } from "../../api/utils/api.interface";
 import {
   fireEvent,
@@ -27,7 +28,7 @@ describe("Withdraw screen", () => {
     (biometricValidation as jest.Mock).mockResolvedValue({ result: "success" });
   });
 
-  const responseWithBankAccount: GenericApiResponse<Customer> = {
+  const responseWithBankAccount: { value: Customer } = {
     value: {
       ...customerMocksDefaultResponse.value,
       bankAccountNumber: "NL123456",
@@ -43,6 +44,52 @@ describe("Withdraw screen", () => {
   });
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let props: any;
+
+  it("shows the expected UI if bank account is null", async () => {
+    props = createTestProps({});
+    render(<Withdraw {...props} />);
+
+    const limitsProgress = await screen.findByLabelText(
+      "limits progress for customer"
+    );
+    const noBankAccountNotification = screen.getByLabelText(
+      "notification message"
+    );
+    const withdrawButton = screen.getByLabelText("withdraw button");
+
+    expect(limitsProgress).toBeTruthy();
+    expect(
+      within(noBankAccountNotification).getByLabelText(
+        "notification message title"
+      )
+    ).toHaveTextContent(/^No known bank account$/);
+    expect(withdrawButton).toBeTruthy();
+  });
+
+  it("shows the expected UI if bank account is defined", async () => {
+    server.use(
+      rest.get(`${backendApiUrl}/api/customers`, (req, rest, ctx) => {
+        return rest(ctx.status(200), ctx.json(responseWithBankAccount));
+      })
+    );
+
+    props = createTestProps({});
+    render(<Withdraw {...props} />);
+
+    const limitsProgress = await screen.findByLabelText(
+      "limits progress for customer"
+    );
+    const balances = await screen.findByLabelText("balances list");
+    const amount = screen.getByLabelText("amount");
+    const fees = await screen.findByLabelText("empty amount withdraw fees");
+    const withdrawButton = screen.getByLabelText("withdraw button");
+
+    expect(limitsProgress).toBeTruthy();
+    expect(balances).toBeTruthy();
+    expect(amount.props.value).toBe("");
+    expect(fees).toBeTruthy();
+    expect(withdrawButton).toBeTruthy();
+  });
 
   it("shows error if limit API returns an error", async () => {
     server.use(
@@ -92,48 +139,17 @@ describe("Withdraw screen", () => {
     ).toHaveTextContent(/^Please try again later$/);
   });
 
-  it("shows the expected initial UI", async () => {
-    props = createTestProps({});
-    render(<Withdraw {...props} />);
-
-    const limitsProgress = await screen.findByLabelText(
-      "limits progress for customer"
-    );
-    const amount = screen.getByLabelText("amount");
-    const withdrawButton = screen.getByLabelText("withdraw button");
-    const infoModalTitle = screen.getByLabelText("info modal title");
-    const infoModalText = await screen.findByLabelText("info modal text");
-    const closeInfoModalButton = screen.getByLabelText("close info modal");
-
-    expect(limitsProgress).toBeTruthy();
-    expect(amount.props.value).toBe("");
-    expect(withdrawButton).toBeTruthy();
-    expect(infoModalTitle).toBeTruthy();
-    expect(infoModalText).toBeTruthy();
-    expect(closeInfoModalButton).toBeTruthy();
-  });
-
   it("hides the form if limits have been reached", async () => {
+    const withdrawLimitsReached: LimitsDetails = {
+      limit: { monthly: "100" },
+      used: { monthly: "100" },
+    };
+
     const limitsReachedMock: GenericApiResponse<Limits[]> = {
       value: [
         {
-          tokenCode: "SCEUR",
-          funding: {
-            limit: {
-              monthly: "500",
-            },
-            used: {
-              monthly: "100",
-            },
-          },
-          withdraw: {
-            limit: {
-              monthly: "100",
-            },
-            used: {
-              monthly: "100",
-            },
-          },
+          ...defaultLimitsMockResponse.value[0],
+          withdraw: withdrawLimitsReached,
         },
       ],
     };
@@ -205,16 +221,18 @@ describe("Withdraw screen", () => {
   });
 
   it("shows validation error if amount is greater than balance", async () => {
+    server.use(
+      rest.get(`${backendApiUrl}/api/customers`, (req, rest, ctx) => {
+        return rest(ctx.status(200), ctx.json(responseWithBankAccount));
+      })
+    );
+
     props = createTestProps({});
     render(<Withdraw {...props} />);
 
-    const withdrawButton = await screen.findByLabelText("withdraw button");
-    const amount = screen.getByLabelText("amount");
+    const amount = await screen.findByLabelText("amount");
 
     fireEvent(amount, "onChangeText", "1000");
-
-    await screen.findByLabelText("amount");
-    await waitFor(() => expect(withdrawButton).toBeDisabled());
 
     const amountError = await screen.findByLabelText("amount error");
     expect(amountError).toHaveTextContent(

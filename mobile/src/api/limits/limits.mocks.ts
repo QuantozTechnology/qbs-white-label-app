@@ -3,7 +3,7 @@ import { backendApiUrl } from "../../utils/axios";
 import { GenericApiResponse } from "../utils/api.interface";
 import { Limits } from "./limits.interface";
 
-const defaultLimitsMockResponse: GenericApiResponse<Limits[]> = {
+export const defaultLimitsMockResponse: GenericApiResponse<Limits[]> = {
   value: [
     {
       tokenCode: "SCEUR",
