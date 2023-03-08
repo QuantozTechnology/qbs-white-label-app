@@ -27,7 +27,6 @@ public class SigningPairLogicTests
         var dbOptions = new DbContextOptionsBuilder<SigningDbContext>()
           .UseSqlite(connection)
           .EnableSensitiveDataLogging()
-          .UseLazyLoadingProxies()
           .Options;
 
         var db = new SigningDbContext(dbOptions);
