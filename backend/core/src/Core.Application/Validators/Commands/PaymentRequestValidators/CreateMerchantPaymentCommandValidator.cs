@@ -29,7 +29,6 @@ namespace Core.Application.Validators.Commands.PaymentRequestValidators
                 .WithErrorCode(ApplicationErrorCode.InvalidPropertyError.ToString())
                 .When(c => c.CallbackUrl != null)
                 .WithMessage("The provided URL is invalid");
-
         }
     }
 }
