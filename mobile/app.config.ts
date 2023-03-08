@@ -1,3 +1,11 @@
+// The logic below follows recommendations from the Expo docs, be sure to have a good understanding before changing configuration
+// - https://docs.expo.dev/guides/environment-variables/
+// - https://docs.expo.dev/build-reference/variables/
+
+// The `process.env.APP_ENV` is read either from:
+// - .envrc file (for local development)
+// - Expo Secrets (for build processes)
+
 const isDevEnv = process.env.APP_ENV === "development";
 const isPreviewEnv = process.env.APP_ENV === "preview";
 
@@ -38,6 +46,8 @@ const AppConfig = {
       ? "com.quantoz.payments.preview"
       : "com.quantoz.payments",
   },
+  // This logic sets the correct env variables to use throughout the app
+  // They can be read through the `expo-constants` package (https://docs.expo.dev/guides/environment-variables/#reading-environment-variables)
   extra: {
     API_URL: isDevEnv ? process.env.DEV_API_URL : process.env.PROD_API_URL,
     AUTH_AZURE_B2C_LOGIN_ISSUER: isDevEnv
@@ -101,6 +111,7 @@ export default () => ({
       },
       package: AppConfig.android.package,
     },
+    // change to your own organization in Expo account
     owner: "quantoz",
     web: {
       favicon: "./assets/favicon.png",
@@ -120,6 +131,7 @@ export default () => ({
         },
       ],
     ],
+    // defines the package name of the app
     scheme: isDevEnv
       ? "quantoz.payments.app.dev"
       : isPreviewEnv

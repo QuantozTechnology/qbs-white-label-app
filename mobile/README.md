@@ -1,11 +1,43 @@
-# Quantoz Payments Mobile App
+# Mobile App
 
-The Quantoz Payments app showcases the main functionality achievable through the Nexus API, including user creation, creating and receiving payments on the blockchain and many more.
+The mobile app showcases the main functionality achievable through the Nexus API, including user creation, creating and receiving payments on the blockchain and many more.
 The app is meant to be used as a white-label, production-ready starting point for any new products that want to achieve the goals above.
+
+## Technologies
+
+**Important**: refer to the `package.json` files to know which version is currently used, and therefore which version of the documentation that needs to be referenced.
+
+### Build and deploy
+
+- [React Native](https://reactnative.dev/)
+- [Expo](https://docs.expo.dev/)
+- [Expo Application Services (EAS)](https://docs.expo.dev/eas/)
+- [React Navigation](https://reactnavigation.org/)
+
+### Data fetching & state management
+
+- [Axios](https://axios-http.com/docs/intro)
+- [TanStack Query](https://tanstack.com/query/latest)
+
+### UI Framework
+
+- [NativeBase](https://nativebase.io/)
+
+### Test
+
+- [Jest](https://jestjs.io/) as a test runner
+- [React Native Testing Library](https://github.com/callstack/react-native-testing-library) to write unit, integration and end-to-end tests
+- [Mock Service Worker](https://mswjs.io/): API mocking to abstract the fetching data layer and make it easier to handle different API responses (success, errors, specific responses...)
+
+### Dev experience tools
+
+- [Husky](https://github.com/typicode/husky): used to customize the Git pre-commit action, so that it checks if there are any issues with the staged code changes before committing. Can be removed, not essential. Used in combination with [lint-staged](https://github.com/okonet/lint-staged)
+
+---
 
 ## Installation
 
-### Install Expo and EAS clients
+### Expo and EAS clients
 
 This app uses the Expo framework, and in order to work it needs additional tooling. Please refer to [their documentation](https://docs.expo.dev/get-started/installation/) to install the needed tools before proceeding.
 
@@ -19,23 +51,32 @@ You need to be in `mobile` folder to execute the following command.
 npm install
 ```
 
-### Configure the authentication provider
+### Add configuration for auth provider
 
-The projects currently relies on Azure Directory B2C as authentication provider. If you wish to keep the same setup, configure your app on Azure and fill the `.envrc` file (located in the `src` folder). If you wish to change/add authentication providers, refer to the [documentation on the Expo website](https://docs.expo.dev/versions/latest/sdk/auth-session/)
+The projects currently relies on Microsoft Azure Directory B2C as authentication provider. If you wish to keep the same setup:
 
-#### Recommended tool: direnv
+1. create your own environments on Azure AD B2C
+2. Fill the necessary env variables in the `.envrc` file in the `mobile` folder.
 
-We use [direnv](https://direnv.net/) to automatically load the environment variables set in the `.envrc` file. If you don't want to use it, the less graceful solution is to prepend all the environment variables to the `npm start` command (e.g. `VAR_1=VALUE1 VAR2=VALUE2 ... npm start`)
+> We use [direnv](https://direnv.net/) to automatically load the environment variables set in the `.envrc` file. If you don't want to use it, the less graceful solution is to prepend all the environment variables to the `npm start` command (e.g. `VAR_1=VALUE1 VAR2=VALUE2 ... npm start`)
+>
+> **VERY IMPORTANT**: every time tou change the `.envrc` file, you **MUST** allow the changes to the env variables by executing the `direnv allow` command in the terminal.
 
-If you want to change/add authentication provider, check the documentation available on the [Expo Docs website](https://docs.expo.dev/guides/authentication/).
+If you wish to change/add authentication providers, refer to the [documentation on the Expo website](https://docs.expo.dev/versions/latest/sdk/auth-session/).
+
+---
 
 ## Usage
 
 ### Run the project
 
-To explore all the options offered by the Expo client, [take a look at their docs](https://docs.expo.dev/workflow/expo-cli/).
+First of all, check the following settings are correct:
 
-To quickly launch the project:
+- `APP_ENV` in the `.envrc` file is correct (e.g. you are running it locally, it should be `development`)
+- execute the `direnv allow` in the terminal to make sure the correct env variables are loaded
+- Set the right value for the `defaultStablecoin` property in `mobile/src/config/config.ts`. For example, we have two different tokens for development and production purposes, and this needs to be changed depending on which build you want to run/deploy.
+
+After this initial checks, run:
 
 ```bash
 npm start
@@ -43,7 +84,44 @@ npm start
 
 This command starts a local server. You can either use a simulator on your computer or the Expo Go app installed on your phone to run the app. Refer to the Expo official docs for the most-updated information.
 
-### Other useful commands
+> Sometimes the app might retain old cached data from previous builds, leading to unexpected behaviors.
+> Use `npm start -- -c` to clean the cache.
+
+### Different builds for different purposes
+
+Refer to the official Expo documentation to discover more about [how to handle development, test and production versions](https://docs.expo.dev/workflow/development-mode/).
+
+In the `app.config.ts` file you will find the Expo configuration for this project. Depending on the value of the `APP_ENV` env variable defined in the `.envrc` file, it will create a different version of the app (different package name, app icon and Azure environment configurations).
+
+Be aware that this project uses also [Expo Application Services (EAS)](https://docs.expo.dev/eas/), which allow to handle the building and deployment phases in a more abstract and easy way. Refer to the link above to understand better how it works, and check out the `eas.json` file in the `src` folder to see the current setup.
+
+#### Secrets stored in Expo accounts
+
+When you will create builds using Expo Application Services (EAS), the env variables used will be the ones stores in the Secrets sections in your Expo account. Our recommendation is the following:
+
+- Use the `.envrc` file locally as explained above
+- Run `eas secret:push` to upload these variables to Expo, so that they can be used for the builds.
+
+> Note: the `APP_ENV` variable should be set to `production` on Expo Secrets, so that it would build the app for production by default.
+
+### Release the app
+
+**Prerequisites**
+
+- Apple Developer account (if releasing on the App Store)
+- Google Play Developer account (if releasing on the Play Store)
+
+Follow the instructions on the [Expo Build](https://docs.expo.dev/build/introduction/) docs website.
+
+To ease the process, a custom command called `create-stores-build` has been added to the project's `package.json` scripts section. Check it out to see what we use to create a new build for the stores.
+
+### Update the app
+
+[EAS Update](https://docs.expo.dev/eas-update/introduction/) can be used to send JS changes (not native ones) to the app, without the need to create a new build on the stores. Useful for quick fixes, the updates get downloaded when the user opens the app after they have been delivered.
+
+As for the creation of the build, the `update-stores-build` has been added to the project's `package.json` scripts section to show how it is currently handled.
+
+### Automated testing
 
 To run all the frontend tests:
 
@@ -51,33 +129,35 @@ To run all the frontend tests:
 npm run test
 ```
 
-## Install new packages
-
-In order to correctly manage packages compatibility, use `npx expo install <package-name>` to install a new package.
-
-HINT: expo will always save it in dependencies: if you want to save the package as dev dependency, use `npx expo install <package-name> -- --save-dev`.
-
-## Testing suite
-
-We use the following tools to test the app:
-
-- [Jest](https://jestjs.io/) as a test runner
-- [React Native Testing Library](https://github.com/callstack/react-native-testing-library) to write unit, integration and end-to-end tests
-- [Mock Service Worker](https://mswjs.io/): API mocking to abstract the fetching data layer and make it easier to handle different API responses
-
-## Development, testing and production releases
-
-Refer to the official Expo documentation to discover more about [how to handle development and production](https://docs.expo.dev/workflow/development-mode/).
-
-Be aware that this project uses also [Expo Application Services (EAS)](https://docs.expo.dev/eas/), which allow to handle the building and deployment phases in a more abstract and easy way. Refer to the link above to understand better how it works, and check out the `eas.json` file in the `src` folder to see the current setup.
+> You can use the following command to simulate a CI enviroment for your tests. Sometimes you could see tests failing with this command, while they pass locally.
+>
+> `npm run ci-test`
 
 ## Contributing
 
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
-
 Please make sure to update tests as appropriate.
 
 ## License
 
-// TODO which license will this project have?
-[MIT](https://choosealicense.com/licenses/mit/)
+MIT License
+
+Copyright (c) 2023 - Quantoz Payments
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
