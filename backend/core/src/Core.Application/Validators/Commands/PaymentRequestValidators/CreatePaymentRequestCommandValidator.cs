@@ -8,8 +8,8 @@ namespace Core.Application.Validators.Commands.PaymentRequestValidators
     {
         public CreatePaymentRequestCommandValidator()
         {
-            RuleFor(c => c.CustomerCode).Length(1, 40).WithErrorCode(ApplicationErrorCode.InvalidPropertyError.ToString());
-            RuleFor(c => c.TokenCode).Length(1, 12).WithErrorCode(ApplicationErrorCode.InvalidPropertyError.ToString());
+            RuleFor(c => c.CustomerCode).NotNull().Length(1, 40).WithErrorCode(ApplicationErrorCode.InvalidPropertyError.ToString());
+            RuleFor(c => c.TokenCode).NotNull().Length(1, 12).WithErrorCode(ApplicationErrorCode.InvalidPropertyError.ToString());
             RuleFor(c => c.Amount).GreaterThan(0).WithErrorCode(ApplicationErrorCode.InvalidPropertyError.ToString());
 
             RuleFor(c => c.Memo).Length(1, 28).When(c => c.Memo != null).WithErrorCode(ApplicationErrorCode.InvalidPropertyError.ToString());

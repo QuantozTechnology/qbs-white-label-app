@@ -18,10 +18,6 @@ open Fake.DotNet
 open Fake.Core
 open Fake.Tools
 open Fake.Tools.Git
-open Octopus.Client
-open Octopus.Client.Model.BuildInformation
-open Octopus.Client.Model.IssueTrackers
-open System.Text.RegularExpressions
 
 [<NoComparison>]
 [<NoEquality>]
@@ -30,15 +26,15 @@ type SubProject =
 
 let coreProject =
     {  Name = "Core"
-       TestBinaries = [ 
+       TestBinaries = [
         "backend/core/tests/Core.ApplicationTests/bin/Release/net7.0/Core.ApplicationTests.dll",
         "backend/core/tests/Core.DomainTests/bin/Release/net7.0/Core.DomainTests.dll",
-        "backend/core/tests/Core.InfrastructureTests/bin/Release/net7.0/Core.InfrastructureTests.dll" 
+        "backend/core/tests/Core.InfrastructureTests/bin/Release/net7.0/Core.InfrastructureTests.dll"
         ] }
 
 let signingServiceProject =
     {  Name = "SigningService"
-       TestBinaries = [ 
+       TestBinaries = [
         "backend/signing-service/tests/SigningService.API.Tests/bin/Release/net7.0/SigningService.API.Tests.dll",
         ] }
 
@@ -46,6 +42,16 @@ let projects = [ coreProject; signingServiceProject ]
 
 Target.create "Default" (fun _ ->
     Trace.trace "May the payments forever be in your favor."
+)
+
+Target.create "BuildRelease" (fun t ->
+    let buildProject =
+        DotNet.build (fun x ->
+            { x with
+                Configuration = DotNet.BuildConfiguration.Release
+                MSBuildParams = { MSBuild.CliArguments.Create() with Properties = [ ("RestoreLockedMode", "true")] } })
+
+    projects |> List.iter (fun x -> buildProject x.SolutionFilter)
 )
 
 let testLoggerPostfix = """ --logger:"junit;LogFilePath=./artifacts/{assembly}-test-result.xml;MethodFormat=Class;FailureBodyFormat=Verbose" """

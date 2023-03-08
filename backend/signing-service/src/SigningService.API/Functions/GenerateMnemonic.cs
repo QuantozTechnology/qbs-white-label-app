@@ -1,13 +1,12 @@
-﻿using System;
-using System.Net.Http;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Azure.WebJobs;
-using Microsoft.Azure.WebJobs.Extensions.Http;
+﻿using Microsoft.Azure.Functions.Worker;
+using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
 using SigningService.API.BLL;
+using SigningService.API.Extensions;
 using SigningService.API.Models.Requests;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace SigningService.API.Functions;
 
@@ -21,44 +20,39 @@ public class GenerateMnemonic
         _signingPairLogic = signingPairLogic;
     }
 
-    [FunctionName("GenerateMnemonic")]
-    public async Task<IActionResult> Run(
-        [HttpTrigger(AuthorizationLevel.Function, "post", Route = "GenerateMnemonic")] HttpRequestMessage req,
-        ILogger log)
+    [Function("GenerateMnemonic")]
+    public async Task<HttpResponseData> Run([HttpTrigger(AuthorizationLevel.Function, "post", Route = "GenerateMnemonic")] HttpRequestData req,
+        FunctionContext executionContext)
     {
-        log.LogInformation("GenerateMnemonic.Run function processed a request at {0}.", DateTime.UtcNow);
+        var logger = executionContext.GetLogger("HttpFunction");
+        logger.LogInformation("GenerateMnemonic.Run function processed a request at {0}.", DateTime.UtcNow);
 
-        // Convert all request perameter into Json object
-        var content = req.Content;
+        var requestModel = await req.ReadFromJsonAsync<GenerateMnemonicModel>();
 
-        string jsonContent = await content.ReadAsStringAsync();
-
-        var requestPram = JsonConvert.DeserializeObject<GenerateMnemonicModel>(jsonContent);
-
-        if (string.IsNullOrWhiteSpace(requestPram.Crypto))
+        if (string.IsNullOrWhiteSpace(requestModel.Crypto))
         {
-            return new BadRequestObjectResult("CryptoCurrencyRequired");
+            return await req.BadRequestAsync("CryptoCurrencyRequired");
         }
 
-        if (string.IsNullOrWhiteSpace(requestPram.LabelPartnerCode))
+        if (string.IsNullOrWhiteSpace(requestModel.LabelPartnerCode))
         {
-            return new BadRequestObjectResult("LabelPartnerRequired");
+            return await req.BadRequestAsync("LabelPartnerRequired");
         }
 
         // check whether the crypto support tokenization
-        if (!(Enum.TryParse<AllowedCryptos>(requestPram.Crypto, true, out var crypto) && Enum.IsDefined(typeof(AllowedCryptos), crypto)))
+        if (!(Enum.TryParse<AllowedCryptos>(requestModel.Crypto, true, out var crypto) && Enum.IsDefined(typeof(AllowedCryptos), crypto)))
         {
-            return new BadRequestObjectResult("CryptoCurrencyInvalid");
+            return await req.BadRequestAsync("CryptoCurrencyInvalid");
         }
 
         // generate a keypair and returns public key
-        var result = _signingPairLogic.GenerateMnemonic(requestPram);
+        var result = _signingPairLogic.GenerateMnemonic(requestModel);
 
         if (result.IsFailed)
         {
-            return new BadRequestObjectResult(result.Errors);
+            return await req.BadRequestAsync(result.Errors.FirstOrDefault()?.Message);
         }
 
-        return new OkResult();
+        return req.Ok();
     }
 }

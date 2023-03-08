@@ -2,34 +2,26 @@ stages:
   - build
   - test
 
-build:
+build_backend:
+  image: mcr.microsoft.com/dotnet/sdk:7.0
   stage: build
   script:
-    - npm -v
-    - node -v
     - echo "Starting build"
-    - dotnet tool restore
-    - dotnet fake build -t BuildRelease
+    - dotnet build
   artifacts:
     expire_in: 24 hours
-    
+
 backend_tests:
+  image: mcr.microsoft.com/dotnet/sdk:7.0
   stage: test
   script:
     - echo "starting tests"
-    - dotnet tool restore
-    - dotnet fake build -t RunTests
+    - dotnet test
   dependencies:
-    - build
-  artifacts:
-    when: always
-    paths:
-      - ./artifacts/*test-result.xml
-    reports:
-      junit:
-        - ./artifacts/*test-result.xml
+    - build_backend
 
 frontend_tests:
+  image: node:16.15
   before_script:
     - cd mobile
     - npm install --legacy-peer-deps

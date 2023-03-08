@@ -1,14 +1,12 @@
-﻿using System;
-using System.Linq;
-using System.Net.Http;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Azure.WebJobs;
-using Microsoft.Azure.WebJobs.Extensions.Http;
+﻿using Microsoft.Azure.Functions.Worker;
+using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
 using SigningService.API.BLL;
+using SigningService.API.Extensions;
 using SigningService.API.Models.Requests;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace SigningService.API.Functions;
 
@@ -22,58 +20,54 @@ public class CreateSignature
         _signingPairLogic = signingPairLogic;
     }
 
-    [FunctionName("CreateSignature")]
-    public async Task<IActionResult> Run(
-        [HttpTrigger(AuthorizationLevel.Function, "post", Route = "CreateSignature")] HttpRequestMessage req,
-        ILogger log)
+    [Function("CreateSignature")]
+    public async Task<HttpResponseData> Run(
+        [HttpTrigger(AuthorizationLevel.Function, "post", Route = "CreateSignature")] HttpRequestData req, FunctionContext executionContext)
     {
-        log.LogInformation("CreateSignature.Run function processed a request at {0}.", DateTime.UtcNow);
+        var logger = executionContext.GetLogger("HttpFunction");
 
-        // Convert all request perameter into Json object
-        var content = req.Content;
+        logger.LogInformation("CreateSignature.Run function processed a request at {0}.", DateTime.UtcNow);
 
-        string jsonContent = await content.ReadAsStringAsync();
-
-        var requestModel = JsonConvert.DeserializeObject<CreateSignatureRequestModel>(jsonContent);
+        var requestModel = await req.ReadFromJsonAsync<CreateSignatureRequestModel>();
 
         if (string.IsNullOrWhiteSpace(requestModel.Crypto))
         {
-            return new BadRequestObjectResult("CryptoCurrencyRequired");
+            return await req.BadRequestAsync("CryptoRequired");
         }
 
         if (string.IsNullOrWhiteSpace(requestModel.LabelPartnerCode))
         {
-            return new BadRequestObjectResult("LabelPartnerRequired");
+            return await req.BadRequestAsync("LabelPartnerRequired");
         }
 
         if (!requestModel.Signers.Any())
         {
-            return new BadRequestObjectResult("SignerRequired");
+            return await req.BadRequestAsync("SignerRequired");
         }
 
         if (string.IsNullOrEmpty(requestModel.ToBeSignedTransactionEnvelope))
         {
-            return new BadRequestObjectResult("TransactionEnvelopeRequired");
+            return await req.BadRequestAsync("TransactionEnvelopeRequired");
         }
 
         // check whether the crypto support tokenization
         if (!(Enum.TryParse<AllowedCryptos>(requestModel.Crypto, true, out var crypto) && Enum.IsDefined(typeof(AllowedCryptos), crypto)))
         {
-            return new BadRequestObjectResult("CryptoCurrencyInvalid");
+            return await req.BadRequestAsync("CryptoRequired");
         }
 
         if (crypto == AllowedCryptos.XLM && string.IsNullOrEmpty(requestModel.NetworkPassphrase))
         {
-            return new BadRequestObjectResult("NetworkPassphraseRequired");
+            return await req.BadRequestAsync("NetworkPassphraseRequired");
         }
 
         var signedTransactionEnvelope = _signingPairLogic.CreateSignature(requestModel);
 
         if (signedTransactionEnvelope.IsFailed)
         {
-            return new BadRequestObjectResult(signedTransactionEnvelope.Errors.FirstOrDefault()?.Message);
+            return await req.BadRequestAsync($"{signedTransactionEnvelope.Errors.FirstOrDefault()?.Message}");
         }
 
-        return new OkObjectResult(signedTransactionEnvelope.Value);
+        return await req.Ok(signedTransactionEnvelope.Value);
     }
 }

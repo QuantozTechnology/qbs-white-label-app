@@ -6,7 +6,6 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "solution-items", "solution-items", "{13E6C59E-0DF1-4F66-B9D2-E62E2CB8F061}"
 	ProjectSection(SolutionItems) = preProject
 		.gitlab-ci.yml = .gitlab-ci.yml
-		build.fsx = build.fsx
 		init_local.ps1 = init_local.ps1
 		nuget.config = nuget.config
 	EndProjectSection

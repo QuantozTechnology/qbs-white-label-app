@@ -3,8 +3,8 @@ using Core.Presentation.Models;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
 using System.Security.Claims;
+using System.Text.Json;
 
 namespace Core.Presentation.Controllers
 {
@@ -80,7 +80,7 @@ namespace Core.Presentation.Controllers
                 paged.TotalPages
             };
 
-            Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(metadata));
+            Response.Headers.Add("X-Pagination", JsonSerializer.Serialize(metadata));
 
             return ConstructCustomResponse(paged.Items, convert);
         }

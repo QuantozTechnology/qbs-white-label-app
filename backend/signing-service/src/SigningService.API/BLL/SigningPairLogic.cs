@@ -34,10 +34,6 @@ public class SigningPairLogic : ISigningPairLogic
         var success = false;
         SigningPairDTO signingPair;
         WalletKeyPair keyPair = null;
-        // retries are used as exit clause to prevent infinite looping
-        var retries = 0;
-
-        // Generate using mnemonic and password from Azure KeyVault
 
         // generate keypairs using mnemonic
         _logger.LogInformation("Get mnemonic and password from KeyVault");
@@ -57,7 +53,7 @@ public class SigningPairLogic : ISigningPairLogic
         var seed = HDWallet.HDWallet.GenerateSeed(secrets.Mnemonic, secrets.Password);
         var wallet = HDWallet.HDWallet.FromSeed(seed);
 
-        retries = 0;
+        var retries = 0;
 
         while (!success && retries < 10)
         {
@@ -95,7 +91,9 @@ public class SigningPairLogic : ISigningPairLogic
                     // if we've hit this many retries, there are likely multiple concurrent requests
                     // As such we increment the index by a random amount.
                     var rnd = new Random();
+                    #pragma warning disable SCS0005 // Weak random number generator.
                     index += rnd.Next(2, 6);
+                    #pragma warning restore SCS0005 // Weak random number generator.
                 }
                 else
                 {
