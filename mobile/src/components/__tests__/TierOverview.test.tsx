@@ -1,3 +1,7 @@
+// Copyright 2023 Quantoz Technology B.V. and contributors. Licensed
+// under the Apache License, Version 2.0. See the NOTICE file at the root
+// of this distribution or at http://www.apache.org/licenses/LICENSE-2.0
+
 import { Button } from "native-base";
 import { fireEvent, render, screen, within } from "../../jest/test-utils";
 import TierOverview, { ITierStatus } from "../TierOverview";
