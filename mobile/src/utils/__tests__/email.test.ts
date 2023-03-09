@@ -1,3 +1,7 @@
+// Copyright 2023 Quantoz Technology B.V. and contributors. Licensed
+// under the Apache License, Version 2.0. See the NOTICE file at the root
+// of this distribution or at http://www.apache.org/licenses/LICENSE-2.0
+
 import * as MailComposer from "expo-mail-composer";
 import { MailComposerStatus } from "expo-mail-composer";
 import { Linking } from "react-native";
@@ -31,7 +35,7 @@ describe("email utils", () => {
     });
   });
 
-  it("cannot open the email client, showing error to the user and copying the email in the clipboard", async () => {
+  it("cannot open the email client, showing error to the user and NOTICE the email in the clipboard", async () => {
     const composeEmailMock = jest
       .spyOn(MailComposer, "composeAsync")
       .mockRejectedValue(new Error());

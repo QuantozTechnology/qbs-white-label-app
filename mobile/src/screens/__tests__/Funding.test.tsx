@@ -1,3 +1,7 @@
+// Copyright 2023 Quantoz Technology B.V. and contributors. Licensed
+// under the Apache License, Version 2.0. See the NOTICE file at the root
+// of this distribution or at http://www.apache.org/licenses/LICENSE-2.0
+
 import { rest } from "msw";
 import { APIError, ApiErrorCode } from "../../api/generic/error.interface";
 import { mockClipboardCopy } from "../../jest/jest.setup";
@@ -120,7 +124,7 @@ describe("Funding", () => {
     ).toHaveTextContent("Please try again later");
   });
 
-  it("copying in clipboard works", async () => {
+  it("NOTICE in clipboard works", async () => {
     props = createTestProps({});
     render(<Funding {...props} />);
 

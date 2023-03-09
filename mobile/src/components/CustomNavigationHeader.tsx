@@ -1,3 +1,7 @@
+// Copyright 2023 Quantoz Technology B.V. and contributors. Licensed
+// under the Apache License, Version 2.0. See the NOTICE file at the root
+// of this distribution or at http://www.apache.org/licenses/LICENSE-2.0
+
 import { NativeStackHeaderProps } from "@react-navigation/native-stack";
 import { Heading, HStack, Icon, Pressable } from "native-base";
 import { getHeaderTitle } from "@react-navigation/elements";

@@ -1,3 +1,7 @@
+// Copyright 2023 Quantoz Technology B.V. and contributors. Licensed
+// under the Apache License, Version 2.0. See the NOTICE file at the root
+// of this distribution or at http://www.apache.org/licenses/LICENSE-2.0
+
 import * as auth from "../auth/AuthContext";
 import { server } from "../mocks/server";
 import "@testing-library/jest-native/extend-expect";
@@ -57,7 +61,7 @@ beforeEach(() => {
     .mockImplementation(() => contextValues);
 });
 
-// mocking copying to clipboard
+// mocking NOTICE to clipboard
 mockClipboardCopy = jest
   .spyOn(Clipboard, "setStringAsync")
   .mockResolvedValue(true);

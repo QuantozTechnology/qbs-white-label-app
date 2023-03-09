@@ -1,3 +1,7 @@
+// Copyright 2023 Quantoz Technology B.V. and contributors. Licensed
+// under the Apache License, Version 2.0. See the NOTICE file at the root
+// of this distribution or at http://www.apache.org/licenses/LICENSE-2.0
+
 import { VStack, Text, View, HStack } from "native-base";
 import { InterfaceHStackProps } from "native-base/lib/typescript/components/primitives/Stack/HStack";
 import { ReactElement, ReactNode } from "react";

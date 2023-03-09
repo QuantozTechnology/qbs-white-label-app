@@ -1,35 +1,40 @@
 # QBS White Label App
-Welcome to the QBS White Label App repository. In here you will find all the information required to setup this app.
+Welcome to the QBS White Label App repository.
+
+QBS App is a white label application that provides token payment functionality on the Stellar or Algorand blockchains. Through the mobile application customer's can securely create token payments to each other or pay merchants for their goods/services.
 
 ## Repository Overview
-This repository consists of the following projects:
-1. [azureB2C](./azureB2C/README.md)
-2. [backend](./backend/README.md)
-3. [mobile](./mobile/README.md)
 
-## AzureB2C
-This app supports AzureB2C as the default identity provider. To help you get setup easier, we provide some templates and policy files that can be uploaded to your domain for authenticating the user on azure.
+### [AzureB2C](./azureB2C/README.md)
+This app supports AzureB2C as the default identity provider. To help you get setup easier, we provide some templates and policy files that can be uploaded to your domain for authenticating/authorizating your users. 
 
-## Backend
-This contains all the backend functionality of the QBS App. It has 3 projects which are the following:
-1. [core](./backend/core) - This API service provides core functionality to the frontend applications. This includes functionality such as customer registration, account creation, payment creation and file uploading.
+In this section you will find guides on how to setup and configure an AzureB2C instance.
 
-2. [signing-service](./backend/signing-service) - This service is used for securely storing the private keys of your customers and signing transactions on their behalf.
+### [Backend](./backend/README.md)
 
-3. [web](./backend/web) - This web application allows customers and merchants to generate and pay payment requests.<br>
+<img src="./docs/images/img1.png"  width="100%" height="70%">
 
-This shows the initial screen where sales can generate a new payment request.<br>
-<img src="./images/img1.png"  width="40%" height="50%">
+The backend provides the following functionality:
 
-This generates a new QR code which can be scanned through the mobile app.<br>
-<img src="./images/img2.png"  width="40%" height="50%">
+1. [Core](./backend/core) - An API service that provides core functionality to the frontend applications. This includes functionality such as customer registration, account creation, payment creation and file uploading.
 
-## Mobile
-<img src="./images/img3.jpg"  width="30%" height="30%">
-<img src="./images/img4.jpg"  width="30%" height="30%">
-<img src="./images/img5.jpg"  width="30%" height="30%">
+2. [SigningService](./backend/signing-service) - A service for securely storing the private keys of your customers and signing transactions on their behalf.
 
+3. [Web](./backend/web) - A web application that allows customers and merchants to generate and pay payment requests.<br>
 
+In this section you will find guides on how to build and run the backend APIs.
+
+### [Mobile](./mobile/README.md)
+
+The mobile application runs on IOS and Android and uses the backend API's to provide registration and payment functionlity to customers. 
+
+In this section you will find guides on how to build and run the mobile application using Expo.
+
+<p align="center">
+<img src="./docs/images/img3.jpg"  width="30%">
+<img src="./docs/images/img4.jpg"  width="30%">
+<img src="./docs/images/img5.jpg"  width="30%">
+</p>
 ## License
 
-see [License](/LICENSE.md)
+qbs-white-label-app is licensed under an Apache-2.0 license. See the [License](/LICENSE) file for details.
