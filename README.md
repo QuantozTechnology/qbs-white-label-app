@@ -1,12 +1,14 @@
 # QBS White Label App
 Welcome to the QBS White Label App repository.
 
-QBS App is a white label application that provides token payment functionality on the Stellar or Algorand blockchains. Through the mobile application customer's can securely create token payments to each other or pay merchants for their goods/services.
+The QBS White Label App is a mobile application that allows users to send and receive payments on the blockchain. This app provides a simple and intuitive interface for customers and merchants to manage their account, send and receive payments, and view their transaction history.
+
+This repository contains the source code which can be customized and branded for use by different businesses and organizations.
 
 ## Repository Overview
 
-### [AzureB2C](./azureB2C/README.md)
-This app supports AzureB2C as the default identity provider. To help you get setup easier, we provide some templates and policy files that can be uploaded to your domain for authenticating/authorizating your users. 
+### [AzureB2C](./azureB2C)
+This app supports AzureB2C as its identity provider. To help you get setup easier, we provide some templates and policy files that can be uploaded to your domain for authenticating/authorizating your users. 
 
 In this section you will find guides on how to setup and configure an AzureB2C instance.
 
@@ -24,17 +26,20 @@ The backend provides the following functionality:
 
 In this section you will find guides on how to build and run the backend APIs.
 
-### [Mobile](./mobile/README.md)
+### [Mobile](./mobile)
 
-The mobile application runs on IOS and Android and uses the backend API's to provide registration and payment functionlity to customers. 
+The mobile application is available on both IOS and Android. It makes use of the backend API's to execute most of its functionality.
 
 In this section you will find guides on how to build and run the mobile application using Expo.
 
-<p align="center">
+<div align="center">
+
 <img src="./docs/images/img3.jpg"  width="30%">
 <img src="./docs/images/img4.jpg"  width="30%">
 <img src="./docs/images/img5.jpg"  width="30%">
-</p>
+
+</div>
+
 ## License
 
 qbs-white-label-app is licensed under an Apache-2.0 license. See the [License](/LICENSE) file for details.
