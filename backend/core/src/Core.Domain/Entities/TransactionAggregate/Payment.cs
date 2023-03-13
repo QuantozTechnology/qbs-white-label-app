@@ -17,6 +17,7 @@ namespace Core.Domain.Entities.TransactionAggregate
         public decimal Amount { get; set; }
         public string? Memo { get; set; }
         public string? TransactionCode { get; set; }
+        public string? SenderAccountCode { get; set; }
         public int? PaymentRequestId { get; set; }
         public PaymentRequest? PaymentRequest { get; set; }
         public DateTimeOffset CreatedOn { get; set; }
@@ -33,7 +34,8 @@ namespace Core.Domain.Entities.TransactionAggregate
                 TokenCode = properties.TokenCode,
                 Memo = properties.Memo,
                 PaymentRequestId = properties.PaymentRequestId,
-                CreatedOn = DateTimeProvider.UtcNow
+                CreatedOn = DateTimeProvider.UtcNow,
+                SenderAccountCode = properties.SenderAccountCode
             };
         }
 
@@ -48,7 +50,8 @@ namespace Core.Domain.Entities.TransactionAggregate
                 TokenCode = properties.TokenCode,
                 Memo = properties.Memo,
                 PaymentRequestId = properties.PaymentRequestId,
-                CreatedOn = DateTimeProvider.UtcNow
+                CreatedOn = DateTimeProvider.UtcNow,
+                SenderAccountCode = properties.SenderAccountCode
             };
         }
 

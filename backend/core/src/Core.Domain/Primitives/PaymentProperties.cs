@@ -13,5 +13,6 @@ namespace Core.Domain.Primitives
         public decimal Amount { get; set; }
         public string? Memo { get; set; }
         public int? PaymentRequestId { get; set; }
+        public required string SenderAccountCode { get; set; }
     }
 }
