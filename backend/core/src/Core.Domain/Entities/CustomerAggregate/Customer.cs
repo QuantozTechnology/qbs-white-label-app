@@ -165,7 +165,8 @@ namespace Core.Domain.Entities.CustomerAggregate
                 TokenCode = paymentRequest.TokenCode,
                 Amount = amount ?? paymentRequest.RequestedAmount,
                 Memo = paymentRequest.Options.Memo,
-                PaymentRequestId = paymentRequest.Id
+                PaymentRequestId = paymentRequest.Id,
+                SenderAccountCode = senderAccount.AccountCode
             };
 
             return Payment.NewToPaymentRequest(properties);
@@ -187,6 +188,7 @@ namespace Core.Domain.Entities.CustomerAggregate
             {
                 SenderPublicKey = fromAccount.PublicKey,
                 ReceiverPublicKey = toAccount.PublicKey,
+                SenderAccountCode = fromAccount.AccountCode,
                 Name = shareName ? GetName() : null,
                 TokenCode = tokenCode,
                 Amount = amount,

@@ -45,6 +45,10 @@ namespace Core.Persistence.Configurations
                 .HasColumnName("TransactionCode")
                 .HasMaxLength(32);
 
+            builder.Property(pr => pr.SenderAccountCode)
+                .HasColumnName("SenderAccountCode")
+                .HasMaxLength(10);
+
             builder.Property(pr => pr.Amount)
                 .HasColumnName("Amount")
                 .HasPrecision(18, 8)
