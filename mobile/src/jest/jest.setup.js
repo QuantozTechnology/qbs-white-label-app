@@ -19,6 +19,7 @@ jest.mock("../utils/biometric", () => ({
 }));
 
 export const mockUseNavigationNavigate = jest.fn();
+export const mockUseNavigationDispatch = jest.fn();
 jest.mock("@react-navigation/native", () => {
   const actualNav = jest.requireActual("@react-navigation/native");
   return {
@@ -27,6 +28,7 @@ jest.mock("@react-navigation/native", () => {
       getParent: jest.fn(() => ({
         navigate: mockUseNavigationNavigate,
       })),
+      dispatch: mockUseNavigationDispatch,
     }),
   };
 });

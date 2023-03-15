@@ -9,7 +9,7 @@ import { rest } from "msw";
 import { backendApiUrl } from "../../utils/axios";
 import { GenericApiResponse } from "../../api/utils/api.interface";
 import { Limits } from "../../api/limits/limits.interface";
-import { mockUseNavigationNavigate } from "../../jest/jest.setup";
+import { mockUseNavigationDispatch } from "../../jest/jest.setup";
 
 describe("Customer limits progress", () => {
   it("shows the expected values in case of successful render", async () => {
@@ -113,8 +113,17 @@ describe("Customer limits progress", () => {
 
     fireEvent(upgradeButton, "onPress");
 
-    expect(mockUseNavigationNavigate).toHaveBeenCalledWith(
-      "UpgradeAccountStack"
-    );
+    expect(mockUseNavigationDispatch).toHaveBeenCalledWith({
+      payload: {
+        index: 0,
+        routes: [
+          {
+            name: "UserProfileStack",
+            params: { screen: "UpgradeAccountStack" },
+          },
+        ],
+      },
+      type: "RESET",
+    });
   });
 });

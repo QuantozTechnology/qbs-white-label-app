@@ -104,7 +104,7 @@ export const customTheme = extendTheme({
     },
     PopoverBody: {
       baseStyle: {
-        p: 2,
+        p: 4,
         _text: {
           lineHeight: "md",
         },
@@ -118,24 +118,24 @@ export const customTheme = extendTheme({
     },
     PopoverCloseButton: {
       baseStyle: {
-        top: 0,
-        right: 0,
-        p: 3,
+        top: 1,
+        right: 1,
+        p: 4,
         _icon: {
-          size: 3,
+          size: 4,
         },
       },
     },
     PopoverFooter: {
       baseStyle: {
-        p: 2,
+        p: 4,
         shadow: 0,
         borderTopWidth: 0,
       },
     },
     PopoverHeader: {
       baseStyle: {
-        p: 2,
+        p: 4,
         _text: {
           letterSpacing: "-0.4px",
         },

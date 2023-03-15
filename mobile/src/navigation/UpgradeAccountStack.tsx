@@ -3,6 +3,7 @@
 // of this distribution or at http://www.apache.org/licenses/LICENSE-2.0
 
 import { Ionicons } from "@expo/vector-icons";
+import { NavigationProp } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { CameraType } from "expo-camera";
 import { Icon } from "native-base";
@@ -13,6 +14,8 @@ import Feedback from "../screens/Feedback";
 import ReviewPhoto from "../screens/ReviewPhoto";
 import SecurityCentreOverview from "../screens/SecurityCentreOverview";
 import TakePhoto from "../screens/TakePhoto";
+import { UserProfileStackParamList } from "./UserProfileStack";
+import { AppBottomTabParamList } from "./AppBottomTab";
 import { FeedbackProps } from "./WelcomeStack";
 
 type DocumentType = {
@@ -68,6 +71,14 @@ export default function UpgradeAccountStackNavigator() {
                   size="xl"
                   color="primary.500"
                 />
+              }
+              onPressCallback={() =>
+                // eslint-disable-next-line react/prop-types
+                props.navigation
+                  // eslint-disable-next-line react/prop-types
+                  .getParent<NavigationProp<UserProfileStackParamList>>()
+                  .getParent<NavigationProp<AppBottomTabParamList>>()
+                  .reset({ index: 0, routes: [{ name: "PortfolioOverview" }] })
               }
             />
           ),

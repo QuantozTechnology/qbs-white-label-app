@@ -3,7 +3,11 @@
 // of this distribution or at http://www.apache.org/licenses/LICENSE-2.0
 
 import { Ionicons } from "@expo/vector-icons";
-import { useNavigation } from "@react-navigation/native";
+import {
+  CommonActions,
+  NavigationProp,
+  useNavigation,
+} from "@react-navigation/native";
 import {
   Button,
   HStack,
@@ -17,6 +21,7 @@ import {
 import { useState } from "react";
 import { useCustomerLimits } from "../api/limits/limits";
 import { defaultConfig } from "../config/config";
+import { AppBottomTabParamList } from "../navigation/AppBottomTab";
 import { displayFiatAmount } from "../utils/currencies";
 import CustomerLimitsProgressError from "./CustomerLimitsProgressError";
 import CustomerLimitsProgressSkeleton from "./CustomerLimitsProgressSkeleton";
@@ -32,7 +37,7 @@ function CustomerLimitsProgress({
   operationType,
   hideRemainingAmountMessage = false,
 }: ICustomerLimitsProgress) {
-  const navigation = useNavigation();
+  const navigation = useNavigation<NavigationProp<AppBottomTabParamList>>();
   const { status, data: limits } = useCustomerLimits();
 
   const [isInfoModalOpen, setIsInfoModalOpen] = useState(false);
@@ -159,7 +164,19 @@ function CustomerLimitsProgress({
 
   function handleUpgradePress() {
     setIsInfoModalOpen(false);
-    navigation.getParent()?.navigate("UpgradeAccountStack");
+    navigation.dispatch(
+      CommonActions.reset({
+        index: 0,
+        routes: [
+          {
+            name: "UserProfileStack",
+            params: {
+              screen: "UpgradeAccountStack",
+            },
+          },
+        ],
+      })
+    );
   }
 }
 
