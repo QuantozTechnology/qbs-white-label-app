@@ -1,0 +1,2 @@
+dotnet ef migrations script --project ./backend/core/src/Core.API --idempotent -o core-migrations.sql
+dotnet ef migrations script --project ./backend/signing-service/src/SigningService.API --idempotent -o signing-service-migrations.sql
