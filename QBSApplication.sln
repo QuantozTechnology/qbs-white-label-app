@@ -8,6 +8,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "solution-items", "solution-
 		.gitlab-ci.yml = .gitlab-ci.yml
 		init_local.ps1 = init_local.ps1
 		nuget.config = nuget.config
+		generate_migration_scripts.ps1 = generate_migration_scripts.ps1
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "backend", "backend", "{CDE75D4E-65F6-4582-AE10-F835B1362A9F}"
