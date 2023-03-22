@@ -68,3 +68,11 @@ export function usePaymentRequests() {
     refetchInterval: 5000,
   });
 }
+
+export async function cancelPaymentRequest(requestId: string) {
+  const response = await paymentsApi.put(
+    `/api/paymentrequests/${requestId}/cancel`
+  );
+
+  return response;
+}

@@ -89,15 +89,18 @@ function PaymentRequestsList() {
   const groupedPayments: { [key: string]: PaymentRequestDetails[] } = {};
 
   data.pages.forEach((page) => {
-    return page.value.reduce((group, record) => {
-      const { createdOn } = record;
-      const createdDate = formatDate(createdOn);
+    return page.value
+      .filter(({ status }) => status !== "Cancelled")
+      .reduce((group, record) => {
+        const { createdOn } = record;
 
-      group[createdDate] = group[createdDate] ?? [];
-      group[createdDate].push(record);
+        const createdDate = formatDate(createdOn);
 
-      return group;
-    }, groupedPayments);
+        group[createdDate] = group[createdDate] ?? [];
+        group[createdDate].push(record);
+
+        return group;
+      }, groupedPayments);
   });
 
   // build data structure required by RN SectionList

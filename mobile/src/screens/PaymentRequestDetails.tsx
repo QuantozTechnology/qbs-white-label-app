@@ -2,10 +2,26 @@
 // under the Apache License, Version 2.0. See the NOTICE file at the root
 // of this distribution or at http://www.apache.org/licenses/LICENSE-2.0
 
+import { Ionicons } from "@expo/vector-icons";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { Badge, Box, Button, Heading, HStack, Text, VStack } from "native-base";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Icon, Spinner, Toast } from "native-base";
+import {
+  Badge,
+  Box,
+  Button,
+  Heading,
+  HStack,
+  IconButton,
+  Text,
+  VStack,
+} from "native-base";
+import { useLayoutEffect } from "react";
 import { useAccount } from "../api/account/account";
+import { cancelPaymentRequest } from "../api/paymentrequest/paymentRequest";
+import CustomNavigationHeader from "../components/CustomNavigationHeader";
 import DataDisplayField from "../components/DataDisplayField";
+import Notification from "../components/Notification";
 import PaidBySection from "../components/PaidBySection";
 import ScreenWrapper from "../components/ScreenWrapper";
 import { PaymentRequestsStackParamList } from "../navigation/PaymentRequestsStack";
@@ -18,10 +34,61 @@ type Props = NativeStackScreenProps<
 >;
 
 function PaymentRequestDetails({ navigation, route }: Props) {
+  const queryClient = useQueryClient();
   const { details } = route.params;
+  const { code, options, payments, requestedAmount, tokenCode } = details;
   const { data: account, status } = useAccount();
 
-  const { code, options, payments, requestedAmount, tokenCode } = details;
+  const { mutate: cancelRequest, isLoading: isCancelingRequest } = useMutation({
+    mutationFn: cancelPaymentRequest,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["paymentRequests"] });
+
+      Toast.show({
+        render: () => (
+          <Notification message="Payment request cancelled" variant="success" />
+        ),
+      });
+
+      navigation.replace("PaymentRequestTabs");
+    },
+    onError: () => {
+      Toast.show({
+        render: () => (
+          <Notification
+            message="Cannot cancel payment request"
+            title="Error"
+            variant="error"
+          />
+        ),
+      });
+    },
+  });
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      header: (props) => (
+        <CustomNavigationHeader
+          {...props}
+          rightHeaderIcons={
+            options.expiresOn == null ||
+            (options.expiresOn && options.expiresOn > Date.now()) ? (
+              isCancelingRequest ? (
+                <Spinner color="primary.500" p={3} />
+              ) : (
+                <IconButton
+                  icon={<Icon as={Ionicons} name="trash-outline" />}
+                  _icon={{ color: "primary.500", size: "lg" }}
+                  onPress={handleCancelPaymentRequest}
+                  accessibilityLabel="cancel payment request"
+                />
+              )
+            ) : null
+          }
+        />
+      ),
+    });
+  }, [navigation, options.expiresOn, isCancelingRequest]);
 
   const sumTotalPaid = payments.reduce(
     (total, current) => total + current.amount,
@@ -32,7 +99,11 @@ function PaymentRequestDetails({ navigation, route }: Props) {
   const isExpired = options.expiresOn && options.expiresOn < Date.now();
 
   return (
-    <ScreenWrapper flex={1} px={-4}>
+    <ScreenWrapper
+      flex={1}
+      px={-4}
+      accessibilityLabel="payment request details screen"
+    >
       <VStack flex={1}>
         <DataDisplayField
           label="Message"
@@ -134,6 +205,7 @@ function PaymentRequestDetails({ navigation, route }: Props) {
                 code: code,
               });
             }}
+            isDisabled={isCancelingRequest}
           >
             Share again
           </Button>
@@ -141,6 +213,10 @@ function PaymentRequestDetails({ navigation, route }: Props) {
       )}
     </ScreenWrapper>
   );
+
+  function handleCancelPaymentRequest() {
+    cancelRequest(code);
+  }
 }
 
 export default PaymentRequestDetails;
