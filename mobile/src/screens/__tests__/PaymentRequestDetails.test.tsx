@@ -9,9 +9,11 @@ import PaymentRequestDetails from "../PaymentRequestDetails";
 
 describe("PaymentRequestDetails", () => {
   const mockNavigate = jest.fn();
+  const mockSetOptions = jest.fn();
   const createTestProps = (props: Record<string, unknown>) => ({
     navigation: {
       navigate: mockNavigate,
+      setOptions: mockSetOptions,
     },
     route: {
       params: {
@@ -160,5 +162,45 @@ describe("PaymentRequestDetails", () => {
     expect(mockNavigate).toHaveBeenCalledWith("SummaryPaymentRequest", {
       code: "payment-request-code",
     });
+  });
+
+  it("should not show the cancel button if request is expired", async () => {
+    const today = new Date();
+    const yesterday = new Date(today).setDate(today.getDate() - 1);
+
+    props = createTestProps({
+      route: {
+        params: {
+          details: {
+            ...paymentRequestMocksDefaultResponse.value,
+            options: {
+              ...paymentRequestMocksDefaultResponse.value.options,
+              expiresOn: yesterday,
+            },
+          },
+        },
+      },
+    });
+    render(<PaymentRequestDetails {...props} />);
+
+    expect(screen.queryByLabelText("cancel payment request")).toBeNull();
+  });
+  it("should show the cancel button if expiresOn is null", () => {
+    props = createTestProps({
+      route: {
+        params: {
+          details: {
+            ...paymentRequestMocksDefaultResponse.value,
+            options: {
+              ...paymentRequestMocksDefaultResponse.value.options,
+              expiresOn: null,
+            },
+          },
+        },
+      },
+    });
+    render(<PaymentRequestDetails {...props} />);
+
+    expect(screen.queryByLabelText("cancel payment request")).toBeNull();
   });
 });

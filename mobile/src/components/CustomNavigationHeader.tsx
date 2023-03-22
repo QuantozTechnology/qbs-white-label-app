@@ -14,7 +14,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 type CustomNavigationHeaderProps = {
   customIcon?: ReactElement;
   onPressCallback?: () => void;
-  rightHeaderIcons?: ReactElement;
+  rightHeaderIcons?: ReactElement | null;
 };
 function CustomNavigationHeader(
   props: CustomNavigationHeaderProps &

@@ -89,4 +89,10 @@ export const paymentRequestsMocks = [
       ctx.json(paymentRequestsListMocksDefaultResponse)
     );
   }),
+  rest.put(
+    `${backendApiUrl}/api/paymentrequests/:code/cancel`,
+    (_req, rest, ctx) => {
+      return rest(ctx.status(200), ctx.json({ value: {} }));
+    }
+  ),
 ];

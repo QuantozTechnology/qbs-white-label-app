@@ -40,7 +40,6 @@ export default function PaymentRequestsNativeStackNavigator() {
         component={PaymentRequestDetails}
         options={{
           title: "Payment request",
-          header: (props) => <CustomNavigationHeader {...props} />,
         }}
       />
       <PaymentRequestsNativeStack.Screen
