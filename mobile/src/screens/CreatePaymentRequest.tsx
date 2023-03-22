@@ -79,19 +79,10 @@ function PaymentRequest({ navigation }: Props) {
   } = useMutation({
     mutationFn: createPaymentRequest,
     onSuccess(response) {
-      const { code, requestedAmount, tokenCode, options } = response.value;
+      const { code } = response.value;
 
       navigation.navigate("SummaryPaymentRequest", {
-        stablecoin: tokenCode,
-        amount: formatAmount(requestedAmount.toString()),
-        canChangeAmount: options?.payerCanChangeRequestedAmount,
-        shareName: options.name != null,
-        isOneOffPayment: options.isOneOffPayment,
-        message: options?.memo,
-        qrCode: code,
-        expiresOn: options?.expiresOn
-          ? formatDateTime(options.expiresOn)
-          : undefined,
+        code,
       });
     },
     onError(error) {
@@ -155,7 +146,7 @@ function PaymentRequest({ navigation }: Props) {
       amount: parseFloat(formatAmount(amount)),
       options: {
         shareName: includePersonalInfo,
-        memo: message,
+        memo: message !== "" ? message : null,
         payerCanChangeRequestedAmount: canAmountBeChanged,
         expiresOn: expiresOn?.getTime(),
         isOneOffPayment: oneOffPayment,
@@ -292,18 +283,6 @@ function PaymentRequest({ navigation }: Props) {
       </Modal>
     </ScreenWrapper>
   );
-
-  // function validateForm() {
-  //   if (amount === "") {
-  //     setErrors({ ...errors, amount: "Amount must be specified" });
-  //     return false;
-  //   } else if (parseFloat(amount) <= 0) {
-  //     setErrors({ ...errors, amount: "Amount must be greater than 0" });
-  //     return false;
-  //   }
-
-  //   return true;
-  // }
 
   function handleAmountChange(value: string) {
     setAmount(value);

@@ -2,23 +2,22 @@
 // under the Apache License, Version 2.0. See the NOTICE file at the root
 // of this distribution or at http://www.apache.org/licenses/LICENSE-2.0
 
+import { rest } from "msw";
+import { PaymentRequestResponse } from "../../api/paymentrequest/paymentRequest.interface";
+import { paymentRequestMocksDefaultResponse } from "../../api/paymentrequest/paymentRequest.mocks";
 import { render, screen, within } from "../../jest/test-utils";
-import { formatDate } from "../../utils/dates";
+import { server } from "../../mocks/server";
+import { backendApiUrl } from "../../utils/axios";
 import SummaryPaymentRequest from "../SummaryPaymentRequest";
 
 describe("Summary payment request", () => {
-  const expirationDate = formatDate(new Date(2099, 0, 1).toISOString());
   const createTestProps = (props: Record<string, unknown>) => ({
     navigation: {
       navigate: jest.fn(),
     },
     route: {
       params: {
-        amount: "10",
-        canChangeAmount: false,
-        stablecoin: "SCEUR",
-        message: "Test",
-        expiresOn: expirationDate,
+        code: "payment-request-code",
       },
     },
     ...props,
@@ -32,9 +31,7 @@ describe("Summary payment request", () => {
     render(<SummaryPaymentRequest {...props} />);
 
     const qrCode = await screen.findByLabelText("qrCode");
-    // TODO add again after feature is implemented
-    // const shareButton = screen.getByLabelText("share");
-    const closeButton = screen.getByLabelText("close");
+    const shareButton = screen.getByLabelText("share");
 
     const amountLabel = within(
       await screen.findByLabelText("amount")
@@ -58,27 +55,40 @@ describe("Summary payment request", () => {
     expect(amountLabel).toHaveTextContent(/^Amount$/);
     expect(amountValue).toHaveTextContent(/^SCEUR 10.00$/);
     expect(messageLabel).toHaveTextContent(/^Message$/);
-    expect(messageValue).toHaveTextContent(/^Test$/);
+    expect(messageValue).toHaveTextContent(/^Test message$/);
     expect(expirationDateMessage).toHaveTextContent(/^Expires on$/);
-    expect(expirationDateValue).toHaveTextContent(/^01\/01\/2099$/);
+    expect(expirationDateValue).toHaveTextContent(/^01\/01\/2099 - 13:35:04$/);
     expect(qrCode).toBeTruthy();
-    // expect(shareButton).toBeTruthy();
-    expect(closeButton).toBeTruthy();
+    expect(shareButton).toBeTruthy();
   });
 
-  it("displays a default message if none is specified", () => {
-    props = createTestProps({
-      route: {
-        params: {
-          amount: "10",
-          canChangeAmount: false,
-          stablecoin: "SCEUR",
+  it("displays a default message if none is specified", async () => {
+    const noMessageResponse: PaymentRequestResponse = {
+      value: {
+        ...paymentRequestMocksDefaultResponse.value,
+        options: {
+          ...paymentRequestMocksDefaultResponse.value.options,
+          memo: null,
         },
       },
-    });
+    };
+
+    server.use(
+      rest.get(
+        `${backendApiUrl}/api/paymentrequests/:code`,
+        (_req, rest, ctx) => {
+          return rest(
+            ctx.status(200),
+            ctx.json<PaymentRequestResponse>(noMessageResponse)
+          );
+        }
+      )
+    );
+
+    props = createTestProps({});
     render(<SummaryPaymentRequest {...props} />);
 
-    const message = screen.getByLabelText("message");
+    const message = await screen.findByLabelText("message");
 
     expect(within(message).getByLabelText("label")).toHaveTextContent(
       /^Message$/
@@ -89,15 +99,29 @@ describe("Summary payment request", () => {
   });
 
   it("displays the info text if amount can be changed by payer", async () => {
-    props = createTestProps({
-      route: {
-        params: {
-          amount: "10",
-          canChangeAmount: true,
-          stablecoin: "SCEUR",
+    const amountCanBeChangedResponse: PaymentRequestResponse = {
+      value: {
+        ...paymentRequestMocksDefaultResponse.value,
+        options: {
+          ...paymentRequestMocksDefaultResponse.value.options,
+          payerCanChangeRequestedAmount: true,
         },
       },
-    });
+    };
+
+    server.use(
+      rest.get(
+        `${backendApiUrl}/api/paymentrequests/:code`,
+        (_req, rest, ctx) => {
+          return rest(
+            ctx.status(200),
+            ctx.json<PaymentRequestResponse>(amountCanBeChangedResponse)
+          );
+        }
+      )
+    );
+
+    props = createTestProps({});
     render(<SummaryPaymentRequest {...props} />);
 
     const amountCanBeChangedText = await screen.findByLabelText(

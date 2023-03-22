@@ -22,14 +22,7 @@ export type PortfolioStackParamList = {
   };
   CreatePaymentRequest: undefined;
   SummaryPaymentRequest: {
-    stablecoin: string;
-    amount: string;
-    canChangeAmount?: boolean;
-    shareName?: boolean;
-    isOneOffPayment?: boolean;
-    qrCode: string;
-    message?: string | null;
-    expiresOn?: string;
+    code: string;
   };
   SendStack: undefined;
   Funding: undefined;

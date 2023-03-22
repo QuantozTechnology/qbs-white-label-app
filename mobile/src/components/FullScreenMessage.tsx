@@ -3,18 +3,20 @@
 // of this distribution or at http://www.apache.org/licenses/LICENSE-2.0
 
 import { Ionicons } from "@expo/vector-icons";
-import { Box, Button, Heading, Icon, Text, VStack } from "native-base";
+import { Box, Button, Heading, Icon, Image, Text, VStack } from "native-base";
 import { ReactNode } from "react";
+import { ImageIdentifier, imagesCollection } from "../utils/images";
 
 type IFullScreenMessage = {
-  title: string;
   message: string;
+  title?: string;
   icon?: ReactNode;
   noFullScreen?: boolean;
   actionButton?: {
     label: string;
     callback: () => void;
   };
+  illustration?: ImageIdentifier;
 };
 
 function FullScreenMessage({
@@ -31,6 +33,7 @@ function FullScreenMessage({
   ),
   noFullScreen = false,
   actionButton,
+  illustration,
 }: IFullScreenMessage) {
   return (
     <VStack
@@ -43,6 +46,18 @@ function FullScreenMessage({
     >
       {icon}
       <Box>
+        {illustration && (
+          <Image
+            // any needed to cast from string of enum to type requested from source
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            source={imagesCollection[illustration] as any}
+            resizeMode="contain"
+            marginX="auto"
+            width={200}
+            height={200}
+            alt="illustration"
+          />
+        )}
         <Heading
           size="xl"
           accessibilityLabel="full screen message title"

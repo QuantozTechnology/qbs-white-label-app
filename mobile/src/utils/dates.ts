@@ -109,3 +109,46 @@ export function addTimeToDate(add: AddTimeIntervals, date = new Date()) {
       return new Date(date.getTime() + 1000 * 60 * 60 * 24);
   }
 }
+
+/**
+ * Calculates the validity of an expiration time based on the difference between the target time and the current time.
+ * @param {number|null|undefined} expiresOn - The expiration time in milliseconds since the UNIX epoch, or null/undefined if the item never expires.
+ * @returns {string} A message indicating the validity of the item based on the expiration time.
+ */
+export function calculateValidity(expiresOn: number | null | undefined) {
+  if (expiresOn == null) {
+    return "Never expires";
+  }
+
+  const now = Date.now(); // get current timestamp in milliseconds
+  const targetTime = expiresOn;
+
+  const diff = targetTime - now; // calculate difference between target time and current time
+  const timeUnits = [
+    { unit: "day", ms: 24 * 60 * 60 * 1000 },
+    { unit: "hour", ms: 60 * 60 * 1000 },
+    { unit: "minute", ms: 60 * 1000 },
+  ];
+
+  if (diff < 0) {
+    // target time is in the past
+    for (const { unit, ms } of timeUnits) {
+      if (diff <= -ms) {
+        const count = Math.floor(-diff / ms);
+        return `Expired ${count} ${unit}${count === 1 ? "" : "s"} ago`;
+      }
+    }
+    return "Just now"; // less than a minute ago
+  } else {
+    // target time is in the future
+    for (const { unit, ms } of timeUnits) {
+      if (diff >= ms) {
+        const count = Math.floor(diff / ms);
+        return `Valid for ${count} ${unit}${count === 1 ? "" : "s"}`;
+      }
+    }
+    // the difference is less than one minute
+    const count = Math.floor(diff / 1000);
+    return `Valid for ${count} second${count === 1 ? "" : "s"}`;
+  }
+}

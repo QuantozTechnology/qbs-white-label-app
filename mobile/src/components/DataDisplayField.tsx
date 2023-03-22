@@ -8,8 +8,8 @@ import { ReactElement, ReactNode } from "react";
 import { AccessibilityProps } from "react-native";
 
 interface IDataDisplayField extends AccessibilityProps, InterfaceHStackProps {
-  label: string;
-  value: string | ReactNode;
+  value: string | number | ReactNode;
+  label?: string;
   children?: ReactNode;
   action?: ReactElement;
 }
@@ -32,10 +32,12 @@ function DataDisplayField({
       bg={bg}
     >
       <VStack space={0} p={4} {...other}>
-        <Text fontSize="sm" color="gray.400" accessibilityLabel="label">
-          {label}
-        </Text>
-        {typeof value === "string" ? (
+        {label && (
+          <Text fontSize="sm" color="gray.400" accessibilityLabel="label">
+            {label}
+          </Text>
+        )}
+        {typeof value === "string" || typeof value === "number" ? (
           <Text fontSize="md" accessibilityLabel="value">
             {value}
           </Text>
