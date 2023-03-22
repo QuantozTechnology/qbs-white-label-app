@@ -129,14 +129,7 @@ describe("Create payment request", () => {
 
     await waitFor(() =>
       expect(mockNavigation).toHaveBeenCalledWith("SummaryPaymentRequest", {
-        amount: "10",
-        canChangeAmount: true,
-        expiresOn: "01/01/2099 - 13:35:04",
-        isOneOffPayment: true,
-        message: "Test message",
-        qrCode: "payment-request-code",
-        shareName: true,
-        stablecoin: "SCEUR",
+        code: "payment-request-code",
       })
     );
   });

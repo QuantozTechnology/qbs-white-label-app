@@ -17,7 +17,7 @@ export const CreatePaymentRequestPayloadSchema = z.object({
       shareName: z.boolean(),
       isOneOffPayment: z.boolean(),
       payerCanChangeRequestedAmount: z.boolean(),
-      memo: z.string().trim().optional(),
+      memo: z.string().trim().nullable().optional(),
       params: z.record(z.string()),
     })
     .partial(),
@@ -27,27 +27,61 @@ export type CreatePaymentRequestPayload = z.infer<
   typeof CreatePaymentRequestPayloadSchema
 >;
 
-export const PaymentRequestStatus = z.enum(["Open", "Paid", "Cancelled"]);
+export const PaymentRequestStatus = z.enum([
+  "Open",
+  "Paid",
+  "Cancelled",
+  "Processing",
+]);
+
+const PaymentRequestPaymentsSchema = z.array(
+  z.object({
+    transactionCode: z.string(),
+    accountCode: z.string().nullable(),
+    amount: z.number(),
+    createdOn: z.number(),
+    updatedOn: z.number(),
+  })
+);
+
+export type PaymentRequestPayments = z.infer<
+  typeof PaymentRequestPaymentsSchema
+>;
+
+export const PaymentRequestDetailsSchema = z.object({
+  code: z.string(),
+  tokenCode: z.string(),
+  requestedAmount: z.number(),
+  status: PaymentRequestStatus,
+  createdOn: z.number(),
+  updatedOn: z.number().nullable(),
+  options: z
+    .object({
+      expiresOn: z.number().nullable(),
+      memo: z.string().trim().nullable(),
+      name: z.string().nullable(),
+      isOneOffPayment: z.boolean(),
+      payerCanChangeRequestedAmount: z.boolean(),
+      params: z.record(z.string()).optional(),
+    })
+    .partial(),
+  payments: PaymentRequestPaymentsSchema,
+});
+
+export type PaymentRequestDetails = z.infer<typeof PaymentRequestDetailsSchema>;
 
 export const PaymentRequestResponseSchema = z.object({
-  value: z.object({
-    code: z.string(),
-    tokenCode: z.string(),
-    requestedAmount: z.number(),
-    status: PaymentRequestStatus,
-    options: z
-      .object({
-        expiresOn: z.number().nullable(),
-        memo: z.string().trim().nullable(),
-        name: z.string().nullable(),
-        isOneOffPayment: z.boolean(),
-        payerCanChangeRequestedAmount: z.boolean(),
-        params: z.record(z.string()).optional(),
-      })
-      .partial(),
-  }),
+  value: PaymentRequestDetailsSchema,
 });
 
 export type PaymentRequestResponse = z.infer<
   typeof PaymentRequestResponseSchema
+>;
+
+export const PaymentRequestsResponseSchema = z.object({
+  value: z.array(PaymentRequestDetailsSchema),
+});
+
+export type PaymentRequestsResponse = z.infer<
+  typeof PaymentRequestsResponseSchema
 >;

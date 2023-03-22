@@ -14,9 +14,11 @@ import CustomTabBarLabel from "../components/CustomTabBarLabel";
 import CustomTabBarIcon from "../components/CustomTabBarIcon";
 import UserProfileStack from "./UserProfileStack";
 import { TouchableOpacity } from "react-native";
+import PaymentRequestsNativeStackNavigator from "./PaymentRequestsStack";
 
 export type AppBottomTabParamList = {
   PortfolioOverview: undefined;
+  PaymentRequests: undefined;
   UserProfileStack: undefined;
   Support: undefined;
 };
@@ -43,6 +45,7 @@ export default function AppBottomTabNavigator() {
       "Feedback",
       "ReviewPhoto",
       "UpgradeAccountStack",
+      "PaymentRequestDetails",
     ];
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     return hideOnScreens.indexOf(routeName!) <= -1;
@@ -84,6 +87,25 @@ export default function AppBottomTabNavigator() {
           tabBarIcon: ({ focused }) => {
             return <CustomTabBarIcon focused={focused} iconName="home" />;
           },
+        })}
+      />
+      <AppBottomTab.Screen
+        name="PaymentRequests"
+        component={PaymentRequestsNativeStackNavigator}
+        options={({ route }) => ({
+          tabBarStyle: {
+            display: getTabBarVisibility(route) ? "flex" : "none",
+          },
+          title: "Payment requests",
+          tabBarLabel({ focused }) {
+            return <CustomTabBarLabel focused={focused} label="Requests" />;
+          },
+          tabBarIcon: ({ focused }) => {
+            return (
+              <CustomTabBarIcon focused={focused} iconName="calendar-alt" />
+            );
+          },
+          headerShown: false,
         })}
       />
       <AppBottomTab.Screen

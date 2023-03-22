@@ -39,6 +39,7 @@ function CustomNavigationHeader(
       bg="white"
       justifyContent="space-between"
       alignItems="center"
+      h="24"
     >
       {(onPressCallback != null || ("back" in props && props.back)) && (
         <Pressable

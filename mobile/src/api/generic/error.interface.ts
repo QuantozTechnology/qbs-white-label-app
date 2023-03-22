@@ -26,3 +26,13 @@ export enum ApiErrorCode {
   CustomerNotActive = "CustomerNotActive",
   InvalidStatus = "InvalidStatus",
 }
+
+export const genericApiError: APIError = {
+  Errors: [
+    {
+      Code: ApiErrorCode.InternalServerError,
+      Message: "Error",
+      Target: null,
+    },
+  ],
+};
