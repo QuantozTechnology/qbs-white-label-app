@@ -28,16 +28,16 @@ To run or host the APIs the following is required:
 {
   "AzureB2COptions": [
     {
-      "Issuer": "https://contoso.b2clogin.com/tfp/e13cb639-f18a-4e92-a148-258d11780b50/b2c_1_mobile_signin/v2.0/",
-      "Audience": "ad72c362-fc57-4268-b3a5-c761f569e5cd"
+      "Issuer": "https://contoso.b2clogin.com/tfp/{TenantID}/b2c_1_mobile_signin/v2.0/",
+      "Audience": "" // application ID of the xxx-api application registered under AzureB2C
     },
     {
-      "Issuer": "https://contoso.b2clogin.com/tfp/e13cb639-f18a-4e92-a148-258d11780b50/b2c_1_merchant_signin/v2.0/",
-      "Audience": "ad72c362-fc57-4268-b3a5-c761f569e5cd"
+      "Issuer": "https://contoso.b2clogin.com/tfp/{TenantID}/b2c_1_merchant_signin/v2.0/",
+      "Audience": "" // application ID of the xxx-api application registered under AzureB2C
     },
     {
-      "Issuer": "https://contoso.b2clogin.com/tfp/e13cb639-f18a-4e92-a148-258d11780b50/signup_withphoneverification/v2.0/",
-      "Audience": "ad72c362-fc57-4268-b3a5-c761f569e5cd"
+      "Issuer": "https://contoso.b2clogin.com/tfp/{TenantID}/signup_withphoneverification/v2.0/",
+      "Audience": "" // application ID of the xxx-api application registered under AzureB2C
     }
   ],
   "NexusOptions": {
