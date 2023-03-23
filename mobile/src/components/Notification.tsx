@@ -26,13 +26,14 @@ function Notification({
       variant={"subtle"}
       status={variant}
       accessibilityLabel="notification message"
+      m={4}
       mb={isToastNotification ? 12 : 0}
       rounded="md"
       justifyContent="center"
       alignItems="flex-start"
     >
       {title != null && (
-        <HStack space={2} alignItems="center">
+        <HStack space={4} alignItems="center">
           <Alert.Icon />
           <Text
             fontWeight={"medium"}
@@ -43,8 +44,8 @@ function Notification({
           </Text>
         </HStack>
       )}
-      <HStack alignItems="center">
-        {title == null && <Alert.Icon mr={2} />}
+      <HStack alignItems="center" space={title == null ? 2 : 0}>
+        {title == null && <Alert.Icon />}
         <Text accessibilityLabel="notification message description">
           {message}
         </Text>
