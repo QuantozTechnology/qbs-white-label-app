@@ -207,7 +207,9 @@ function Send({ navigation }: Props) {
                 value={accountCode}
                 onChangeText={(value) => {
                   setAccountCode(value);
-                  checkValidationErrorsFor({ accountCode: value });
+                  if (validationErrors?.accountCode) {
+                    checkValidationErrorsFor({ accountCode: value });
+                  }
                 }}
                 accessibilityLabel="account code"
                 // @ts-ignore it works, but it complains about the current property possibly undefined
@@ -230,8 +232,11 @@ function Send({ navigation }: Props) {
                 value={amount}
                 keyboardType="numeric"
                 onChangeText={(value) => {
-                  checkValidationErrorsFor({ amount: value });
                   setAmount(value);
+
+                  if (validationErrors?.amount) {
+                    checkValidationErrorsFor({ amount: value });
+                  }
                 }}
                 accessibilityLabel="amount"
                 returnKeyType="next"
@@ -252,8 +257,11 @@ function Send({ navigation }: Props) {
               <Input
                 value={message}
                 onChangeText={(value) => {
-                  checkValidationErrorsFor({ message: value });
                   setMessage(value);
+
+                  if (validationErrors?.message) {
+                    checkValidationErrorsFor({ message: value });
+                  }
                 }}
                 accessibilityLabel="message"
                 ref={messageInput}
