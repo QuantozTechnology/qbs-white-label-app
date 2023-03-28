@@ -119,3 +119,36 @@ To run or host the APIs the following is required:
   "AllowedHosts": "*"
 }
 ```
+
+## Postman
+We have included a JSON file [here](../../docs/Postman/QP_API.postman_collection.json) that contains Postman scripts which can be used to test the API endpoints.
+
+To use these scripts, follow these steps:
+1. Download and install postman if you haven't already. You can download it from [here](https://www.postman.com/downloads/).
+2. Open Postman and import the collection file that contains the scripts.
+3. Once the collection is imported, you can select it from the `Collections` tab in the left-hand sidebar. This will show you a list of all the requests included in the collection.
+4. Setup the `Environment` to switch between different configurations. We have included an environment [here](../../docs/Postman/Development.postman_environment.json) as a sample -
+  - Enter a name for your environment (e.g. "Development", "Testing", "Production").
+  - Add the variables you want to use in your requests or scripts by clicking on the 'Add' button next to the 'Initial Value' field.
+  - Repeat the above steps to create additional environments as needed.
+  To use an environment in a request or script, click on the `Environment` dropdown menu in the top-right corner of the Postman window, and select the environment you want to use.
+  Use the variables in your requests or scripts by enclosing them in double curly braces (e.g. {{variable_name}}).
+5. To authorize yourself with the backend API and ensure that you have the necessary permissions to access and manipulate the data, click on the `Authorization` tab in the collection.
+  - Type: oAuth 2.0
+  - Add auth data to: Request Headers
+  - Configuration Options:
+    - Grant Type: Authorization Code
+    - Callback URL: https://oauth.pstmn.io/v1/callback
+    - Auth URL: {{auth_url}}/authorize
+      - where {{auth_url}} = {tenantName}/{domain}/{signinPolicyName}/oauth2/v2.0
+    - Access Token URL: {{auth_url}}/token
+    - Client ID: {{auth_client_id}}
+      - where {{auth_client_id}} = application ID of the xxx-mobile application registered under AzureB2C
+    - Client Secret: {{auth_client_secret}}
+      - where {{auth_client_secret}} = client secret of the xxx-mobile application registered under AzureB2C
+    - Scope: {{domain}}/{{auth_app_id}}/{{required_Permission}}
+      - where {{auth_app_id}} = application ID of the xxx-api application registered under AzureB2C <br />
+              &emsp; &emsp; &ensp;{{required_Permission}} = permission configured under AzureB2C
+    - Click on 'Get New Access Token' to get a new access token for the requests.
+6. To use a script, simply click on the request in the collection that you want to run. This will open the request details in the main window, where you can edit the request parameters and headers if necessary.
+7. To run the script, click on the `Send` button in the top-right corner of the request details window. This will send the request to the API endpoint and display the response in the main window.
