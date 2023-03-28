@@ -1,0 +1,2690 @@
+{
+	"info": {
+		"_postman_id": "89fba0fe-33bf-4119-b5df-47877231a24d",
+		"name": "Quantoz Payments API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "11917644"
+	},
+	"item": [
+		{
+			"name": "Customers",
+			"item": [
+				{
+					"name": "Files",
+					"item": [
+						{
+							"name": "POST",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "x-api-version",
+										"value": "1.0",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "file",
+											"type": "file",
+											"src": []
+										}
+									]
+								},
+								"url": {
+									"raw": "{{host_url}}/api/customers/files/Selfie",
+									"host": [
+										"{{host_url}}"
+									],
+									"path": [
+										"api",
+										"customers",
+										"files",
+										"Selfie"
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "Upload photo",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "x-api-key",
+												"value": "{{postman_api_key}}",
+												"type": "text"
+											},
+											{
+												"key": "x-api-version",
+												"value": "1.0",
+												"type": "text"
+											},
+											{
+												"key": "x-mock-response-code",
+												"value": "201",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "formdata",
+											"formdata": [
+												{
+													"key": "file",
+													"value": "",
+													"type": "text"
+												}
+											],
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{host_url}}/api/customers/files/Selfie",
+											"host": [
+												"{{host_url}}"
+											],
+											"path": [
+												"api",
+												"customers",
+												"files",
+												"Selfie"
+											]
+										}
+									},
+									"status": "Created",
+									"code": 201,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json; charset=utf-8",
+											"description": "",
+											"type": "text"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"value\": {}\n}"
+								},
+								{
+									"name": "Upload photo Error",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "x-api-key",
+												"value": "{{postman_api_key}}",
+												"type": "text"
+											},
+											{
+												"key": "x-api-version",
+												"value": "1.0",
+												"type": "text"
+											},
+											{
+												"key": "x-mock-response-code",
+												"value": "400",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{host_url}}/api/customers/files/Selfie?file",
+											"host": [
+												"{{host_url}}"
+											],
+											"path": [
+												"api",
+												"customers",
+												"files",
+												"Selfie"
+											],
+											"query": [
+												{
+													"key": "file",
+													"value": null
+												}
+											]
+										}
+									},
+									"status": "Bad Request",
+									"code": 400,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json; charset=utf-8",
+											"description": "",
+											"type": "text"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"Errors\": [\n        {\n            \"Code\": \"UnsupportedFormat\",\n            \"Target\": null,\n            \"Message\": \"Photo in wrong format\"\n        }\n    ]\n}"
+								}
+							]
+						}
+					]
+				},
+				{
+					"name": "Limits",
+					"item": [
+						{
+							"name": "GET",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "x-api-version",
+										"value": "1.0",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{host_url}}/api/customers/limits",
+									"host": [
+										"{{host_url}}"
+									],
+									"path": [
+										"api",
+										"customers",
+										"limits"
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "200",
+									"originalRequest": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{host_url}}/api/customers/limits",
+											"host": [
+												"{{host_url}}"
+											],
+											"path": [
+												"api",
+												"customers",
+												"limits"
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json; charset=utf-8",
+											"description": "",
+											"type": "text"
+										}
+									],
+									"cookie": [],
+									"body": "{\r\n    \"value\": \r\n    [\r\n        {\r\n            \"tokenCode\": \"SCEUR\",\r\n            \"funding\": {\r\n                \"used\": {\r\n                    \"monthly\": 400\r\n                },\r\n                \"limit\": {\r\n                    \"monthly\": 500\r\n                }\r\n            },\r\n            \"withdraw\": {\r\n                \"used\": {\r\n                    \"monthly\": 20\r\n                },\r\n                \"limit\": {\r\n                    \"monthly\": 100\r\n                }\r\n            }\r\n        }\r\n    ]\r\n}"
+								},
+								{
+									"name": "400",
+									"originalRequest": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "x-mock-response-code",
+												"value": "400",
+												"type": "text",
+												"disabled": true
+											}
+										],
+										"url": {
+											"raw": "{{host_url}}/api/customers/limits",
+											"host": [
+												"{{host_url}}"
+											],
+											"path": [
+												"api",
+												"customers",
+												"limits"
+											]
+										}
+									},
+									"status": "Bad Request",
+									"code": 400,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json; charset=utf-8",
+											"description": "",
+											"type": "text"
+										}
+									],
+									"cookie": [],
+									"body": "{\r\n    \"Errors\": [\r\n        {\r\n            \"Code\": \"BadRequest\",\r\n            \"Target\": null,\r\n            \"Message\": \"Something went wrong\"\r\n        }\r\n    ]\r\n}"
+								}
+							]
+						}
+					]
+				},
+				{
+					"name": "POST",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "x-api-version",
+								"value": "1.0",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"firstName\": \"{{$randomFirstName}}\",\r\n  \"lastName\": \"{{$randomLastName}}\",\r\n  \"dateOfBirth\": \"{{$randomDateOfBirth}}\",\r\n  \"countryOfResidence\": \"{{$randomCountryOfResidence}}\",\r\n  \"email\": \"{{$randomEmail}}\",\r\n  \"phone\": \"{{$randomPhone}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host_url}}/api/customers",
+							"host": [
+								"{{host_url}}"
+							],
+							"path": [
+								"api",
+								"customers"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "201",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "x-api-version",
+										"value": "1.0",
+										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"firstName\": \"{{$randomFirstName}}\",\r\n  \"lastName\": \"{{$randomLastName}}\",\r\n  \"dateOfBirth\": \"{{$randomDateOfBirth}}\",\r\n  \"countryOfResidence\": \"{{$randomCountryOfResidence}}\",\r\n  \"email\": \"{{$randomEmail}}\",\r\n  \"phone\": \"{{$randomPhone}}\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{host_url}}/api/customers",
+									"host": [
+										"{{host_url}}"
+									],
+									"path": [
+										"api",
+										"customers"
+									]
+								}
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\r\n    \"value\": {\r\n        \"reference\": \"F722F0DB-C40A-4475-925E-239413A87E94\",\r\n        \"trustLevel\": null,\r\n        \"currencyCode\": null,\r\n        \"email\": \"alessandro+11@quantoz.com\",\r\n        \"status\": \"ACTIVE\",\r\n        \"bankAccountNumber\": null,\r\n        \"personalData\": {\r\n            \"firstName\": \"Robert\",\r\n            \"lastName\": \"Deniro\",\r\n            \"dateOfBirth\": \"1977-11-19T08:04:09.000Z\",\r\n            \"countryOfResidence\": \"NL\",\r\n            \"phone\": \"+312345678\"\r\n        }\r\n    }\r\n}"
+						},
+						{
+							"name": "400",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"firstName\": \"{{$randomFirstName}}\",\r\n  \"lastName\": \"{{$randomLastName}}\",\r\n  \"dateOfBirth\": \"{{$randomDateOfBirth}}\",\r\n  \"countryOfResidence\": \"{{$randomCountryOfResidence}}\",\r\n  \"email\": \"{{$randomEmail}}\",\r\n  \"phone\": \"{{$randomPhone}}\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{host_url}}/api/customers",
+									"host": [
+										"{{host_url}}"
+									],
+									"path": [
+										"api",
+										"customers"
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"Errors\": [\n        {\n            \"Code\": \"InvalidProperty\",\n            \"Target\": \"CountryOfResidence\",\n            \"Message\": \"Country is blacklisted\"\n        }\n    ]\n}"
+						}
+					]
+				},
+				{
+					"name": "GET",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-api-version",
+								"value": "1.0",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{host_url}}/api/customers",
+							"host": [
+								"{{host_url}}"
+							],
+							"path": [
+								"api",
+								"customers"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "200",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{host_url}}/api/customers",
+									"host": [
+										"{{host_url}}"
+									],
+									"path": [
+										"api",
+										"customers"
+									]
+								}
+							},
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"value\": {\n        \"reference\": \"F722F0DB-C40A-4475-925E-239413A87E94\",\n        \"trustLevel\": null,\n        \"currencyCode\": null,\n        \"email\": \"alessandro+11@quantoz.com\",\n        \"status\": \"ACTIVE\",\n        \"bankAccountNumber\": null,\n        \"personalData\": {\n            \"firstName\": \"Robert\",\n            \"lastName\": \"Deniro\",\n            \"dateOfBirth\": \"1977-11-19T08:04:09.000Z\",\n            \"countryOfResidence\": \"NL\",\n            \"phone\": \"+312345678\"\n        }\n    }\n}"
+						},
+						{
+							"name": "404",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"reference\": \"4db929fe-5eef-402a-b4db-12d10871c4ca\",\r\n  \"firstName\": \"Hans\",\r\n  \"lastName\": \"Peter\",\r\n  \"dateOfBirth\": \"2022-09-25T12:26:54.002\",\r\n  \"countryOfResidence\": \"Iraq\",\r\n  \"email\": \"hanspeter@gmail.com\",\r\n  \"phone\": \"+31683345559\",\r\n  \"ip\": \"124.69.179.76\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{host_url}}/api/customers",
+									"host": [
+										"{{host_url}}"
+									],
+									"path": [
+										"api",
+										"customers"
+									]
+								}
+							},
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"Errors\": [\n        {\n            \"Code\": \"EntityNotFound\",\n            \"Target\": \"Reference\",\n            \"Message\": \"Entity was not found\"\n        }\n    ]\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Transactions",
+			"item": [
+				{
+					"name": "GET",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-api-version",
+								"value": "1.0",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{host_url}}/api/transactions?page=1&pageSize=2",
+							"host": [
+								"{{host_url}}"
+							],
+							"path": [
+								"api",
+								"transactions"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "pageSize",
+									"value": "2"
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "200",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{host_url}}/api/transactions?page=1&pageSize=2",
+									"host": [
+										"{{host_url}}"
+									],
+									"path": [
+										"api",
+										"transactions"
+									],
+									"query": [
+										{
+											"key": "page",
+											"value": "1"
+										},
+										{
+											"key": "pageSize",
+											"value": "2"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\r\n    \"value\": [\r\n        {\r\n            \"transactionCode\": \"FED030FACFBC45D08950C815856F5406\",\r\n            \"fromAccountCode\": \"P4Q4PWI4\",\r\n            \"toAccountCode\": \"1ACNAVU7\",\r\n            \"senderName\": \"Max Stoll\",\r\n            \"receiverName\": null,\r\n            \"amount\": 10.00000000,\r\n            \"tokenCode\": \"SCEUR\",\r\n            \"created\": 1677747743000,\r\n            \"status\": \"SubmissionCompleted\",\r\n            \"type\": \"Payment\",\r\n            \"memo\": \"test\",\r\n            \"direction\": \"Outgoing\"\r\n        },\r\n        {\r\n            \"transactionCode\": \"4E23ED2D538E4DA295AF2539E4512A01\",\r\n            \"fromAccountCode\": \"P4Q4PWI4\",\r\n            \"toAccountCode\": \"1ACNAVU7\",\r\n            \"senderName\": null,\r\n            \"receiverName\": null,\r\n            \"amount\": 10.00000000,\r\n            \"tokenCode\": \"SCEUR\",\r\n            \"created\": 1677747698000,\r\n            \"status\": \"SubmissionCompleted\",\r\n            \"type\": \"Payment\",\r\n            \"memo\": \"test\",\r\n            \"direction\": \"Outgoing\"\r\n        },\r\n        {\r\n            \"transactionCode\": \"34DCCF2448074CADB9F4504827E30BE9\",\r\n            \"fromAccountCode\": \"P4Q4PWI4\",\r\n            \"toAccountCode\": \"P4Q4PWI4\",\r\n            \"senderName\": null,\r\n            \"receiverName\": null,\r\n            \"amount\": 10.00000000,\r\n            \"tokenCode\": \"SCEUR\",\r\n            \"created\": 1677703496000,\r\n            \"status\": \"SubmissionCompleted\",\r\n            \"type\": \"Payment\",\r\n            \"memo\": \"test\",\r\n            \"direction\": \"Outgoing\"\r\n        },\r\n        {\r\n            \"transactionCode\": \"194DA9F2565847F4ACE016F706DC1904\",\r\n            \"fromAccountCode\": \"P4Q4PWI4\",\r\n            \"toAccountCode\": \"1ACNAVU7\",\r\n            \"senderName\": null,\r\n            \"receiverName\": null,\r\n            \"amount\": 10.00000000,\r\n            \"tokenCode\": \"SCEUR\",\r\n            \"created\": 1677703273000,\r\n            \"status\": \"SubmissionCompleted\",\r\n            \"type\": \"Payment\",\r\n            \"memo\": \"test\",\r\n            \"direction\": \"Outgoing\"\r\n        },\r\n        {\r\n            \"transactionCode\": \"1D0DD30B855141ED8B72D06B9412AB95\",\r\n            \"fromAccountCode\": \"P4Q4PWI4\",\r\n            \"toAccountCode\": \"1ACNAVU7\",\r\n            \"senderName\": null,\r\n            \"receiverName\": null,\r\n            \"amount\": 10.00000000,\r\n            \"tokenCode\": \"SCEUR\",\r\n            \"created\": 1677703249000,\r\n            \"status\": \"SubmissionCompleted\",\r\n            \"type\": \"Payment\",\r\n            \"memo\": \"test\",\r\n            \"direction\": \"Outgoing\"\r\n        },\r\n        {\r\n            \"transactionCode\": \"2C5FD3286AF0445EA1FA70097D237F65\",\r\n            \"fromAccountCode\": \"1ACNAVU7\",\r\n            \"toAccountCode\": \"P4Q4PWI4\",\r\n            \"senderName\": null,\r\n            \"receiverName\": null,\r\n            \"amount\": 10.00000000,\r\n            \"tokenCode\": \"SCEUR\",\r\n            \"created\": 1677698409000,\r\n            \"status\": \"SubmissionCompleted\",\r\n            \"type\": \"Payment\",\r\n            \"memo\": \"test\",\r\n            \"direction\": \"Incoming\"\r\n        },\r\n        {\r\n            \"transactionCode\": \"FA3C16D988134FA18247383A0190B86C\",\r\n            \"fromAccountCode\": \"1ACNAVU7\",\r\n            \"toAccountCode\": \"P4Q4PWI4\",\r\n            \"senderName\": null,\r\n            \"receiverName\": null,\r\n            \"amount\": 1.00000000,\r\n            \"tokenCode\": \"SCEUR\",\r\n            \"created\": 1677677946000,\r\n            \"status\": \"SubmissionCompleted\",\r\n            \"type\": \"Payment\",\r\n            \"memo\": null,\r\n            \"direction\": \"Incoming\"\r\n        },\r\n        {\r\n            \"transactionCode\": \"C8093670D9DA4DF1A141E6973589C438\",\r\n            \"fromAccountCode\": \"1ACNAVU7\",\r\n            \"toAccountCode\": \"P4Q4PWI4\",\r\n            \"senderName\": null,\r\n            \"receiverName\": null,\r\n            \"amount\": 1.00000000,\r\n            \"tokenCode\": \"SCEUR\",\r\n            \"created\": 1677675454000,\r\n            \"status\": \"SubmissionCompleted\",\r\n            \"type\": \"Payment\",\r\n            \"memo\": null,\r\n            \"direction\": \"Incoming\"\r\n        },\r\n        {\r\n            \"transactionCode\": \"964303B05B274E1D95F0DCEA5C65CF95\",\r\n            \"fromAccountCode\": \"1ACNAVU7\",\r\n            \"toAccountCode\": \"P4Q4PWI4\",\r\n            \"senderName\": null,\r\n            \"receiverName\": null,\r\n            \"amount\": 1.00000000,\r\n            \"tokenCode\": \"SCEUR\",\r\n            \"created\": 1677672115000,\r\n            \"status\": \"SubmissionCompleted\",\r\n            \"type\": \"Payment\",\r\n            \"memo\": null,\r\n            \"direction\": \"Incoming\"\r\n        },\r\n        {\r\n            \"transactionCode\": \"C5898E413A514844BCF24C7ED20F737E\",\r\n            \"fromAccountCode\": \"1ACNAVU7\",\r\n            \"toAccountCode\": \"P4Q4PWI4\",\r\n            \"senderName\": null,\r\n            \"receiverName\": null,\r\n            \"amount\": 1.00000000,\r\n            \"tokenCode\": \"SCEUR\",\r\n            \"created\": 1677671958000,\r\n            \"status\": \"SubmissionCompleted\",\r\n            \"type\": \"Payment\",\r\n            \"memo\": null,\r\n            \"direction\": \"Incoming\"\r\n        },\r\n        {\r\n            \"transactionCode\": \"40561CB75EB64396825191E2BB9D64C4\",\r\n            \"fromAccountCode\": \"1ACNAVU7\",\r\n            \"toAccountCode\": \"P4Q4PWI4\",\r\n            \"senderName\": null,\r\n            \"receiverName\": null,\r\n            \"amount\": 1.00000000,\r\n            \"tokenCode\": \"SCEUR\",\r\n            \"created\": 1677671796000,\r\n            \"status\": \"SubmissionCompleted\",\r\n            \"type\": \"Payment\",\r\n            \"memo\": null,\r\n            \"direction\": \"Incoming\"\r\n        },\r\n        {\r\n            \"transactionCode\": \"F0727D66585E469CB93365BF566AFD48\",\r\n            \"fromAccountCode\": \"1ACNAVU7\",\r\n            \"toAccountCode\": \"P4Q4PWI4\",\r\n            \"senderName\": null,\r\n            \"receiverName\": null,\r\n            \"amount\": 1.00000000,\r\n            \"tokenCode\": \"SCEUR\",\r\n            \"created\": 1677671715000,\r\n            \"status\": \"SubmissionCompleted\",\r\n            \"type\": \"Payment\",\r\n            \"memo\": null,\r\n            \"direction\": \"Incoming\"\r\n        },\r\n        {\r\n            \"transactionCode\": \"70E98FB110864767877150F4F184BB53\",\r\n            \"fromAccountCode\": \"1ACNAVU7\",\r\n            \"toAccountCode\": \"P4Q4PWI4\",\r\n            \"senderName\": null,\r\n            \"receiverName\": null,\r\n            \"amount\": 10.00000000,\r\n            \"tokenCode\": \"SCEUR\",\r\n            \"created\": 1677671440000,\r\n            \"status\": \"SubmissionCompleted\",\r\n            \"type\": \"Payment\",\r\n            \"memo\": null,\r\n            \"direction\": \"Incoming\"\r\n        },\r\n        {\r\n            \"transactionCode\": \"3DB4B80779B44B6D9568E879F7683AB8\",\r\n            \"fromAccountCode\": \"1ACNAVU7\",\r\n            \"toAccountCode\": \"P4Q4PWI4\",\r\n            \"senderName\": null,\r\n            \"receiverName\": null,\r\n            \"amount\": 10.00000000,\r\n            \"tokenCode\": \"SCEUR\",\r\n            \"created\": 1677671361000,\r\n            \"status\": \"SubmissionCompleted\",\r\n            \"type\": \"Payment\",\r\n            \"memo\": null,\r\n            \"direction\": \"Incoming\"\r\n        },\r\n        {\r\n            \"transactionCode\": \"64EFB5FCDBD84D74B3927D9BEA57FD1E\",\r\n            \"fromAccountCode\": \"1ACNAVU7\",\r\n            \"toAccountCode\": \"P4Q4PWI4\",\r\n            \"senderName\": null,\r\n            \"receiverName\": null,\r\n            \"amount\": 10.00000000,\r\n            \"tokenCode\": \"SCEUR\",\r\n            \"created\": 1677670984000,\r\n            \"status\": \"SubmissionCompleted\",\r\n            \"type\": \"Payment\",\r\n            \"memo\": null,\r\n            \"direction\": \"Incoming\"\r\n        }\r\n    ]\r\n}"
+						},
+						{
+							"name": "400",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "x-mock-response-code",
+										"value": "500",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{host_url}}/api/transactions?page=1&pageSize=2",
+									"host": [
+										"{{host_url}}"
+									],
+									"path": [
+										"api",
+										"transactions"
+									],
+									"query": [
+										{
+											"key": "page",
+											"value": "1"
+										},
+										{
+											"key": "pageSize",
+											"value": "2"
+										}
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\r\n    \"Errors\": [\r\n        {\r\n            \"Code\": \"BadRequest\",\r\n            \"Message\": \"Something went wrong\",\r\n            \"Target\": null\r\n        }\r\n    ]\r\n}"
+						}
+					]
+				},
+				{
+					"name": "Payment Through payment request",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "x-api-version",
+								"value": "1.0",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"paymentRequestCode\": \"{{randomPaymentRequestCode}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host_url}}/api/transactions/payments/pay/paymentrequest",
+							"host": [
+								"{{host_url}}"
+							],
+							"path": [
+								"api",
+								"transactions",
+								"payments",
+								"pay",
+								"paymentrequest"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Create Payment",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "x-api-key",
+										"value": "{{postman_api_key}}",
+										"type": "text"
+									},
+									{
+										"key": "x-api-version",
+										"value": "1.0",
+										"type": "text"
+									},
+									{
+										"key": "x-mock-response-code",
+										"value": "201",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"paymentRequestCode\": \"2509f2b8-85bf-45c7-9c39-b4cfa1f8482c\",\n    \"amount\": 5\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{host_url}}/api/transactions/payments/pay/paymentrequest",
+									"host": [
+										"{{host_url}}"
+									],
+									"path": [
+										"api",
+										"transactions",
+										"payments",
+										"pay",
+										"paymentrequest"
+									]
+								}
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"value\": {}\n}"
+						},
+						{
+							"name": "Create Payment Error",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "x-api-key",
+										"value": "{{postman_api_key}}",
+										"type": "text"
+									},
+									{
+										"key": "x-api-version",
+										"value": "1.0",
+										"type": "text"
+									},
+									{
+										"key": "x-mock-response-code",
+										"value": "400",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{host_url}}/api/transactions/payments/pay/paymentrequest",
+									"host": [
+										"{{host_url}}"
+									],
+									"path": [
+										"api",
+										"transactions",
+										"payments",
+										"pay",
+										"paymentrequest"
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"Errors\": [\n        {\n            \"Code\": \"InvalidProperty\",\n            \"Target\": \"StablecoinNotExisting\",\n            \"Message\": \"Stablecoin specified does not existÏ\"\n        }\n    ]\n}"
+						}
+					]
+				},
+				{
+					"name": "Payment Through account code",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "x-api-version",
+								"value": "1.0",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"toAccountCode\": \"{{randomToAccountCode}}\",\n    \"tokenCode\": \"{{tokenCode}}\",\n    \"amount\": {{randomAmount}},\n    \"memo\": \"{{randomMemo}}\",\n    \"options\": {\n        \"shareName\": {{randomShareName}}\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host_url}}/api/transactions/payments/pay/account",
+							"host": [
+								"{{host_url}}"
+							],
+							"path": [
+								"api",
+								"transactions",
+								"payments",
+								"pay",
+								"account"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Create Payment",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "x-api-key",
+										"value": "{{postman_api_key}}",
+										"type": "text"
+									},
+									{
+										"key": "x-api-version",
+										"value": "1.0",
+										"type": "text"
+									},
+									{
+										"key": "x-mock-response-code",
+										"value": "201",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{host_url}}/api/transactions/payments/pay/account",
+									"host": [
+										"{{host_url}}"
+									],
+									"path": [
+										"api",
+										"transactions",
+										"payments",
+										"pay",
+										"account"
+									]
+								}
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"value\": {}\n}"
+						},
+						{
+							"name": "Create Payment Error",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "x-api-key",
+										"value": "{{postman_api_key}}",
+										"type": "text"
+									},
+									{
+										"key": "x-api-version",
+										"value": "1.0",
+										"type": "text"
+									},
+									{
+										"key": "x-mock-response-code",
+										"value": "400",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{host_url}}/api/transactions/payments/pay/account",
+									"host": [
+										"{{host_url}}"
+									],
+									"path": [
+										"api",
+										"transactions",
+										"payments",
+										"pay",
+										"account"
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"Errors\": [\n        {\n            \"Code\": \"InvalidProperty\",\n            \"Target\": \"StablecoinNotExisting\",\n            \"Message\": \"Stablecoin specified does not existÏ\"\n        }\n    ]\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "LabelPartner",
+			"item": [
+				{
+					"name": "GET Banking details",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{host_url}}/api/banks",
+							"host": [
+								"{{host_url}}"
+							],
+							"path": [
+								"api",
+								"banks"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "200",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{host_url}}/api/banks",
+									"host": [
+										"{{host_url}}"
+									],
+									"path": [
+										"api",
+										"banks"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\r\n    \"value\": [\r\n        {\r\n            \"account\": \"NXS123456\",\r\n            \"beneficiary\": \"Quantoz Payments\",\r\n            \"bic\": \"ABN12345\",\r\n            \"iban\": \"NL123456789\"\r\n        }\r\n    ]\r\n}"
+						},
+						{
+							"name": "400",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "x-mock-response-code",
+										"value": "500",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{host_url}}/api/banks",
+									"host": [
+										"{{host_url}}"
+									],
+									"path": [
+										"api",
+										"banks"
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\r\n    \"Errors\": [\r\n        {\r\n            \"Code\": \"BadRequest\",\r\n            \"Target\": null,\r\n            \"Message\": \"Somethign went wrong\"\r\n        }\r\n    ]\r\n}"
+						}
+					]
+				},
+				{
+					"name": "GET Trustlevels",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-api-version",
+								"value": "1.0",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": []
+						},
+						"url": {
+							"raw": "{{host_url}}/api/trustlevels",
+							"host": [
+								"{{host_url}}"
+							],
+							"path": [
+								"api",
+								"trustlevels"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "200",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{host_url}}/api/trustlevels",
+									"host": [
+										"{{host_url}}"
+									],
+									"path": [
+										"api",
+										"trustlevels"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\r\n    \"value\": [\r\n        {\r\n            \"code\": \"tier1\",\r\n            \"name\": \"Tier 1\",\r\n            \"limits\": {\r\n                \"funding\": {\r\n                    \"monthly\": 100\r\n                },\r\n                \"withdraw\": {\r\n                    \"monthly\": 50\r\n                }\r\n            }\r\n        },\r\n        {\r\n            \"code\": \"tier2\",\r\n            \"name\": \"Tier 2\",\r\n            \"limits\": {\r\n                \"funding\": {\r\n                    \"monthly\": 500\r\n                },\r\n                \"withdraw\": {\r\n                    \"monthly\": 200\r\n                }\r\n            }\r\n        },\r\n        {\r\n            \"code\": \"tier3\",\r\n            \"name\": \"Tier 3\",\r\n            \"limits\": {\r\n                \"funding\": {\r\n                    \"monthly\": 1000\r\n                },\r\n                \"withdraw\": {\r\n                    \"monthly\": 500\r\n                }\r\n            }\r\n        }\r\n    ]\r\n}"
+						},
+						{
+							"name": "400",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "x-mock-response-code",
+										"value": "500",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{host_url}}/api/trustlevels",
+									"host": [
+										"{{host_url}}"
+									],
+									"path": [
+										"api",
+										"trustlevels"
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\r\n    \"Errors\": [\r\n        {\r\n            \"Code\": \"BadRequest\",\r\n            \"Target\": null,\r\n            \"Message\": \"Something went wrong\"\r\n        }\r\n    ]\r\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Withdraw",
+			"item": [
+				{
+					"name": "Create Withdraw",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "x-api-version",
+								"value": "1.0",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"tokenCode\":\"{{tokenCode}}\",\n    \"amount\": {{randomAmount}},\n    \"memo\": \"{{randomMemo}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host_url}}/api/transactions/withdraws",
+							"host": [
+								"{{host_url}}"
+							],
+							"path": [
+								"api",
+								"transactions",
+								"withdraws"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Create Withdraws",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "x-api-key",
+										"value": "{{postman_api_key}}",
+										"type": "text"
+									},
+									{
+										"key": "x-api-version",
+										"value": "1.0",
+										"type": "text"
+									},
+									{
+										"key": "x-mock-response-code",
+										"value": "201",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"tokenCode\":\"{{tokenCode}}\",\n    \"amount\": {{randomAmount}},\n    \"memo\": \"{{randomMemo}}\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{host_url}}/api/transactions/withdraws",
+									"host": [
+										"{{host_url}}"
+									],
+									"path": [
+										"api",
+										"transactions",
+										"withdraws"
+									]
+								}
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"value\": {}\n}"
+						},
+						{
+							"name": "Create Withdraws Error",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "x-api-key",
+										"value": "{{postman_api_key}}",
+										"type": "text"
+									},
+									{
+										"key": "x-api-version",
+										"value": "1.0",
+										"type": "text"
+									},
+									{
+										"key": "x-mock-response-code",
+										"value": "400",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"tokenCode\":\"{{tokenCode}}\",\r\n    \"amount\": {{randomAmount}},\r\n    \"memo\": \"{{randomMemo}}\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{host_url}}/api/transactions/withdraws",
+									"host": [
+										"{{host_url}}"
+									],
+									"path": [
+										"api",
+										"transactions",
+										"withdraws"
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"Errors\": [\n        {\n            \"Code\": \"InvalidProperty\",\n            \"Target\": \"StablecoinNotExisting\",\n            \"Message\": \"Stablecoin specified does not existÏ\"\n        }\n    ]\n}"
+						}
+					]
+				},
+				{
+					"name": "GET Fees",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-api-version",
+								"value": "1.0",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"tokenCode\": \"SCEUR\",\n    \"amount\": \"10\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host_url}}/api/transactions/withdraws/fees?tokenCode=:tokenCode&amount=:amount",
+							"host": [
+								"{{host_url}}"
+							],
+							"path": [
+								"api",
+								"transactions",
+								"withdraws",
+								"fees"
+							],
+							"query": [
+								{
+									"key": "tokenCode",
+									"value": ":tokenCode"
+								},
+								{
+									"key": "amount",
+									"value": ":amount"
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Create Withdraws",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "x-api-key",
+										"value": "{{postman_api_key}}",
+										"type": "text"
+									},
+									{
+										"key": "x-api-version",
+										"value": "1.0",
+										"type": "text"
+									},
+									{
+										"key": "x-mock-response-code",
+										"value": "201",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"tokenCode\": \"SCEUR\",\n    \"amount\": \"10\",\n    \"memo\": \"test\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{host_url}}/api/transactions/withdraws/fees?tokenCode=:tokenCode&amount=:amount",
+									"host": [
+										"{{host_url}}"
+									],
+									"path": [
+										"api",
+										"transactions",
+										"withdraws",
+										"fees"
+									],
+									"query": [
+										{
+											"key": "tokenCode",
+											"value": ":tokenCode"
+										},
+										{
+											"key": "amount",
+											"value": ":amount"
+										}
+									]
+								}
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"value\": {\n        \"finalAmount\": 10,\n        \"finalAmountFiat\": 10,\n        \"serviceFeeFiat\": 1,\n        \"bankFeeFiat\": 1.2\n    }\n}"
+						},
+						{
+							"name": "Create Withdraws Error",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "x-api-key",
+										"value": "{{postman_api_key}}",
+										"type": "text"
+									},
+									{
+										"key": "x-api-version",
+										"value": "1.0",
+										"type": "text"
+									},
+									{
+										"key": "x-mock-response-code",
+										"value": "400",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{host_url}}/api/transactions/withdraws/fees?tokenCode=:tokenCode&amount=:amount",
+									"host": [
+										"{{host_url}}"
+									],
+									"path": [
+										"api",
+										"transactions",
+										"withdraws",
+										"fees"
+									],
+									"query": [
+										{
+											"key": "tokenCode",
+											"value": ":tokenCode"
+										},
+										{
+											"key": "amount",
+											"value": ":amount"
+										}
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"Errors\": [\n        {\n            \"Code\": \"InvalidProperty\",\n            \"Target\": \"StablecoinNotExisting\",\n            \"Message\": \"Stablecoin specified does not existÏ\"\n        }\n    ]\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Account",
+			"item": [
+				{
+					"name": "Balances",
+					"item": [
+						{
+							"name": "GET",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "x-api-version",
+										"value": "1.0",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{host_url}}/api/accounts/balances",
+									"host": [
+										"{{host_url}}"
+									],
+									"path": [
+										"api",
+										"accounts",
+										"balances"
+									]
+								}
+							},
+							"response": [
+								{
+									"name": "200",
+									"originalRequest": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{host_url}}/api/accounts/balances",
+											"host": [
+												"{{host_url}}"
+											],
+											"path": [
+												"api",
+												"accounts",
+												"balances"
+											]
+										}
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json; charset=utf-8",
+											"description": "",
+											"type": "text"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"value\": [\n        {\n            \"code\": \"SCEUR\",\n            \"balance\": 200\n        },\n        {\n            \"code\": \"SCUSD\",\n            \"balance\": 100\n        }\n    ]\n}"
+								},
+								{
+									"name": "500",
+									"originalRequest": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{host_url}}/api/accounts/balances",
+											"host": [
+												"{{host_url}}"
+											],
+											"path": [
+												"api",
+												"accounts",
+												"balances"
+											]
+										}
+									},
+									"status": "Internal Server Error",
+									"code": 500,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json; charset=utf-8",
+											"description": "",
+											"type": "text"
+										}
+									],
+									"cookie": [],
+									"body": "{\r\n    \"Errors\": [\r\n        {\r\n            \"Code\": \"InternalServerError\",\r\n            \"Message\": \"There is no account for this customer\",\r\n            \"Target\": \"D2322533-FAD7-4040-ADB9-1A864980F1B1\"\r\n        }\r\n    ]\r\n}"
+								}
+							]
+						}
+					]
+				},
+				{
+					"name": "POST",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "x-api-version",
+								"value": "1.0",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{host_url}}/api/accounts",
+							"host": [
+								"{{host_url}}"
+							],
+							"path": [
+								"api",
+								"accounts"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "201",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "x-api-version",
+										"value": "1.0",
+										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{host_url}}/api/accounts",
+									"host": [
+										"{{host_url}}"
+									],
+									"path": [
+										"api",
+										"accounts"
+									]
+								}
+							},
+							"_postman_previewlanguage": null,
+							"header": null,
+							"cookie": [],
+							"body": null
+						},
+						{
+							"name": "400",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"url": {
+									"raw": "{{host_url}}/api/accounts",
+									"host": [
+										"{{host_url}}"
+									],
+									"path": [
+										"api",
+										"accounts"
+									]
+								}
+							},
+							"_postman_previewlanguage": null,
+							"header": null,
+							"cookie": [],
+							"body": null
+						}
+					]
+				},
+				{
+					"name": "GET",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-api-version",
+								"value": "1.0",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{host_url}}/api/accounts",
+							"host": [
+								"{{host_url}}"
+							],
+							"path": [
+								"api",
+								"accounts"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "200",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{host_url}}/api/accounts",
+									"host": [
+										"{{host_url}}"
+									],
+									"path": [
+										"api",
+										"accounts"
+									]
+								}
+							},
+							"_postman_previewlanguage": "json",
+							"header": null,
+							"cookie": [],
+							"body": "{\n    \"value\": {\n        \"customerCode\": \"D2322533-FAD7-4040-ADB9-1A864980F1B1\",\n        \"accountCode\": \"S5FYZHQN\",\n        \"dcCode\": \"XLM\",\n        \"publicAddress\": \"GBATTKY2GSJXHG6KGYIGLI3O6SNKS4XLDHJ7O2UDFZN3ZWCWEYA6T772\"\n    }\n}"
+						},
+						{
+							"name": "400",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{host_url}}/api/accounts",
+									"host": [
+										"{{host_url}}"
+									],
+									"path": [
+										"api",
+										"accounts"
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": null,
+							"cookie": [],
+							"body": "{\n    \"Errors\": [\n        {\n            \"Code\": \"InvalidProperty\",\n            \"Message\": \"Customer with this reference does not exist in Nexus\",\n            \"Target\": \"3472dcc9-64e7-4dc9-a6e1-ae6543929edc\"\n        }\n    ]\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Tokens",
+			"item": [
+				{
+					"name": "GET",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-api-version",
+								"value": "1.0",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{host_url}}/api/tokens/{tokenCode}",
+							"host": [
+								"{{host_url}}"
+							],
+							"path": [
+								"api",
+								"tokens",
+								"{tokenCode}"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "200",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "x-api-version",
+										"value": "1.0",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{host_url}}/api/tokens/{tokenCode}",
+									"host": [
+										"{{host_url}}"
+									],
+									"path": [
+										"api",
+										"tokens",
+										"{tokenCode}"
+									]
+								}
+							},
+							"_postman_previewlanguage": "json",
+							"header": null,
+							"cookie": [],
+							"body": "{\n    \"value\": {\n        \"tokenCode\": \"SCEUR\",\n        \"validator\": \"\",\n        \"owner\": \"\",\n        \"asset\": \"\"\n    }\n}"
+						},
+						{
+							"name": "500",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "x-api-version",
+										"value": "1.0",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{host_url}}/api/tokens/{tokenCode}",
+									"host": [
+										"{{host_url}}"
+									],
+									"path": [
+										"api",
+										"tokens",
+										"{tokenCode}"
+									]
+								}
+							},
+							"status": "Internal Server Error",
+							"code": 500,
+							"_postman_previewlanguage": "json",
+							"header": null,
+							"cookie": [],
+							"body": "{\n    \"Errors\": [\n        {\n            \"Code\": \"InternalServerError\",\n            \"Message\": \"There is no account for this customer\",\n            \"Target\": \"D2322533-FAD7-4040-ADB9-1A864980F1B1\"\n        }\n    ]\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "PaymentRequests",
+			"item": [
+				{
+					"name": "POST",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "x-api-version",
+								"value": "1.0",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"tokenCode\": \"{{$randomTokenCode}}\",\r\n  \"amount\": {{$randomAmount}},\r\n  \"options\": {\r\n    \"expiresOn\": {{$randomExpiredOn}},\r\n    \"shareName\": {{$randomShareName}},\r\n    \"isOneOffPayment\": {{$randomIsOneOffPayment}},\r\n    \"payerCanChangeRequestedAmount\": {{$randomPayerCanChangeRequestedAmount}},\r\n    \"memo\": {{$randomMemo}},\r\n    \"params\": { }\r\n  }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host_url}}/api/paymentrequests",
+							"host": [
+								"{{host_url}}"
+							],
+							"path": [
+								"api",
+								"paymentrequests"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "201",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"tokenCode\": \"{{$randomTokenCode}}\",\r\n  \"amount\": {{$randomAmount}},\r\n  \"options\": {\r\n    \"expiresOn\": {{$randomExpiredOn}},\r\n    \"shareName\": {{$randomShareName}},\r\n    \"isOneOffPayment\": {{$randomIsOneOffPayment}},\r\n    \"payerCanChangeRequestedAmount\": {{$randomPayerCanChangeRequestedAmount}},\r\n    \"memo\": {{$randomMemo}},\r\n    \"params\": { }\r\n  }\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{host_url}}/api/paymentrequests",
+									"host": [
+										"{{host_url}}"
+									],
+									"path": [
+										"api",
+										"paymentrequests"
+									]
+								}
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"name": "Content-Type",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\r\n    \"value\": {\r\n        \"code\": \"8615e2af-d669-4224-9c76-b8cffadb4a6f\",\r\n        \"tokenCode\": \"SCEUR\",\r\n        \"requestedAmount\": 10,\r\n        \"paidAmount\": null,\r\n        \"status\": \"Open\",\r\n        \"options\": {\r\n            \"expiresOn\": null,\r\n            \"memo\": null,\r\n            \"name\": \"Hbna LKoa\",\r\n            \"isOneOffPayment\": true,\r\n            \"payerCanChangeRequestedAmount\": true,\r\n            \"params\": {}\r\n        }\r\n    }\r\n}"
+						},
+						{
+							"name": "500",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"tokenCode\": \"{{$randomTokenCode}}\",\r\n  \"amount\": {{$randomAmount}},\r\n  \"options\": {\r\n    \"expiresOn\": {{$randomExpiredOn}},\r\n    \"shareName\": {{$randomShareName}},\r\n    \"isOneOffPayment\": {{$randomIsOneOffPayment}},\r\n    \"payerCanChangeRequestedAmount\": {{$randomPayerCanChangeRequestedAmount}},\r\n    \"memo\": {{$randomMemo}},\r\n    \"params\": { }\r\n  }\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{host_url}}/api/paymentrequests",
+									"host": [
+										"{{host_url}}"
+									],
+									"path": [
+										"api",
+										"paymentrequests"
+									]
+								}
+							},
+							"status": "Internal Server Error",
+							"code": 500,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"name": "Content-Type",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"Errors\": [\n        {\n            \"Code\": \"InternalServerError\",\n            \"Message\": \"Unexpected error\",\n            \"Target\": null\n        }\n    ]\n}"
+						}
+					]
+				},
+				{
+					"name": "GET by code",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-api-version",
+								"value": "1.0",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{host_url}}/api/paymentrequests/:code",
+							"host": [
+								"{{host_url}}"
+							],
+							"path": [
+								"api",
+								"paymentrequests",
+								":code"
+							],
+							"variable": [
+								{
+									"key": "code",
+									"value": null
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "200",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{host_url}}/api/paymentrequests/:code",
+									"host": [
+										"{{host_url}}"
+									],
+									"path": [
+										"api",
+										"paymentrequests",
+										":code"
+									],
+									"variable": [
+										{
+											"key": "code",
+											"value": null
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8",
+									"name": "Content-Type",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"value\": {\n        \"code\": \"476fa34c-7f05-45b5-846f-b270f5b70713\",\n        \"tokenCode\": \"SCEUR\",\n        \"requestedAmount\": 10.00000000,\n        \"status\": \"Paid\",\n        \"createdOn\": 1677774725600,\n        \"updatedOn\": 1677774829766,\n        \"options\": {\n            \"expiresOn\": 1677775625325,\n            \"memo\": null,\n            \"name\": \"Max Stoll\",\n            \"isOneOffPayment\": true,\n            \"payerCanChangeRequestedAmount\": false,\n            \"params\": {}\n        },\n        \"payments\": [\n            {\n                \"transactionCode\": \"536088FE5323499A8B8A3472F1DDAABA\",\n                \"accountCode\": null,\n                \"amount\": 10.00000000,\n                \"createdOn\": 1677774818514,\n                \"updatedOn\": 1677774829766\n            }\n        ]\n    }\n}"
+						},
+						{
+							"name": "500",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{host_url}}/api/paymentrequests/:code",
+									"host": [
+										"{{host_url}}"
+									],
+									"path": [
+										"api",
+										"paymentrequests",
+										":code"
+									],
+									"variable": [
+										{
+											"key": "code",
+											"value": null
+										}
+									]
+								}
+							},
+							"status": "Internal Server Error",
+							"code": 500,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"name": "Content-Type",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"Errors\": [\n        {\n            \"Code\": \"InternalServerError\",\n            \"Message\": \"Unexpected error\",\n            \"Target\": null\n        }\n    ]\n}"
+						}
+					]
+				},
+				{
+					"name": "GET all for customer",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-api-version",
+								"value": "1.0",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{host_url}}/api/paymentrequests",
+							"host": [
+								"{{host_url}}"
+							],
+							"path": [
+								"api",
+								"paymentrequests"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "PUT",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "{{host_url}}/api/paymentrequests/:code/cancel",
+							"host": [
+								"{{host_url}}"
+							],
+							"path": [
+								"api",
+								"paymentrequests",
+								":code",
+								"cancel"
+							],
+							"variable": [
+								{
+									"key": "code",
+									"value": null
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Merchants",
+			"item": [
+				{
+					"name": "Create merchant",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "x-api-version",
+								"value": "1.0",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"companyName\": \"{{$randomCompanyName}}\",\r\n    \"contactPersonFullName\": \"{{$randomFullName}}\",\r\n    \"businessEmail\": \"{{$randomEmail}}\",\r\n    \"countryOfRegistration\": \"{{$randomCountry}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host_url}}/api/customers/merchant",
+							"host": [
+								"{{host_url}}"
+							],
+							"path": [
+								"api",
+								"customers",
+								"merchant"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "201",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"companyName\": \"{{$randomCompanyName}}\",\r\n  \"companyAddress\": \"{{$randomCompanyAddress}}\",\r\n  \"countryOfResidence\": \"{{$randomCountryCode}}\",\r\n  \"email\": \"{{$randomEmail}}\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{host_url}}/api/customers/merchant",
+									"host": [
+										"{{host_url}}"
+									],
+									"path": [
+										"api",
+										"customers",
+										"merchant"
+									]
+								}
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "json",
+							"header": null,
+							"cookie": [],
+							"body": "{\n    \"value\": {\n        \"reference\": \"3482DCC9-64E7-4DC9-A6E1-AE6543929EDC\",\n        \"trustLevel\": \"BTier1\",\n        \"currencyCode\": \"EUR\",\n        \"email\": \"XYZ@TR.COM\",\n        \"status\": \"UNDERREVIEW\",\n        \"bankAccountNumber\": null,\n        \"personalData\": {\n            \"DateOfBirth\": \"NL\",\n            \"FirstName\": \"XYZ\",\n            \"LastName\": \"XYZ_ADDRESS\"\n        }\n    }\n}"
+						},
+						{
+							"name": "400",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"companyName\": \"{{$randomCompanyName}}\",\r\n  \"companyAddress\": \"{{$randomCompanyAddress}}\",\r\n  \"countryOfResidence\": \"{{$randomCountryCode}}\",\r\n  \"email\": \"{{$randomEmail}}\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{host_url}}/api/customers/merchant",
+									"host": [
+										"{{host_url}}"
+									],
+									"path": [
+										"api",
+										"customers",
+										"merchant"
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": null,
+							"cookie": [],
+							"body": "{\n    \"Errors\": [\n        {\n            \"Code\": \"InvalidProperty\",\n            \"Target\": \"CountryOfResidence\",\n            \"Message\": \"Country is blacklisted\"\n        }\n    ]\n}"
+						}
+					]
+				},
+				{
+					"name": "Get merchant details",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-api-version",
+								"value": "1.0",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{host_url}}/api/customers",
+							"host": [
+								"{{host_url}}"
+							],
+							"path": [
+								"api",
+								"customers"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "200",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{host_url}}/api/customers",
+									"host": [
+										"{{host_url}}"
+									],
+									"path": [
+										"api",
+										"customers"
+									]
+								}
+							},
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"value\": {\n        \"reference\": \"F722F0DB-C40A-4475-925E-239413A87E94\",\n        \"trustLevel\": null,\n        \"currencyCode\": null,\n        \"email\": \"alessandro+11@quantoz.com\",\n        \"status\": \"ACTIVE\",\n        \"bankAccountNumber\": null,\n        \"personalData\": {\n            \"firstName\": \"Robert\",\n            \"lastName\": \"Deniro\",\n            \"dateOfBirth\": \"1977-11-19T08:04:09.000Z\",\n            \"countryOfResidence\": \"NL\",\n            \"phone\": \"+312345678\"\n        }\n    }\n}"
+						},
+						{
+							"name": "404",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"reference\": \"4db929fe-5eef-402a-b4db-12d10871c4ca\",\r\n  \"firstName\": \"Hans\",\r\n  \"lastName\": \"Peter\",\r\n  \"dateOfBirth\": \"2022-09-25T12:26:54.002\",\r\n  \"countryOfResidence\": \"Iraq\",\r\n  \"email\": \"hanspeter@gmail.com\",\r\n  \"phone\": \"+31683345559\",\r\n  \"ip\": \"124.69.179.76\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{host_url}}/api/customers",
+									"host": [
+										"{{host_url}}"
+									],
+									"path": [
+										"api",
+										"customers"
+									]
+								}
+							},
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"Errors\": [\n        {\n            \"Code\": \"EntityNotFound\",\n            \"Target\": \"Reference\",\n            \"Message\": \"Entity was not found\"\n        }\n    ]\n}"
+						}
+					]
+				},
+				{
+					"name": "GET merchant payment request by code",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{host_url}}/api/paymentrequests/merchant/:code",
+							"host": [
+								"{{host_url}}"
+							],
+							"path": [
+								"api",
+								"paymentrequests",
+								"merchant",
+								":code"
+							],
+							"variable": [
+								{
+									"key": "code",
+									"value": null
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "200",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{host_url}}/api/paymentrequests/merchant/:code",
+									"host": [
+										"{{host_url}}"
+									],
+									"path": [
+										"api",
+										"paymentrequests",
+										"merchant",
+										":code"
+									],
+									"variable": [
+										{
+											"key": "code",
+											"value": null
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8",
+									"name": "Content-Type",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"value\": {\n        \"code\": \"random_pay_request_code\",\n        \"tokenCode\": \"TEST\",\n        \"requestedAmount\": 1000,\n        \"status\": \"Open\",\n        \"options\": {\n            \"expiresOn\": 1675599885000,\n            \"includePersonalData\": true,\n            \"memo\": \"Message here\",\n            \"email\": \"john@doe.com\",\n            \"name\": \"John Doe\",\n            \"data\": {\n                \"canAmountBeChanged\": \"true\"\n            }\n        }\n    }\n}"
+						},
+						{
+							"name": "500",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{host_url}}/api/paymentrequests/merchant/:code",
+									"host": [
+										"{{host_url}}"
+									],
+									"path": [
+										"api",
+										"paymentrequests",
+										"merchant",
+										":code"
+									],
+									"variable": [
+										{
+											"key": "code",
+											"value": null
+										}
+									]
+								}
+							},
+							"status": "Internal Server Error",
+							"code": 500,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"name": "Content-Type",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"Errors\": [\n        {\n            \"Code\": \"InternalServerError\",\n            \"Message\": \"Unexpected error\",\n            \"Target\": null\n        }\n    ]\n}"
+						}
+					]
+				},
+				{
+					"name": "Create merchant payment request",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "x-api-version",
+								"value": "1.0",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"tokenCode\": \"{{$TokenCode}}\",\r\n  \"amount\": {{$randomAmount}},\r\n    \"options\": {\r\n    \"expiresOn\": {{$randomExpiredOn}},\r\n    \"shareName\": {{$randomShareName}},\r\n    \"isOneOffPayment\": {{$randomIsOneOffPayment}},\r\n    \"payerCanChangeRequestedAmount\": {{$randomPayerCanChangeRequestedAmount}},\r\n    \"memo\": {{$randomMemo}},\r\n    \"params\": { }\r\n    },\r\n  \"merchantSettings\": {\r\n      \"callbackUrl\": \"{{$randomCallbackUrl}}\",\r\n      \"ReturnUrl\": \"{{$randomReturnUrl}}\"\r\n  }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host_url}}/api/PaymentRequests/merchant",
+							"host": [
+								"{{host_url}}"
+							],
+							"path": [
+								"api",
+								"PaymentRequests",
+								"merchant"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "201",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"tokenCode\": \"{{$TokenCode}}\",\r\n  \"amount\": {{$randomAmount}},\r\n    \"options\": {\r\n    \"expiresOn\": {{$randomExpiredOn}},\r\n    \"shareName\": {{$randomShareName}},\r\n    \"isOneOffPayment\": {{$randomIsOneOffPayment}},\r\n    \"payerCanChangeRequestedAmount\": {{$randomPayerCanChangeRequestedAmount}},\r\n    \"memo\": {{$randomMemo}},\r\n    \"params\": { }\r\n    },\r\n  \"merchantSettings\": {\r\n      \"callbackUrl\": \"{{$randomCallbackUrl}}\",\r\n      \"ReturnUrl\": \"{{$randomReturnUrl}}\"\r\n  }\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{host_url}}/api/PaymentRequests/merchant",
+									"host": [
+										"{{host_url}}"
+									],
+									"path": [
+										"api",
+										"PaymentRequests",
+										"merchant"
+									]
+								}
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"name": "Content-Type",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\r\n  \"value\": {\r\n    \"code\": \"string\",\r\n    \"tokenCode\": \"string\",\r\n    \"requestedAmount\": 0,\r\n    \"status\": \"string\",\r\n    \"options\": {\r\n      \"expiresOn\": 0,\r\n      \"memo\": \"string\",\r\n      \"email\": \"string\",\r\n      \"name\": \"string\",\r\n      \"data\": {\r\n        \"additionalProp1\": \"string\",\r\n        \"additionalProp2\": \"string\",\r\n        \"additionalProp3\": \"string\"\r\n      }\r\n    }\r\n  }\r\n}"
+						},
+						{
+							"name": "500",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"name": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"tokenCode\": \"{{$TokenCode}}\",\r\n  \"amount\": {{$randomAmount}},\r\n    \"options\": {\r\n    \"expiresOn\": {{$randomExpiredOn}},\r\n    \"shareName\": {{$randomShareName}},\r\n    \"isOneOffPayment\": {{$randomIsOneOffPayment}},\r\n    \"payerCanChangeRequestedAmount\": {{$randomPayerCanChangeRequestedAmount}},\r\n    \"memo\": {{$randomMemo}},\r\n    \"params\": { }\r\n    },\r\n  \"merchantSettings\": {\r\n      \"callbackUrl\": \"{{$randomCallbackUrl}}\",\r\n      \"ReturnUrl\": \"{{$randomReturnUrl}}\"\r\n  }\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{host_url}}/api/PaymentRequests/merchant",
+									"host": [
+										"{{host_url}}"
+									],
+									"path": [
+										"api",
+										"PaymentRequests",
+										"merchant"
+									]
+								}
+							},
+							"status": "Internal Server Error",
+							"code": 500,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json",
+									"name": "Content-Type",
+									"description": "",
+									"type": "text"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"Errors\": [\n        {\n            \"Code\": \"InternalServerError\",\n            \"Message\": \"Unexpected error\",\n            \"Target\": null\n        }\n    ]\n}"
+						}
+					]
+				}
+			]
+		}
+	],
+	"auth": {
+		"type": "oauth2",
+		"oauth2": [
+			{
+				"key": "scope",
+				"value": "{{value}}",
+				"type": "string"
+			},
+			{
+				"key": "grant_type",
+				"value": "authorization_code",
+				"type": "string"
+			},
+			{
+				"key": "clientSecret",
+				"value": "{{auth_client_secret}}",
+				"type": "string"
+			},
+			{
+				"key": "clientId",
+				"value": "{{auth_client_id}}",
+				"type": "string"
+			},
+			{
+				"key": "tokenType",
+				"value": "",
+				"type": "string"
+			},
+			{
+				"key": "accessToken",
+				"value": "",
+				"type": "string"
+			},
+			{
+				"key": "authUrl",
+				"value": "{{auth_url}}/authorize",
+				"type": "string"
+			},
+			{
+				"key": "accessTokenUrl",
+				"value": "{{auth_url}}/token",
+				"type": "string"
+			},
+			{
+				"key": "useBrowser",
+				"value": true,
+				"type": "boolean"
+			},
+			{
+				"key": "username",
+				"value": "",
+				"type": "string"
+			},
+			{
+				"key": "password",
+				"value": "",
+				"type": "string"
+			},
+			{
+				"key": "challengeAlgorithm",
+				"value": "S256",
+				"type": "string"
+			},
+			{
+				"key": "addTokenTo",
+				"value": "header",
+				"type": "string"
+			},
+			{
+				"key": "client_authentication",
+				"value": "header",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "auth_provider",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "auth_client_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "auth_client_secret",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "auth_scope",
+			"value": "",
+			"type": "string"
+		}
+	]
+}
