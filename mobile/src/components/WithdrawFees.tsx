@@ -86,7 +86,7 @@ function WithdrawFees({ tokenCode, amount }: Props) {
               defaultConfig.feeSettings.minimumFee
                 ? `Min: ${displayFiatAmount(
                     defaultConfig.feeSettings.minimumFee,
-                    { currency: defaultConfig.defaultStableCoin }
+                    { currency: defaultConfig.defaultStableCoin.code }
                   )}`
                 : "Fees: N/A"}
             </Text>

@@ -2,24 +2,21 @@
 // under the Apache License, Version 2.0. See the NOTICE file at the root
 // of this distribution or at http://www.apache.org/licenses/LICENSE-2.0
 
-import { Balances } from "../../api/balances/balances.interface";
+import { defaultBalancesResponse } from "../../api/balances/balances.mocks";
+import { linkingOpenUrlMock } from "../../jest/jest.setup";
 import { fireEvent, render, screen, within } from "../../jest/test-utils";
 import TokensSelection from "../TokensSelection";
 
 describe("TokensSelection", () => {
   it("switches correctly between stablecoins", async () => {
-    const mockBalances: Balances[] = [
-      { balance: 300, tokenCode: "SCEUR" },
-      { balance: 10, tokenCode: "SCUSD" },
-    ];
     const mockSetToken = jest.fn();
 
     render(
       <TokensSelection
         isOpen={true}
         onClose={jest.fn()}
-        tokens={mockBalances}
-        selectedToken={mockBalances[0]}
+        tokens={defaultBalancesResponse.value}
+        selectedToken={defaultBalancesResponse.value[0]}
         setSelectedToken={mockSetToken}
       />
     );
@@ -47,5 +44,26 @@ describe("TokensSelection", () => {
       balance: 10,
       tokenCode: "SCUSD",
     });
+  });
+
+  it("goes to the token website on press of the external url icon", async () => {
+    render(
+      <TokensSelection
+        isOpen={true}
+        onClose={jest.fn()}
+        tokens={defaultBalancesResponse.value}
+        selectedToken={defaultBalancesResponse.value[0]}
+        setSelectedToken={jest.fn()}
+      />
+    );
+
+    await screen.findAllByLabelText("token");
+    const tokenDetailsButtons = await screen.findAllByLabelText(
+      "see token details"
+    );
+
+    fireEvent(tokenDetailsButtons[0], "onPress");
+
+    expect(linkingOpenUrlMock).toHaveBeenCalledWith("https://www.quantoz.com");
   });
 });

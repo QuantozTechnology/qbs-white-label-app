@@ -7,7 +7,7 @@ import { backendApiUrl } from "../../utils/axios";
 import { GenericApiResponse } from "../utils/api.interface";
 import { Balances } from "./balances.interface";
 
-const defaultBalancesResponse: GenericApiResponse<Balances[]> = {
+export const defaultBalancesResponse: GenericApiResponse<Balances[]> = {
   value: [
     { tokenCode: "SCEUR", balance: 300 },
     { tokenCode: "SCUSD", balance: 10 },

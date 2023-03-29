@@ -20,6 +20,7 @@ import ErrorBoundary from "./src/components/ErrorBoundary";
 import { appNavigationState } from "./src/config/config";
 import FullScreenLoadingSpinner from "./src/components/FullScreenLoadingSpinner";
 import { CustomerProvider } from "./src/context/CustomerContext";
+import { Feather } from "@expo/vector-icons";
 
 const prefix = Linking.createURL("/");
 const queryClient = new QueryClient();
@@ -41,6 +42,7 @@ export default function App() {
       });
       await Font.loadAsync(FontAwesome5.font);
       await Font.loadAsync(Ionicons.font);
+      await Font.loadAsync(Feather.font);
 
       setAppReady(true);
     }
