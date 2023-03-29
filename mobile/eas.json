@@ -50,7 +50,7 @@
     "preview-store": {
       "android": {
         "serviceAccountKeyPath": "./google-service-account.json",
-        "track": "alpha"
+        "track": "internal"
       }
     },
     "production": {

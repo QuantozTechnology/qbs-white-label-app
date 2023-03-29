@@ -60,9 +60,13 @@ function SignIn() {
       <Box accessibilityLabel="sign-in message" flex={1} p={4}>
         <VStack flex={1} space={4} justifyContent="center" alignItems="center">
           <Image
-            source={require("../../assets/qpay-logo-dark.png")}
-            alt="quantoz payments logo"
-            style={{ resizeMode: "contain", width: width * 0.6, height: 100 }}
+            source={require("../../assets/adaptive-icon-qbs.png")}
+            alt="qbs logo"
+            style={{
+              resizeMode: "center",
+              width: width,
+              height: 200,
+            }}
           />
           <Heading size="lg" color="warmGray.100">
             The future of digital cash

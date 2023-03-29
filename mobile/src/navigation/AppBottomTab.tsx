@@ -53,7 +53,7 @@ export default function AppBottomTabNavigator() {
 
   async function handleSupportPress() {
     const emailRecipient = defaultConfig.supportEmail;
-    const emailSubject = "Support request - Quantoz Payments";
+    const emailSubject = "Support request - Quantoz Blockchain Solutions";
     const emailBody = `Please provide a detailed description of the issue you are experiencing. Be sure to leave the information below as it is.
     
     ---------------------
