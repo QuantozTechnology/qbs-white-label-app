@@ -15,40 +15,28 @@ const isPreviewEnv = process.env.APP_ENV === "preview";
 
 const AppConfig = {
   name: isDevEnv
-    ? "Quantoz Payments (Dev)"
+    ? "Quantoz Blockchain Solutions (Dev)"
     : isPreviewEnv
-    ? "Quantoz Payments (Test)"
-    : "Quantoz Payments",
-  icon: isDevEnv
-    ? "./assets/dev-icon.png"
-    : isPreviewEnv
-    ? "./assets/test-icon.png"
-    : "./assets/icon.png",
-  image: isDevEnv
-    ? "./assets/dev-splash.png"
-    : isPreviewEnv
-    ? "./assets/test-splash.png"
-    : "./assets/splash.png",
+    ? "Quantoz Blockchain Solutions (Test)"
+    : "Quantoz Blockchain Solutions",
+  icon: "./assets/icon-qbs.png",
+  image: "./assets/splash-qbs.png",
   ios: {
     bundleIdentifier: isDevEnv
-      ? "com.quantoz.payments.dev"
+      ? "com.quantoz.qbs.dev"
       : isPreviewEnv
-      ? "com.quantoz.payments.preview"
-      : "com.quantoz.payments",
+      ? "com.quantoz.qbs.preview"
+      : "com.quantoz.qbs",
   },
   android: {
     adaptiveIcon: {
-      foregroundImage: isDevEnv
-        ? "./assets/dev-adaptive-icon.png"
-        : isPreviewEnv
-        ? "./assets/test-adaptive-icon.png"
-        : "./assets/adaptive-icon.png",
+      foregroundImage: "./assets/adaptive-icon-qbs.png",
     },
     package: isDevEnv
-      ? "com.quantoz.payments.dev"
+      ? "com.quantoz.qbs.dev"
       : isPreviewEnv
-      ? "com.quantoz.payments.preview"
-      : "com.quantoz.payments",
+      ? "com.quantoz.qbs.preview"
+      : "com.quantoz.qbs",
   },
   // This logic sets the correct env variables to use throughout the app
   // They can be read through the `expo-constants` package (https://docs.expo.dev/guides/environment-variables/#reading-environment-variables)
@@ -79,18 +67,14 @@ const AppConfig = {
 export default () => ({
   expo: {
     name: AppConfig.name,
-    slug: "quantoz-payments",
-    version: "1.0.2",
+    slug: "qbs-test-app",
+    version: "1.0.0",
     orientation: "portrait",
     icon: AppConfig.icon,
     userInterfaceStyle: "light",
 
     splash: {
-      image: isDevEnv
-        ? "./assets/dev-splash.png"
-        : isPreviewEnv
-        ? "./assets/test-splash.png"
-        : "./assets/splash.png",
+      image: "./assets/splash-qbs.png",
       resizeMode: "contain",
       backgroundColor: "#ffffff",
     },
@@ -122,7 +106,7 @@ export default () => ({
     },
     extra: {
       eas: {
-        projectId: "4a15d834-f9d3-4247-ab71-fabe26335f7a",
+        projectId: "508103fd-4d90-4213-98d1-045bdcd043b5",
       },
       ...AppConfig.extra,
     },
@@ -137,10 +121,10 @@ export default () => ({
     ],
     // defines the package name of the app
     scheme: isDevEnv
-      ? "quantoz.payments.app.dev"
+      ? "quantoz.qbs.dev"
       : isPreviewEnv
-      ? "quantoz.payments.app.preview"
-      : "quantoz.payments.app",
+      ? "quantoz.qbs.preview"
+      : "quantoz.qbs",
     platforms: ["ios", "android"],
     runtimeVersion: {
       policy: "sdkVersion",
