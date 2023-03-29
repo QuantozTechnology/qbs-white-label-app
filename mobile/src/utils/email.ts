@@ -15,12 +15,14 @@ const ZSendEmail = z.object({
   onEmailSendError: z.function().returns(z.void()).optional(),
 });
 
+export type SendEmailPayload = z.infer<typeof ZSendEmail>;
+
 export async function composeEmail({
   recipients,
   subject,
   body,
   onEmailSendError,
-}: z.infer<typeof ZSendEmail>) {
+}: SendEmailPayload) {
   if (
     !ZSendEmail.safeParse({ recipients, subject, body, onEmailSendError })
       .success

@@ -150,7 +150,7 @@ function Withdraw({ navigation }: Props) {
     ({ tokenCode }) => tokenCode === selectedToken.tokenCode
   )?.balance;
   const sceurToken = limits.value.find(
-    ({ tokenCode }) => tokenCode === defaultConfig.defaultStableCoin
+    ({ tokenCode }) => tokenCode === defaultConfig.defaultStableCoin.code
   );
 
   if (balanceOfSelectedStablecoin == null || sceurToken == null) {

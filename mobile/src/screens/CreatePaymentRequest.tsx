@@ -106,11 +106,7 @@ function PaymentRequest({ navigation }: Props) {
   });
 
   useEffect(() => {
-    if (
-      balances != null &&
-      balances.value.length === 1 &&
-      selectedToken == null
-    ) {
+    if (balances != null && selectedToken == null) {
       setSelectedToken(balances.value[0]);
     }
   }, [balances]);
@@ -124,7 +120,7 @@ function PaymentRequest({ navigation }: Props) {
     );
   }
 
-  if (balancesStatus === "loading") {
+  if (balancesStatus === "loading" || selectedToken == null) {
     return (
       <VStack p={4} space={2}>
         <FormControlSkeleton />
@@ -162,6 +158,9 @@ function PaymentRequest({ navigation }: Props) {
     }
   };
 
+  console.log(balances);
+  console.log(selectedToken);
+
   return (
     <ScreenWrapper flex={1}>
       <KeyboardAvoidingView
@@ -173,7 +172,7 @@ function PaymentRequest({ navigation }: Props) {
           <ScrollView>
             <BalancesList
               selectedToken={balances.value.find(
-                ({ tokenCode }) => tokenCode === selectedToken?.tokenCode
+                ({ tokenCode }) => tokenCode === selectedToken.tokenCode
               )}
               setSelectedToken={setSelectedToken}
             />
@@ -182,7 +181,7 @@ function PaymentRequest({ navigation }: Props) {
                 <FormControl isRequired isInvalid={errors["amount"] != null}>
                   {/* TODO change label with dynamically selected token */}
                   <FormControl.Label>
-                    Amount ({defaultConfig.defaultStableCoin})
+                    Amount ({defaultConfig.defaultStableCoin.code})
                   </FormControl.Label>
                   <Input
                     value={amount}

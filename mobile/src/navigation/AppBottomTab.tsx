@@ -46,6 +46,7 @@ export default function AppBottomTabNavigator() {
       "ReviewPhoto",
       "UpgradeAccountStack",
       "PaymentRequestDetails",
+      "TokenDetails",
     ];
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     return hideOnScreens.indexOf(routeName!) <= -1;

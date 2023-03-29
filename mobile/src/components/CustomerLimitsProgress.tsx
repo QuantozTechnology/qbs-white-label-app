@@ -55,7 +55,7 @@ function CustomerLimitsProgress({
   }
 
   const matchingToken = limits.value.find(
-    ({ tokenCode }) => tokenCode === defaultConfig.defaultStableCoin
+    ({ tokenCode }) => tokenCode === defaultConfig.defaultStableCoin.code
   );
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const used = matchingToken![operationType].used.monthly;

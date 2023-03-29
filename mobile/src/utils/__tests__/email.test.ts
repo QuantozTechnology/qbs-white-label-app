@@ -4,9 +4,9 @@
 
 import * as MailComposer from "expo-mail-composer";
 import { MailComposerStatus } from "expo-mail-composer";
-import { Linking } from "react-native";
+import { linkingOpenUrlMock } from "../../jest/jest.setup";
 import { waitFor } from "../../jest/test-utils";
-import { ISendEmail, composeEmail } from "../email";
+import { composeEmail, SendEmailPayload } from "../email";
 
 describe("email utils", () => {
   const canComposeEmailMock = jest
@@ -16,7 +16,7 @@ describe("email utils", () => {
     .spyOn(MailComposer, "composeAsync")
     .mockResolvedValue({ status: MailComposerStatus.SENT });
 
-  const testEmailOptions: ISendEmail = {
+  const testEmailOptions: SendEmailPayload = {
     recipients: ["test@test.test"],
     onEmailSendError: jest.fn(() => "error"),
     body: "Test body for email",
@@ -61,12 +61,9 @@ describe("email utils", () => {
       .spyOn(MailComposer, "isAvailableAsync")
       .mockResolvedValue(false);
 
-    const linkingMock = jest.fn();
-    Linking.openURL = linkingMock;
-
     await composeEmail(testEmailOptions);
 
     await waitFor(() => expect(canComposeEmailMock).toHaveBeenCalled());
-    expect(linkingMock).toHaveBeenCalled();
+    expect(linkingOpenUrlMock).toHaveBeenCalled();
   });
 });

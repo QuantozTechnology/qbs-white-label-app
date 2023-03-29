@@ -6,7 +6,10 @@ import { backendApiUrl } from "../utils/axios";
 
 type AppDefaultConfig = {
   defaultFiatCurrency: string;
-  defaultStableCoin: string;
+  defaultStableCoin: {
+    code: string;
+    websiteLink: string;
+  };
   supportEmail: string;
   feeSettings: {
     minimumFee: number;
@@ -23,7 +26,10 @@ type AppDefaultConfig = {
 
 export const defaultConfig: AppDefaultConfig = {
   defaultFiatCurrency: "EUR",
-  defaultStableCoin: "SCEUR",
+  defaultStableCoin: {
+    code: "SCEUR",
+    websiteLink: "https://www.quantoz.com",
+  },
   supportEmail: "support@quantozpayments.com",
   feeSettings: {
     minimumFee: 2,

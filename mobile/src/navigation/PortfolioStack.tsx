@@ -27,6 +27,9 @@ export type PortfolioStackParamList = {
   SendStack: undefined;
   Funding: undefined;
   Withdraw: undefined;
+  TokenDetails: {
+    tokenCode: string;
+  };
 };
 
 const PortfolioStack = createNativeStackNavigator<PortfolioStackParamList>();

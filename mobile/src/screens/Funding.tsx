@@ -138,7 +138,7 @@ function Funding({ navigation }: FundingProps) {
 
   // TODO limits should change based on selected token, in the <BalanceList> component below
   const matchingToken = limits.value.find(
-    ({ tokenCode }) => tokenCode === defaultConfig.defaultStableCoin
+    ({ tokenCode }) => tokenCode === defaultConfig.defaultStableCoin.code
   );
   const hasReachedLimits =
     matchingToken?.funding.used.monthly ===

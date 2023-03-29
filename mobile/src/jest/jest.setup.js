@@ -10,6 +10,7 @@ import { paymentsApi } from "../utils/axios";
 import * as CustomerContext from "../context/CustomerContext";
 import * as Clipboard from "expo-clipboard";
 import { biometricValidation } from "../utils/biometric";
+import { Linking } from "react-native";
 
 export const mockRefresh = jest.fn();
 export let mockClipboardCopy;
@@ -29,9 +30,13 @@ jest.mock("@react-navigation/native", () => {
         navigate: mockUseNavigationNavigate,
       })),
       dispatch: mockUseNavigationDispatch,
+      navigate: mockUseNavigationNavigate,
     }),
   };
 });
+
+export const linkingOpenUrlMock = jest.fn();
+Linking.openURL = linkingOpenUrlMock;
 
 beforeEach(() => {
   jest.spyOn(auth, "useAuth").mockImplementation(() => {

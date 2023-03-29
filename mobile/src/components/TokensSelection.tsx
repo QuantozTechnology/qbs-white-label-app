@@ -2,10 +2,12 @@
 // under the Apache License, Version 2.0. See the NOTICE file at the root
 // of this distribution or at http://www.apache.org/licenses/LICENSE-2.0
 
-import { Ionicons } from "@expo/vector-icons";
-import { Actionsheet, Box, HStack, Icon, Text } from "native-base";
+import { Feather } from "@expo/vector-icons";
+import { Actionsheet, Box, HStack, Icon, Pressable, Text } from "native-base";
 import { Dispatch, SetStateAction } from "react";
+import { Linking } from "react-native";
 import { Balances } from "../api/balances/balances.interface";
+import { defaultConfig } from "../config/config";
 import { displayFiatAmount } from "../utils/currencies";
 
 type TokensSelectionProps = {
@@ -23,6 +25,12 @@ function TokensSelection({
   setSelectedToken,
   tokens,
 }: TokensSelectionProps) {
+  function handleTokenDetailsPress() {
+    onClose();
+
+    Linking.openURL(defaultConfig.defaultStableCoin.websiteLink);
+  }
+
   return (
     <Actionsheet
       isOpen={isOpen}
@@ -49,31 +57,33 @@ function TokensSelection({
             <Actionsheet.Item
               key={tokenCode}
               startIcon={
-                <Icon
-                  as={Ionicons}
-                  size="6"
-                  name="information-circle-outline"
-                  color={
-                    tokenCode === selectedToken?.tokenCode
-                      ? "light.100"
-                      : "gray.500"
-                  }
-                />
+                <Pressable
+                  onPress={handleTokenDetailsPress}
+                  accessibilityLabel="see token details"
+                  alignSelf="center"
+                >
+                  <Icon
+                    as={Feather}
+                    name="external-link"
+                    size="6"
+                    color={
+                      tokenCode === selectedToken?.tokenCode
+                        ? "light.100"
+                        : "gray.500"
+                    }
+                  />
+                </Pressable>
               }
               accessibilityLabel="token"
               onPress={() => handleTokenPress(tokenCode)}
               background={
                 tokenCode === selectedToken?.tokenCode
-                  ? "primary.600"
+                  ? "primary.500"
                   : "gray.50"
               }
               borderRadius="md"
             >
-              <HStack
-                justifyContent={"space-between"}
-                alignItems="center"
-                width={"80%"}
-              >
+              <HStack justifyContent="space-between" w="81%">
                 <Text
                   accessibilityLabel="token code"
                   color={
