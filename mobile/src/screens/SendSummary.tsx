@@ -28,6 +28,7 @@ import DataDisplayFieldSkeleton from "../components/DataDisplayFieldSkeleton";
 import FullScreenMessage from "../components/FullScreenMessage";
 import Notification from "../components/Notification";
 import ScreenWrapper from "../components/ScreenWrapper";
+import { defaultConfig } from "../config/config";
 import { PortfolioStackParamList } from "../navigation/PortfolioStack";
 import { SendStackParamList } from "../navigation/SendStack";
 import { biometricValidation } from "../utils/biometric";
@@ -149,6 +150,10 @@ function SendSummary({ navigation, route }: Props) {
   const CreatePaymentSchema = z.object({
     amount: z.coerce
       .number()
+      .min(
+        defaultConfig.minSendAmount,
+        `Min: ${displayFiatAmount(defaultConfig.minSendAmount)}`
+      )
       .max(balance.value[0].balance, "Amount greater than your balance"),
     tokenCode: z.string().refine(
       () => {
