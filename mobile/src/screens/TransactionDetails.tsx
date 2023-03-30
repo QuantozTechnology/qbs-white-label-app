@@ -2,7 +2,9 @@
 // under the Apache License, Version 2.0. See the NOTICE file at the root
 // of this distribution or at http://www.apache.org/licenses/LICENSE-2.0
 
+import { Ionicons } from "@expo/vector-icons";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { Icon } from "native-base";
 import { Button, ScrollView } from "native-base";
 import { TransactionType } from "../api/transactions/transactions.interface";
 import DataDisplayField from "../components/DataDisplayField";
@@ -59,6 +61,36 @@ function TransactionDetails({ navigation, route }: TransactionDetailsProps) {
           label="Amount"
           value={displayFiatAmount(amount, { currency: tokenCode })}
           accessibilityLabel="amount"
+          action={
+            !isOutgoingTransaction ? (
+              <Button
+                accessibilityLabel="refund"
+                startIcon={
+                  <Icon
+                    as={Ionicons}
+                    name="arrow-redo"
+                    color="white"
+                    size="sm"
+                  />
+                }
+                size="sm"
+                mr={4}
+                alignSelf="center"
+                onPress={() => {
+                  navigation.replace("SendStack", {
+                    screen: "Send",
+                    params: {
+                      accountCode: fromAccountCode,
+                      amount: amount,
+                      message: memo,
+                    },
+                  });
+                }}
+              >
+                Refund
+              </Button>
+            ) : null
+          }
         />
         <DataDisplayField
           label="Message"
