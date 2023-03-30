@@ -19,6 +19,23 @@ jest.mock("../utils/biometric", () => ({
   biometricValidation: jest.fn().mockResolvedValue({ result: "success" }),
 }));
 
+// create a mock for the whole react navigation prop object
+export const mockNavigation = {
+  navigate: jest.fn(),
+  replace: jest.fn(),
+  goBack: jest.fn(),
+  dispatch: jest.fn(),
+  setOptions: jest.fn(),
+  addListener: jest.fn(),
+  removeListener: jest.fn(),
+  reset: jest.fn(),
+  isFocused: jest.fn(),
+  dangerouslyGetParent: jest.fn(),
+  dangerouslyGetState: jest.fn(),
+  setParams: jest.fn(),
+  getParam: jest.fn(),
+};
+
 export const mockUseNavigationNavigate = jest.fn();
 export const mockUseNavigationDispatch = jest.fn();
 jest.mock("@react-navigation/native", () => {

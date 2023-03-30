@@ -11,7 +11,7 @@ interface IDataDisplayField extends AccessibilityProps, InterfaceHStackProps {
   value: string | number | ReactNode;
   label?: string;
   children?: ReactNode;
-  action?: ReactElement;
+  action?: ReactElement | null;
 }
 
 function DataDisplayField({

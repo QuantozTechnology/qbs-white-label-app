@@ -39,7 +39,7 @@ import { validationCheck } from "../utils/validation/errors";
 
 type Props = NativeStackScreenProps<SendStackParamList, "Send">;
 
-function Send({ navigation }: Props) {
+function Send({ navigation, route }: Props) {
   const { data: balances, status: balancesStatus } = useBalances();
 
   const { mutate: createSend, isLoading: isCreatingPayment } = useMutation({
@@ -77,9 +77,15 @@ function Send({ navigation }: Props) {
   });
 
   const [selectedToken, setSelectedToken] = useState<Balances | undefined>();
-  const [accountCode, setAccountCode] = useState<string | undefined>();
-  const [amount, setAmount] = useState<string | undefined>();
-  const [message, setMessage] = useState<string | undefined>();
+  const [accountCode, setAccountCode] = useState<string | undefined>(
+    route.params?.accountCode
+  );
+  const [amount, setAmount] = useState<string | undefined>(
+    route.params?.amount?.toString()
+  );
+  const [message, setMessage] = useState<string | undefined>(
+    route.params?.message
+  );
   const [includePersonalInfo, setIncludePersonalInfo] = useState(false);
   const [validationErrors, setValidationErrors] = useState<
     Record<"accountCode" | "amount" | "message", string | null>

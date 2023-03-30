@@ -13,7 +13,13 @@ import SendSummary from "../screens/SendSummary";
 import { FeedbackProps } from "./WelcomeStack";
 
 export type SendStackParamList = {
-  Send: undefined;
+  Send:
+    | {
+        accountCode: string;
+        amount: number;
+        message?: string;
+      }
+    | undefined;
   ScanQrCode: undefined;
   SendSummary: {
     code: string;

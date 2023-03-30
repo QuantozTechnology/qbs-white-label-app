@@ -9,14 +9,14 @@ import {
   mockOutgoingPayment,
   mockPayout,
 } from "../../api/transactions/transactions.mocks";
-import { render, screen, within } from "../../jest/test-utils";
+import { mockNavigation } from "../../jest/jest.setup";
+import { fireEvent, render, screen, within } from "../../jest/test-utils";
 import TransactionDetails from "../TransactionDetails";
 
 describe("Transaction details screen", () => {
   const createTestProps = (props: Record<string, unknown>) => ({
     navigation: {
-      navigate: jest.fn(),
-      setOptions: jest.fn(),
+      ...mockNavigation,
     },
     ...props,
   });
@@ -357,5 +357,43 @@ describe("Transaction details screen", () => {
     expect(within(message).getByLabelText("value")).toHaveTextContent(
       /^Funding$/
     );
+  });
+
+  it("takes the user to the send screen when the refund button is pressed on an inc", async () => {
+    props = createTestProps({
+      route: {
+        params: {
+          transaction: mockIncomingPayment,
+        },
+      },
+    });
+
+    render(<TransactionDetails {...props} />);
+
+    const refundButton = await screen.findByLabelText("refund");
+    fireEvent.press(refundButton);
+
+    expect(mockNavigation.replace).toHaveBeenCalledWith("SendStack", {
+      screen: "Send",
+      params: {
+        accountCode: mockIncomingPayment.fromAccountCode,
+        amount: mockIncomingPayment.amount,
+        message: mockIncomingPayment.memo,
+      },
+    });
+  });
+
+  it("does not show the refund button on an outgoing transaction", async () => {
+    props = createTestProps({
+      route: {
+        params: {
+          transaction: mockOutgoingPayment,
+        },
+      },
+    });
+
+    render(<TransactionDetails {...props} />);
+
+    expect(screen.queryByLabelText("refund")).toBeNull();
   });
 });

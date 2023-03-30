@@ -14,7 +14,7 @@ export interface Transaction {
   status: string;
   type: TransactionType;
   tokenCode: string;
-  memo: string | null;
+  memo?: string;
   direction: "Outgoing" | "Incoming";
 }
 

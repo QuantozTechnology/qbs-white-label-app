@@ -21,6 +21,9 @@ describe("Send", () => {
         reset: mockReset,
       }),
     },
+    route: {
+      params: {},
+    },
     ...props,
   });
 

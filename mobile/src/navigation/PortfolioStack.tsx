@@ -24,7 +24,16 @@ export type PortfolioStackParamList = {
   SummaryPaymentRequest: {
     code: string;
   };
-  SendStack: undefined;
+  SendStack:
+    | {
+        screen: "Send";
+        params: {
+          accountCode: string;
+          amount: number;
+          message?: string;
+        };
+      }
+    | undefined;
   Funding: undefined;
   Withdraw: undefined;
   TokenDetails: {
