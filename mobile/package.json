@@ -7,7 +7,7 @@
     "android": "npx expo start --android",
     "ios": "npx expo start --ios",
     "web": "npx expo start --web",
-    "ci-test": "TZ=UTC jest --ci --runInBand --forceExit --reporters=\"jest-junit\" --reporters=\"default\"",
+    "ci-test": "TZ=UTC jest --ci --maxWorkers=2 --forceExit --reporters=\"jest-junit\" --reporters=\"default\"",
     "test": "TZ=UTC npx jest --forceExit",
     "lint": "eslint",
     "prepare": "cd .. && husky install",

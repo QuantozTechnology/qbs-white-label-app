@@ -158,9 +158,6 @@ function PaymentRequest({ navigation }: Props) {
     }
   };
 
-  console.log(balances);
-  console.log(selectedToken);
-
   return (
     <ScreenWrapper flex={1}>
       <KeyboardAvoidingView

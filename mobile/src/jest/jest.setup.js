@@ -13,7 +13,9 @@ import { biometricValidation } from "../utils/biometric";
 import { Linking } from "react-native";
 
 export const mockRefresh = jest.fn();
-export let mockClipboardCopy;
+export let mockClipboardCopy: jest.SpyInstance;
+export let authMock: jest.SpyInstance;
+export let customerContextMock: jest.SpyInstance;
 
 jest.mock("../utils/biometric", () => ({
   biometricValidation: jest.fn().mockResolvedValue({ result: "success" }),
@@ -56,7 +58,12 @@ export const linkingOpenUrlMock = jest.fn();
 Linking.openURL = linkingOpenUrlMock;
 
 beforeEach(() => {
-  jest.spyOn(auth, "useAuth").mockImplementation(() => {
+  // mocking NOTICE to clipboard
+  mockClipboardCopy = jest
+    .spyOn(Clipboard, "setStringAsync")
+    .mockResolvedValue(true);
+
+  authMock = jest.spyOn(auth, "useAuth").mockImplementation(() => {
     return {
       error: null,
       isLoading: false,
@@ -80,15 +87,11 @@ beforeEach(() => {
     requiresCustomer: false,
     refresh: mockRefresh,
   };
-  jest
+
+  customerContextMock = jest
     .spyOn(CustomerContext, "useCustomerState")
     .mockImplementation(() => contextValues);
 });
-
-// mocking NOTICE to clipboard
-mockClipboardCopy = jest
-  .spyOn(Clipboard, "setStringAsync")
-  .mockResolvedValue(true);
 
 // mock biometric check
 biometricValidation.mockResolvedValue({ result: "success" });
@@ -107,6 +110,7 @@ beforeAll(() => {
 afterEach(() => {
   server.resetHandlers();
   cleanup();
+  jest.restoreAllMocks();
 });
 // Clean up after the tests are finished.
 afterAll(() => server.close());

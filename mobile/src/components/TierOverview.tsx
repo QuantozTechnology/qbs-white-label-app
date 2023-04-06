@@ -138,8 +138,7 @@ function TierOverview({
             ))}
         </VStack>
       </HStack>
-      {typeof tierUpgradeActions !== "function" &&
-        typeof tierUpgradeActions !== "undefined" &&
+      {tierUpgradeActions &&
         (tierStatus === ITierStatus.Inactive ||
           tierStatus === ITierStatus.Pending) && (
           <Box accessibilityLabel="tier upgrade actions">
