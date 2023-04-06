@@ -9,12 +9,16 @@ import { waitFor } from "../../jest/test-utils";
 import { composeEmail, SendEmailPayload } from "../email";
 
 describe("email utils", () => {
-  const canComposeEmailMock = jest
-    .spyOn(MailComposer, "isAvailableAsync")
-    .mockResolvedValue(true);
-  const composeEmailMock = jest
-    .spyOn(MailComposer, "composeAsync")
-    .mockResolvedValue({ status: MailComposerStatus.SENT });
+  let canComposeEmailMock: jest.SpyInstance;
+  let composeEmailMock: jest.SpyInstance;
+  beforeEach(() => {
+    canComposeEmailMock = jest
+      .spyOn(MailComposer, "isAvailableAsync")
+      .mockResolvedValue(true);
+    composeEmailMock = jest
+      .spyOn(MailComposer, "composeAsync")
+      .mockResolvedValue({ status: MailComposerStatus.SENT });
+  });
 
   const testEmailOptions: SendEmailPayload = {
     recipients: ["test@test.test"],
@@ -36,7 +40,7 @@ describe("email utils", () => {
   });
 
   it("cannot open the email client, showing error to the user and NOTICE the email in the clipboard", async () => {
-    const composeEmailMock = jest
+    composeEmailMock = jest
       .spyOn(MailComposer, "composeAsync")
       .mockRejectedValue(new Error());
 
@@ -48,16 +52,18 @@ describe("email utils", () => {
   });
 
   it("cannot compose email (not available on device), returns error", async () => {
-    const canComposeEmailMock = jest
+    canComposeEmailMock = jest
       .spyOn(MailComposer, "isAvailableAsync")
-      .mockRejectedValue(new Error());
+      .mockResolvedValue(new Error());
+
+    await composeEmail(testEmailOptions);
 
     expect(canComposeEmailMock).toHaveBeenCalled();
     expect(testEmailOptions.onEmailSendError).toHaveBeenCalled();
   });
 
   it("cannot use expo-mail-composer, defaults to Linking API from react-native", async () => {
-    const canComposeEmailMock = jest
+    canComposeEmailMock = jest
       .spyOn(MailComposer, "isAvailableAsync")
       .mockResolvedValue(false);
 
