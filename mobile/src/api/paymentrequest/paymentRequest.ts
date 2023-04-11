@@ -49,10 +49,13 @@ export function usePaymentRequest(
 
 // GET all payment requests for a customer
 
-export async function getPaymentRequests({ pageParam = 1 }) {
-  const { data, headers } = await paymentsApi.get<PaymentRequestsResponse>(
-    `/api/paymentrequests?page=${pageParam}&pageSize=10`
-  );
+export async function getPaymentRequests({ pageParam = 1, type }) {
+  const url =
+    type != null
+      ? `/api/paymentrequests?page=${pageParam}&pageSize=10&status=${type}`
+      : `/api/paymentrequests?page=${pageParam}&pageSize=10`;
+
+  const { data, headers } = await paymentsApi.get<PaymentRequestsResponse>(url);
 
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const nextPage = JSON.parse(headers["x-pagination"]!).NextPage;
@@ -60,13 +63,21 @@ export async function getPaymentRequests({ pageParam = 1 }) {
   return { ...data, nextPage };
 }
 
-export function usePaymentRequests() {
-  return useInfiniteQuery(["paymentRequests"], getPaymentRequests, {
-    getNextPageParam: (lastPage) => {
-      return lastPage.nextPage ?? undefined;
-    },
-    refetchInterval: 5000,
-  });
+type UsePaymentRequestsProps = {
+  type?: "open" | "expired";
+};
+
+export function usePaymentRequests({ type }: UsePaymentRequestsProps) {
+  return useInfiniteQuery(
+    ["paymentRequests", type],
+    () => getPaymentRequests({ type }),
+    {
+      getNextPageParam: (lastPage) => {
+        return lastPage.nextPage ?? undefined;
+      },
+      refetchInterval: 5000,
+    }
+  );
 }
 
 export async function cancelPaymentRequest(requestId: string) {

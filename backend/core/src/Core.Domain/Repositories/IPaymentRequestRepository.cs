@@ -16,5 +16,7 @@ namespace Core.Domain.Repositories
         public Task<PaymentRequest> GetByCodeForMerchantAsync(string code, CancellationToken cancellationToken = default);
 
         public Task<Paged<PaymentRequest>> GetAllForCustomerAsync(string customerCode, int page = 1, int pageSize = 10, CancellationToken cancellationToken = default);
+
+        public Task<IEnumerable<PaymentRequest>> GetOpenPaymentRequestsToExpireAsync(CancellationToken cancellationToken = default);
     }
 }

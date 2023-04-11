@@ -2,9 +2,11 @@
 // under the Apache License, Version 2.0. See the NOTICE file at the root
 // of this distribution or at http://www.apache.org/licenses/LICENSE-2.0
 
+using Core.Domain.Abstractions;
 using Core.Domain.Exceptions;
 using Core.Domain.Primitives;
 using Core.Domain.Repositories;
+using Microsoft.EntityFrameworkCore;
 
 namespace Core.Persistence.Repositories
 {
@@ -43,6 +45,25 @@ namespace Core.Persistence.Repositories
             }
 
             return entity;
+        }
+
+        public async Task<List<T>> ListAsync(ISpecification<T> specification, CancellationToken cancellationToken = default)
+        {
+            var query = Query();
+
+            var queryableResultWithIncludes = specification
+                .Includes
+                .Aggregate(query,
+                    (current, include) => current.Include(include));
+
+            var secondaryResult = specification
+                .IncludeStrings
+                .Aggregate(queryableResultWithIncludes,
+                    (current, include) => current.Include(include));
+
+            return await secondaryResult
+                .Where(specification.Criteria)
+                .ToListAsync(cancellationToken);
         }
     }
 }

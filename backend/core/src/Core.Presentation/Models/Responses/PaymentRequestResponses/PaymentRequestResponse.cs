@@ -44,7 +44,7 @@ namespace Core.Presentation.Models.Responses.PaymentRequestResponses
                     IsOneOffPayment = paymentRequest.Options.IsOneOffPayment,
                     PayerCanChangeRequestedAmount = paymentRequest.Options.PayerCanChangeRequestedAmount
                 },
-                Payments = paymentRequest.Payments.Select(p => PaymentResponse.FromPayment(p))
+                Payments = paymentRequest.Payments.Select(p => PaymentResponse.FromPayment(p))?.OrderByDescending(p => p.CreatedOn)
             };
         }
     }

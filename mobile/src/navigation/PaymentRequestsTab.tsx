@@ -3,7 +3,8 @@
 // of this distribution or at http://www.apache.org/licenses/LICENSE-2.0
 
 import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
-import PaymentRequestsList from "../screens/PaymentRequestsList";
+import ActivePaymentRequests from "../screens/ActivePaymentRequests";
+import ExpiredPaymentRequests from "../screens/ExpiredPaymentRequests";
 import { customTheme } from "../theme/theme";
 
 export type PaymentRequestsTabParamList = {
@@ -27,11 +28,11 @@ export default function PaymentRequestsTopTabsStack() {
     >
       <PaymentRequestsTopTabs.Screen
         name="Active"
-        component={PaymentRequestsList}
+        component={ActivePaymentRequests}
       />
       <PaymentRequestsTopTabs.Screen
         name="Expired"
-        component={PaymentRequestsList}
+        component={ExpiredPaymentRequests}
       />
     </PaymentRequestsTopTabs.Navigator>
   );

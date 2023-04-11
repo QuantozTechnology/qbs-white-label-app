@@ -7,11 +7,19 @@ import { genericApiError } from "../../api/generic/error.interface";
 import { render, screen, within } from "../../jest/test-utils";
 import { server } from "../../mocks/server";
 import { backendApiUrl } from "../../utils/axios";
-import PaymentRequestsList from "../PaymentRequestsList";
+import PaymentRequestsList from "../../components/PaymentRequestsList";
 
 describe("PaymentRequestDetails", () => {
+  const createTestProps = (props: Record<string, unknown>) => ({
+    navigation: {},
+    ...props,
+  });
+
+  let props: any;
+
   it("shows the list with the expected items ", async () => {
-    render(<PaymentRequestsList />);
+    props = createTestProps({});
+    render(<PaymentRequestsList {...props} />);
 
     const transactions = await screen.findAllByLabelText(
       "payment request item"
@@ -26,7 +34,8 @@ describe("PaymentRequestDetails", () => {
       })
     );
 
-    render(<PaymentRequestsList />);
+    props = createTestProps({});
+    render(<PaymentRequestsList {...props} />);
 
     const errorMessage = await screen.findByLabelText("full screen message");
 
@@ -51,7 +60,8 @@ describe("PaymentRequestDetails", () => {
       })
     );
 
-    render(<PaymentRequestsList />);
+    props = createTestProps({});
+    render(<PaymentRequestsList {...props} />);
 
     const errorMessage = await screen.findByLabelText("full screen message");
 

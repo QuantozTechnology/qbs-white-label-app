@@ -137,7 +137,7 @@ namespace Core.Domain.Entities.CustomerAggregate
                 throw new CustomErrorsException(DomainErrorCode.CustomerUnderReviewError.ToString(), CustomerCode, "Cannot execute any payments because your account is currently placed under review");
             }
 
-            if (paymentRequest.IsExpired())
+            if (paymentRequest.HasExpired())
             {
                 throw new CustomErrorsException(DomainErrorCode.ExpiredError.ToString(), paymentRequest.Options.ExpiresOn.ToString()!, "This payment request has expired");
             }

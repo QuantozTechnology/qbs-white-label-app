@@ -163,8 +163,11 @@ namespace Core.API.DependencyInjection
             {
                 q.UseMicrosoftDependencyInjectionJobFactory();
 
-                // Register the job, loading the schedule from configuration
+                // Register the ProcessCallbacksJob, loading the schedule from configuration
                 q.AddJobAndTrigger<ProcessCallbacksJob>(configuration);
+
+                // Register the ProcessPaymentRequestsJob, loading the schedule from configuration
+                q.AddJobAndTrigger<ProcessExpiredPaymentRequestJob>(configuration);
             });
 
             services.AddQuartzHostedService(opt =>
