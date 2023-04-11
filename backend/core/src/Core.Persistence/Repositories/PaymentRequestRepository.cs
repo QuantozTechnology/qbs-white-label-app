@@ -2,6 +2,7 @@
 // under the Apache License, Version 2.0. See the NOTICE file at the root
 // of this distribution or at http://www.apache.org/licenses/LICENSE-2.0
 
+using Core.Domain;
 using Core.Domain.Entities.PaymentRequestAggregate;
 using Core.Domain.Exceptions;
 using Core.Domain.Primitives;
@@ -80,6 +81,15 @@ namespace Core.Persistence.Repositories
             }
 
             return paymentRequest;
+        }
+
+        public async Task<IEnumerable<PaymentRequest>> GetOpenPaymentRequestsToExpireAsync(CancellationToken cancellationToken = default)
+        {
+            return await Query()
+                .Where(pr => pr.Options.ExpiresOn.HasValue && DateTimeProvider.UtcNow > pr.Options.ExpiresOn.Value
+                    && pr.Status == PaymentRequestStatus.Open)
+                .Take(20)
+                .ToListAsync(cancellationToken);
         }
     }
 }

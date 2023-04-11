@@ -7,12 +7,20 @@ using FluentValidation;
 
 namespace Core.Application.Validators.Queries.PaymentRequestValidators
 {
-    public class GetPagedPaymentRequestsForCustomerQueryValidator : AbstractValidator<GetPagedPaymentRequestsForCustomerQuery>
+    public class GetPagedPaymentRequestsForCustomerQueryValidator :  AbstractValidator<GetPagedPaymentRequestsForCustomerQuery>
     {
         public GetPagedPaymentRequestsForCustomerQueryValidator()
         {
             Include(new IPagedQueryValidator());
-            RuleFor(c => c.CustomerCode).NotNull().NotEmpty().WithErrorCode(ApplicationErrorCode.InvalidPropertyError.ToString());
+
+            RuleFor(c => c.CustomerCode)
+                .NotNull()
+                .NotEmpty()
+                .WithErrorCode(ApplicationErrorCode.InvalidPropertyError.ToString());
+
+            RuleFor(c => c.Status)
+                .IsInEnum()
+                .WithErrorCode(ApplicationErrorCode.InvalidPropertyError.ToString());
         }
     }
 }

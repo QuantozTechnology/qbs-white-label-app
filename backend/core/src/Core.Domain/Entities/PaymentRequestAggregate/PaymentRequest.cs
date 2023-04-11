@@ -90,19 +90,9 @@ namespace Core.Domain.Entities.PaymentRequestAggregate
             }
         }
 
-        public bool IsExpired()
+        public bool HasExpired()
         {
-            var isExpired = false;
-
-            if (Options != null && Options.ExpiresOn.HasValue)
-            {
-                if (DateTimeProvider.UtcNow > Options.ExpiresOn.Value)
-                {
-                    isExpired = true;
-                }
-            }
-
-            return isExpired;
+            return Status == PaymentRequestStatus.Expired;
         }
 
         public bool CanBeProcessed()

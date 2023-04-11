@@ -49,6 +49,7 @@ namespace Core.Domain
         Open,
         Paid,
         Processing,
-        Cancelled
+        Cancelled,
+        Expired
     }
 }

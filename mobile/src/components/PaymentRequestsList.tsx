@@ -19,14 +19,20 @@ import { useCallback, useState } from "react";
 import { RefreshControl } from "react-native";
 import { usePaymentRequests } from "../api/paymentrequest/paymentRequest";
 import { PaymentRequestDetails } from "../api/paymentrequest/paymentRequest.interface";
-import FullScreenMessage from "../components/FullScreenMessage";
-import PaymentRequestItem from "../components/PaymentRequestItem";
-import ScreenWrapper from "../components/ScreenWrapper";
+import FullScreenMessage from "./FullScreenMessage";
+import PaymentRequestItem from "./PaymentRequestItem";
+import ScreenWrapper from "./ScreenWrapper";
 import { customTheme } from "../theme/theme";
 import { formatDate } from "../utils/dates";
 import { ImageIdentifier } from "../utils/images";
+import { PaymentRequestsTabParamList } from "../navigation/PaymentRequestsTab";
+import { MaterialTopTabScreenProps } from "@react-navigation/material-top-tabs";
 
-function PaymentRequestsList() {
+type Props = MaterialTopTabScreenProps<PaymentRequestsTabParamList> & {
+  type: "open" | "expired";
+};
+
+function PaymentRequestsList({ type }: Props) {
   const {
     data,
     status,
@@ -37,7 +43,7 @@ function PaymentRequestsList() {
     isFetchingNextPage,
     fetchNextPage,
     hasNextPage,
-  } = usePaymentRequests();
+  } = usePaymentRequests({ type });
 
   const [refreshing, setRefreshing] = useState(false);
 

@@ -65,9 +65,9 @@ namespace Core.Presentation.Controllers
         [ProducesResponseType(typeof(CustomErrorsResponse), 404)]
         [ProducesResponseType(typeof(CustomErrorsResponse), 500)]
         [RequiredScope("PaymentRequest.Read")]
-        public async Task<IActionResult> GetPaymentRequestsAsync([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+        public async Task<IActionResult> GetPaymentRequestsAsync([FromQuery] string? status, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
         {
-            var query = new GetPagedPaymentRequestsForCustomerQuery(GetUserId(), page, pageSize);
+            var query = new GetPagedPaymentRequestsForCustomerQuery(GetUserId(), status, page, pageSize);
             var paymentRequest = await _sender.Send(query);
             var response = ConstructCustomResponse(paymentRequest, PaymentRequestResponse.FromPaymentRequest);
             return Ok(response);
