@@ -54,7 +54,7 @@ describe("email utils", () => {
   it("cannot compose email (not available on device), returns error", async () => {
     canComposeEmailMock = jest
       .spyOn(MailComposer, "isAvailableAsync")
-      .mockResolvedValue(new Error());
+      .mockRejectedValue(new Error());
 
     await composeEmail(testEmailOptions);
 

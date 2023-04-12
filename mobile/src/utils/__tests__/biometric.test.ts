@@ -21,11 +21,15 @@ jest.doMock("../biometric", () => ({
   ...jest.requireActual("../biometric"),
 }));
 
-describe("isBiometricCheckSupportedByDevice", () => {
-  hasHardwareAsyncMock.mockResolvedValue(true);
-  isEnrolledAsyncMock.mockResolvedValue(true);
+afterEach(() => {
+  jest.resetAllMocks();
+});
 
+describe("isBiometricCheckSupportedByDevice", () => {
   it("returns true when both hardware and enrollment are supported", async () => {
+    hasHardwareAsyncMock.mockResolvedValue(true);
+    isEnrolledAsyncMock.mockResolvedValue(true);
+
     const result = await isBiometricCheckSupportedByDevice();
 
     expect(result).toBe(true);
@@ -33,6 +37,7 @@ describe("isBiometricCheckSupportedByDevice", () => {
 
   it("returns false when hardware support is missing", async () => {
     hasHardwareAsyncMock.mockResolvedValueOnce(false);
+    isEnrolledAsyncMock.mockResolvedValue(true);
 
     const result = await isBiometricCheckSupportedByDevice();
 
@@ -40,6 +45,7 @@ describe("isBiometricCheckSupportedByDevice", () => {
   });
 
   it("returns false when enrollment is missing", async () => {
+    hasHardwareAsyncMock.mockResolvedValue(true);
     isEnrolledAsyncMock.mockResolvedValueOnce(false);
 
     const result = await isBiometricCheckSupportedByDevice();
@@ -50,6 +56,8 @@ describe("isBiometricCheckSupportedByDevice", () => {
 
 describe("biometricValidation", () => {
   it("returns success result when authentication is successful", async () => {
+    hasHardwareAsyncMock.mockResolvedValue(true);
+    isEnrolledAsyncMock.mockResolvedValue(true);
     authenticateAsyncMock.mockResolvedValueOnce({
       success: true,
     });
@@ -60,6 +68,8 @@ describe("biometricValidation", () => {
   });
 
   it("returns error result with message when authentication fails", async () => {
+    hasHardwareAsyncMock.mockResolvedValue(true);
+    isEnrolledAsyncMock.mockResolvedValue(true);
     authenticateAsyncMock.mockResolvedValueOnce({
       success: false,
       error: "Authentication failed",
@@ -72,6 +82,8 @@ describe("biometricValidation", () => {
   });
 
   it("returns success result when biometric check is not supported by the device", async () => {
+    hasHardwareAsyncMock.mockResolvedValue(true);
+    isEnrolledAsyncMock.mockResolvedValue(true);
     hasHardwareAsyncMock.mockResolvedValueOnce(false);
 
     const result = await biometricValidation();

@@ -17,6 +17,22 @@ export let mockClipboardCopy: jest.SpyInstance;
 export let authMock: jest.SpyInstance;
 export let customerContextMock: jest.SpyInstance;
 
+// Needed after update to Jest 29
+global.setImmediate =
+  global.setImmediate ||
+  function (fn) {
+    return setTimeout(fn, 0);
+  };
+
+// Needed after update to Jest 29
+global.clearImmediate =
+  global.clearImmediate ||
+  function (id) {
+    clearTimeout(id);
+  };
+
+jest.mock("expo-font");
+jest.mock("expo-asset");
 jest.mock("../utils/biometric", () => ({
   biometricValidation: jest.fn().mockResolvedValue({ result: "success" }),
 }));
@@ -111,6 +127,7 @@ afterEach(() => {
   server.resetHandlers();
   cleanup();
   jest.restoreAllMocks();
+  jest.clearAllMocks();
 });
 // Clean up after the tests are finished.
 afterAll(() => server.close());

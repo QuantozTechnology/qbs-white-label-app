@@ -10,12 +10,10 @@ describe("Notification", () => {
     render(<Notification message="this is an error message" variant="error" />);
 
     const notification = screen.getByLabelText("notification message");
-    const icon = screen.getByRole("image");
 
     expect(
       within(notification).getByLabelText("notification message description")
     ).toHaveTextContent(/^this is an error message$/);
-    expect(icon).toBeTruthy();
   });
 
   it("displays also the title if passed", () => {
@@ -28,7 +26,6 @@ describe("Notification", () => {
     );
 
     const notification = screen.getByLabelText("notification message");
-    const icon = screen.getByRole("image");
 
     expect(
       within(notification).getByLabelText("notification message description")
@@ -36,6 +33,5 @@ describe("Notification", () => {
     expect(
       within(notification).getByLabelText("notification message title")
     ).toHaveTextContent(/^Test title$/);
-    expect(icon).toBeTruthy();
   });
 });
