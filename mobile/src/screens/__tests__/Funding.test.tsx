@@ -9,6 +9,9 @@ import { fireEvent, render, screen, within } from "../../jest/test-utils";
 import { server } from "../../mocks/server";
 import { backendApiUrl } from "../../utils/axios";
 import Funding from "../Funding";
+import { defaultLimitsMockResponse } from "../../api/limits/limits.mocks";
+import { GenericApiResponse } from "../../api/utils/api.interface";
+import { Limits } from "../../api/limits/limits.interface";
 
 describe("Funding", () => {
   const createTestProps = (props: Record<string, unknown>) => ({
@@ -138,31 +141,14 @@ describe("Funding", () => {
   });
 
   it("hides the payment info if customer reached the limit", async () => {
+    const mockReachedLimits: GenericApiResponse<Limits[]> = JSON.parse(
+      JSON.stringify(defaultLimitsMockResponse)
+    );
+    mockReachedLimits.value[0].funding.used.monthly = "500";
+
     server.use(
       rest.get(`${backendApiUrl}/api/customers/limits`, (_req, rest, ctx) => {
-        return rest(
-          ctx.status(200),
-          ctx.json({
-            value: {
-              funding: {
-                limit: {
-                  monthly: "500",
-                },
-                used: {
-                  monthly: "500",
-                },
-              },
-              withdraw: {
-                limit: {
-                  monthly: "100",
-                },
-                used: {
-                  monthly: "20",
-                },
-              },
-            },
-          })
-        );
+        return rest(ctx.status(200), ctx.json(mockReachedLimits));
       })
     );
 

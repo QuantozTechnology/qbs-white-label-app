@@ -5,6 +5,7 @@
 import { rest } from "msw";
 import { Customer } from "../../api/customer/customer.interface";
 import { customerMocksDefaultResponse } from "../../api/customer/customer.mocks";
+import { genericApiError } from "../../api/generic/error.interface";
 import { GenericApiResponse } from "../../api/utils/api.interface";
 import { render, screen, within } from "../../jest/test-utils";
 import { server } from "../../mocks/server";
@@ -39,7 +40,7 @@ describe("Security centre overview", () => {
   it("shows full screen error if customer API returns error", async () => {
     server.use(
       rest.get(`${backendApiUrl}/api/customers`, (_req, rest, ctx) => {
-        return rest(ctx.status(400));
+        return rest(ctx.status(400), ctx.json({ ...genericApiError }));
       })
     );
 

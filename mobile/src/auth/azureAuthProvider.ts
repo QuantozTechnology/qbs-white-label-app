@@ -29,14 +29,10 @@ export const azureAuthProvider = (): IAsyncAuthProvider => {
    */
   async function authorize(isSignUp: boolean): Promise<AuthorizeResponse> {
     try {
-      const isProduction =
-        Constants.expoConfig?.extra?.APP_ENV === "production";
-
-      const redirectUri = AuthSession.makeRedirectUri(
-        isProduction
-          ? { path: "authorize" }
-          : { useProxy: true, projectNameForProxy: "@quantoz/quantoz-payments" }
-      );
+      const redirectUri = AuthSession.makeRedirectUri({
+        scheme: Constants.expoConfig?.scheme,
+        path: "authorize",
+      });
 
       const issuerUrl = isSignUp
         ? Constants.expoConfig?.extra?.AUTH_AZURE_B2C_SIGNUP_ISSUER
@@ -66,12 +62,7 @@ export const azureAuthProvider = (): IAsyncAuthProvider => {
       };
 
       const request = await AuthSession.loadAsync(config, discovery);
-      const result = await request.promptAsync(
-        discovery,
-        isProduction
-          ? {}
-          : { useProxy: true, projectNameForProxy: "@quantoz/quantoz-payments" }
-      );
+      const result = await request.promptAsync(discovery);
 
       if (!result) {
         return error(AuthErrorEnum.AUTH_INVALID_RESPONSE);
@@ -124,8 +115,8 @@ export const azureAuthProvider = (): IAsyncAuthProvider => {
   async function changePassword(): Promise<AuthorizeResponse> {
     try {
       const redirectUri = AuthSession.makeRedirectUri({
-        useProxy: true,
-        projectNameForProxy: "@quantoz/quantoz-payments",
+        scheme: Constants.expoConfig?.scheme,
+        path: "authorize",
       });
 
       const discovery = await AuthSession.fetchDiscoveryAsync(
@@ -154,10 +145,7 @@ export const azureAuthProvider = (): IAsyncAuthProvider => {
       };
 
       const request = await AuthSession.loadAsync(config, discovery);
-      const result = await request.promptAsync(discovery, {
-        useProxy: true,
-        projectNameForProxy: "@quantoz/quantoz-payments",
-      });
+      const result = await request.promptAsync(discovery);
 
       if (!result) {
         return error(AuthErrorEnum.AUTH_INVALID_RESPONSE);

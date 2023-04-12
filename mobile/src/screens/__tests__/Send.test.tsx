@@ -176,6 +176,10 @@ describe("Send", () => {
   });
 
   it("sends a payment correctly", async () => {
+    (biometricValidation as jest.Mock).mockResolvedValueOnce({
+      result: "success",
+    });
+
     props = createTestProps({});
     render(<Send {...props} />);
 
@@ -199,6 +203,10 @@ describe("Send", () => {
   });
 
   it("fails to create a payment", async () => {
+    (biometricValidation as jest.Mock).mockResolvedValueOnce({
+      result: "success",
+    });
+
     const apiError: APIError = {
       Errors: [
         {

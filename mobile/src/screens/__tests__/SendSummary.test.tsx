@@ -335,6 +335,10 @@ describe("SendSummary", () => {
   });
 
   it("should succeed the payment and go back to Portfolio", async () => {
+    (biometricValidation as jest.Mock).mockResolvedValueOnce({
+      result: "success",
+    });
+
     props = createTestProps({
       route: {
         params: {
@@ -363,6 +367,10 @@ describe("SendSummary", () => {
   });
 
   it("should not allow payment to go on if POST payments API error", async () => {
+    (biometricValidation as jest.Mock).mockResolvedValueOnce({
+      result: "success",
+    });
+
     const balancesApiError: APIError = {
       Errors: [
         {

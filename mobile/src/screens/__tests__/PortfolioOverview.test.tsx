@@ -6,6 +6,9 @@ import { render, screen } from "../../jest/test-utils";
 import PortfolioOverview from "../PortfolioOverview";
 
 describe("Portfolio overview screen", () => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let props: any;
+
   const createTestProps = (props: Record<string, unknown>) => ({
     navigation: {
       navigate: jest.fn(),
@@ -13,11 +16,11 @@ describe("Portfolio overview screen", () => {
     ...props,
   });
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let props: any;
+  beforeEach(() => {
+    props = createTestProps({});
+  });
 
   it("Loads expected UI", () => {
-    props = createTestProps({});
     render(<PortfolioOverview {...props} />);
 
     const buttons = screen.getByLabelText("action buttons");
