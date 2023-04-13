@@ -10,10 +10,8 @@ using MediatR;
 
 namespace Core.Application.Commands.PaymentRequestCommands
 {
-    public class CreatePaymentRequestCommand : IRequest<PaymentRequest>
+    public class BaseCreatePaymentRequestCommand : IRequest<PaymentRequest>
     {
-        public required string CustomerCode { get; set; }
-
         public required string TokenCode { get; set; }
 
         public required decimal Amount { get; set; }
@@ -31,6 +29,10 @@ namespace Core.Application.Commands.PaymentRequestCommands
         public IDictionary<string, string>? Params { get; set; }
     }
 
+    public class CreatePaymentRequestCommand : BaseCreatePaymentRequestCommand
+    {
+        public required string CustomerCode { get; set; }
+    }
 
     public class CreatePaymentRequestCommandHandler : IRequestHandler<CreatePaymentRequestCommand, PaymentRequest>
     {

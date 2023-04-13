@@ -23,6 +23,7 @@ namespace Web.SDK.Services.Models.Requests
 
     public class CreateMerchantPaymentRequestCommand : CreatePaymentRequestRequest
     {
+        public required string AccountCode { get; set; }
         public required MerchantSettings MerchantSettings { get; set; }
     }
 

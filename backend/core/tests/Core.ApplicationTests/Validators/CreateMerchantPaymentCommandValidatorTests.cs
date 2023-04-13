@@ -22,7 +22,7 @@ namespace Core.ApplicationTests.Validators
             var command = new CreateMerchantPaymentRequestCommand 
             {
                 Amount = 100,
-                CustomerCode = "TestMerchant",
+                AccountCode = "TestMerchant",
                 TokenCode = "SCEUR",
                 CallbackUrl = null,
                 ReturnUrl = url 
@@ -44,7 +44,7 @@ namespace Core.ApplicationTests.Validators
             var command = new CreateMerchantPaymentRequestCommand 
             {
                 Amount = 100,
-                CustomerCode = "TestMerchant",
+                AccountCode = "TestMerchant",
                 TokenCode = "SCEUR",
                 CallbackUrl = null,
                 ReturnUrl = url 
@@ -65,7 +65,7 @@ namespace Core.ApplicationTests.Validators
             var command = new CreateMerchantPaymentRequestCommand
             {
                 Amount = 100,
-                CustomerCode = "TestMerchant",
+                AccountCode = "TestMerchant",
                 TokenCode = "SCEUR",
                 Params = new Dictionary<string, string> { { "key", "value" } },
                 ReturnUrl = "https://example.com/return",
@@ -87,7 +87,7 @@ namespace Core.ApplicationTests.Validators
             var command = new CreateMerchantPaymentRequestCommand
             {
                 Amount = 100,
-                CustomerCode = "TestMerchant",
+                AccountCode = "TestMerchant",
                 TokenCode = "SCEUR",
                 Params = new Dictionary<string, string> { { "key", "value" } },
                 ReturnUrl = returnUrl,
@@ -112,7 +112,7 @@ namespace Core.ApplicationTests.Validators
             var command = new CreateMerchantPaymentRequestCommand
             {
                 Amount = 100,
-                CustomerCode = "TestMerchant",
+                AccountCode = "TestMerchant",
                 TokenCode = "SCEUR",
                 ReturnUrl = "https://www.example.com/success",
                 CallbackUrl = url
@@ -149,7 +149,7 @@ namespace Core.ApplicationTests.Validators
             var command = new CreateMerchantPaymentRequestCommand
             {
                 Amount = 100,
-                CustomerCode = "TestMerchant",
+                AccountCode = "TestMerchant",
                 TokenCode = "SCEUR",
                 ReturnUrl = "https://www.example.com/success",
                 CallbackUrl = url 

@@ -11,8 +11,6 @@ namespace Core.Application.Validators.Commands.PaymentRequestValidators
     {
         public CreateMerchantPaymentCommandValidator()
         {
-            Include(new CreatePaymentRequestCommandValidator());
-
             RuleFor(c => c.ReturnUrl)
                 .NotEmpty()
                 .Length(1, 100)
