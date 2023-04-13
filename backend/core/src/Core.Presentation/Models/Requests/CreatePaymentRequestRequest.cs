@@ -35,13 +35,16 @@ namespace Core.Presentation.Models.Requests
     public class CreateMerchantPaymentRequestRequest : CreatePaymentRequestRequest
     {
         [Required]
+        public required string AccountCode { get; set; }
+
+        [Required]
         public required MerchantSettingsRequest MerchantSettings { get; set; }
 
-        public new CreateMerchantPaymentRequestCommand ToCommand(string customerCode)
+        public CreateMerchantPaymentRequestCommand ToCommand()
         {
             return new CreateMerchantPaymentRequestCommand
             {
-                CustomerCode = customerCode,
+                AccountCode = AccountCode,
                 Amount = Amount,
                 TokenCode = TokenCode,
                 Memo = Options?.Memo,

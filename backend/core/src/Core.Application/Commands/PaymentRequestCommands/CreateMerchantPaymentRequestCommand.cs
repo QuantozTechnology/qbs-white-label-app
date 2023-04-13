@@ -10,13 +10,14 @@ using MediatR;
 
 namespace Core.Application.Commands.PaymentRequestCommands
 {
-    public class CreateMerchantPaymentRequestCommand : CreatePaymentRequestCommand
+    public class CreateMerchantPaymentRequestCommand : BaseCreatePaymentRequestCommand
     {
+        public required string AccountCode { get; set; }
+
         public required string? CallbackUrl { get; set; }
 
         public required string ReturnUrl { get; set; }
     }
-
 
     public class CreateMerchantPaymentRequestCommandHandler : IRequestHandler<CreateMerchantPaymentRequestCommand, PaymentRequest>
     {
@@ -39,8 +40,8 @@ namespace Core.Application.Commands.PaymentRequestCommands
 
         public async Task<PaymentRequest> Handle(CreateMerchantPaymentRequestCommand request, CancellationToken cancellationToken)
         {
-            var customer = await _customerRepository.GetAsync(request.CustomerCode, cancellationToken);
-            var account = await _accountRepository.GetByCustomerCodeAsync(customer.CustomerCode, cancellationToken);
+            var account = await _accountRepository.GetByAccountCodeAsync(request.AccountCode, cancellationToken);
+            var customer = await _customerRepository.GetAsync(account.CustomerCode, cancellationToken);
 
             var properties = new MerchantPaymentRequestProperties
             {

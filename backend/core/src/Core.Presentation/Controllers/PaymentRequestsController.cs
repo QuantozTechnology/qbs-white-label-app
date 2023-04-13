@@ -78,10 +78,10 @@ namespace Core.Presentation.Controllers
         [ProducesResponseType(typeof(CustomErrorsResponse), 400)]
         [ProducesResponseType(typeof(CustomErrorsResponse), 404)]
         [ProducesResponseType(typeof(CustomErrorsResponse), 500)]
-        [RequiredScope("PaymentRequest.Merchant.Create")]
+        [AllowAnonymous]
         public async Task<IActionResult> CreateMerchantPaymentRequestAsync([FromBody] CreateMerchantPaymentRequestRequest request)
         {
-            var command = request.ToCommand(GetUserId());
+            var command = request.ToCommand();
             var paymentRequest = await _sender.Send(command);
             var response = ConstructCustomResponse(paymentRequest, MerchantPaymentRequestResponse.FromPaymentRequest);
             return CreatedAtRoute("GetMerchantPaymentRequest", new { code = paymentRequest.Code }, response);

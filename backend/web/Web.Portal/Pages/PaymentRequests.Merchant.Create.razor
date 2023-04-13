@@ -65,6 +65,12 @@
 
                                     <div class="row">
                                         <div class="col-md-6 mb-4">
+                                            <label class="form-label" for="form3Example1m">Account Code:</label>
+                                            <InputText @bind-Value="CreatePaymentRequest.AccountCode" min="0" class="form-control form-control-lg" />
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6 mb-4">
                                             <div class="form-outline">
                                                 <label class="form-label" for="form3Example1m">Amount:</label>
                                                 <InputNumber @bind-Value="CreatePaymentRequest.Amount" min="0" class="form-control form-control-lg" />
@@ -149,6 +155,7 @@
     private PaymentRequest CreatePaymentRequest = new()
         {
             TokenCode = "",
+            AccountCode = string.Empty,
             Amount = 10,
             ExpiresIn = ExpiresIn.FifteenMinutes,
             Memo = null,
@@ -204,7 +211,8 @@
                 MerchantSettings = new MerchantSettings
                 {
                     ReturnUrl = $"{Navigation.BaseUri}paymentrequests/merchant"
-                }
+                },
+                AccountCode = CreatePaymentRequest.AccountCode
             };
 
         try
@@ -234,6 +242,10 @@
         [Required]
         [StringLength(12)]
         public required string TokenCode { get; set; }
+
+        [Required]
+        [StringLength(12)]
+        public required string AccountCode { get; set; }
 
         public required decimal Amount { get; set; }
 
