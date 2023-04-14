@@ -3,26 +3,30 @@
     of this distribution or at http://www.apache.org/licenses/LICENSE-2.0 *@
 
 @page "/"
+@using Markdig;
 @attribute [AllowAnonymous]
 @inject NavigationManager Navigation
+@inject HttpClient HttpClient
 
 <div class="container py-5">
-    <div class="row d-flex justify-content-center align-items-center">
-        <div class="col">
-            <div class="card my-4 shadow rounded">
-                <div class="row g-0">
-                    <div class="p-5 text-center">
-                        <h1 class="mb-3">Welcome to the QBA Portal</h1>
-                            <div class="col-lg-3">
-                                <div type="button" @onclick="OpenPointOfSales" class="card">
-                                    <img class="card-img-top" src="paymentrequests.merchant.create@3x.png" alt="Card image cap">
-                                    <div class="card-body">
-                                        <h5 class="card-title">Point of Sales</h5>
-                                        <p class="card-text">Allow your customer's to directly pay peer to peer through simple scanning of a QR Code.</p>
-                                    </div>
-                                </div>
-                            </div>
-                    </div>
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <div class="card shadow rounded h-100">
+                <div class="card-body d-flex flex-column justify-content-center align-items-center">
+                    <img class="card-img-top" src="paymentrequests.merchant.create@3x.png" alt="Card image cap">
+                    <h5 class="card-title mt-3">Point of Sales</h5>
+                    <p class="card-text text-center">Allow your customer's to directly pay peer to peer through simple scanning of a QR Code.</p>
+                    <button type="button" class="btn btn-primary" @onclick="OpenPointOfSales">Open Point of Sales</button>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 mb-4">
+            <div class="card shadow rounded h-100">
+                <div class="card-body d-flex flex-column justify-content-center align-items-center">
+                    <img class="card-img-top" src="docs.png" alt="Card image cap">
+                    <h5 class="card-title">Merchant Docs</h5>
+                    <p class="card-text text-center">Everything you need to know to integrate with our APIs</p>
+                    <button type="button" class="btn btn-primary" @onclick="OpenMarkdownPreview">Open Merchant Docs</button>
                 </div>
             </div>
         </div>
@@ -34,5 +38,10 @@
     private void OpenPointOfSales()
     {
         Navigation.NavigateTo($"/paymentrequests/merchant");
+    }
+
+    private void OpenMarkdownPreview()
+    {
+        Navigation.NavigateTo("/paymentrequests.doc");
     }
 }

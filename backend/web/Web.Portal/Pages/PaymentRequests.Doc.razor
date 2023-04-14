@@ -1,0 +1,32 @@
+﻿@* Copyright 2023 Quantoz Technology B.V. and contributors. Licensed
+    under the Apache License, Version 2.0. See the NOTICE file at the root
+    of this distribution or at http://www.apache.org/licenses/LICENSE-2.0 *@
+
+@page "/paymentrequests.doc"
+
+@using Web.Portal.Services;
+@attribute [AllowAnonymous]
+
+@inject DocsService DocsService
+@inject HttpClient HttpClient
+
+<div>
+    @if (string.IsNullOrWhiteSpace(_markdown))
+    {
+        <p>Loading...</p>
+    }
+    else
+    {
+        @((MarkupString)_markdown)
+    }
+</div>
+
+@code {
+    private string _markdown;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _markdown = await DocsService.GetPaymentRequestDocs();
+    }
+}
+
