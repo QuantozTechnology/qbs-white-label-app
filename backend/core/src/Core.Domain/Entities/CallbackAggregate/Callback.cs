@@ -31,9 +31,9 @@ namespace Core.Domain.Entities.CallbackAggregate
             CreatedOn = DateTimeProvider.UtcNow;
         }
 
-        public static Callback NewPaymentRequestUpdatedCallback(string destinationUrl, string content)
+        public static Callback NewPaymentRequestPaidCallback(string destinationUrl, string content)
         {
-            return new Callback(CallbackType.PaymentRequestUpdated, destinationUrl, content);
+            return new Callback(CallbackType.PaymentRequestPaid, destinationUrl, content);
         }
 
         public void Sent()
@@ -63,6 +63,6 @@ namespace Core.Domain.Entities.CallbackAggregate
 
     public enum CallbackType
     {
-        PaymentRequestUpdated
+        PaymentRequestPaid
     }
 }

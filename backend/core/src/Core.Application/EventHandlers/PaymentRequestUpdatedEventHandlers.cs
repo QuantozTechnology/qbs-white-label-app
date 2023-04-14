@@ -32,12 +32,14 @@ namespace Core.Application.EventHandlers
 
             if (paymentRequest.MerchantSettings?.CallbackUrl != null)
             {
+                var paymentContent = new { TransactionCode = payment.TransactionCode };
+                var content = new { PaymentRequestCode = paymentRequest.Code, Payment = paymentContent };
+
                 // Serialize the content of the callback to json
-                var content = new { PaymentRequestCode = paymentRequest.Code, payment };
                 var jsonContent = JsonSerializer.Serialize(content);
 
                 // Add the callback to the database
-                var callback = Callback.NewPaymentRequestUpdatedCallback(paymentRequest.MerchantSettings.CallbackUrl, jsonContent);
+                var callback = Callback.NewPaymentRequestPaidCallback(paymentRequest.MerchantSettings.CallbackUrl, jsonContent);
                 _callbackRepository.Add(callback);
 
                 // Add the callback to the existing payment request

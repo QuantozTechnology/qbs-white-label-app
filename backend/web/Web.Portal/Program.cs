@@ -5,6 +5,7 @@
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Web.Portal;
+using Web.Portal.Services;
 using Web.SDK.Extensions;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
@@ -12,6 +13,12 @@ builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
 
 builder.Services.AddCoreAPI<AuthorizationProvider>(new Uri(builder.HostEnvironment.BaseAddress));
+
+builder.Services.AddScoped<DocsService>();
+builder.Services.AddHttpClient<DocsService>(client =>
+{
+    client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress + "docs/");
+});
 
 builder.Services.AddMsalAuthentication(options =>
 {
