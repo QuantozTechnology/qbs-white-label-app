@@ -21,7 +21,7 @@ namespace Core.Domain.Entities.CallbackAggregate.Tests
             var now = DateTimeOffset.UtcNow;
             using var context = new DateTimeProviderContext(now);
 
-            var callback = Callback.NewPaymentRequestUpdatedCallback("test_destinationUrl", "test_content");
+            var callback = Callback.NewPaymentRequestPaidCallback("test_destinationUrl", "test_content");
             callback.Sent();
 
             Assert.AreEqual(CallbackStatus.Sent, callback.Status);

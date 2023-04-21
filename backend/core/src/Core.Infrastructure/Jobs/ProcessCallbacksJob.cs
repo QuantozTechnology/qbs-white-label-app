@@ -46,16 +46,25 @@ namespace Core.Infrastructure.Jobs
                         Type = callback.Type.ToString()
                     };
 
-                    var response = await _client.PostAsJsonAsync(callback.DestinationUrl, body);
+                    try
+                    {
+                        var response = await _client.PostAsJsonAsync(callback.DestinationUrl, body);
 
-                    if (response.IsSuccessStatusCode)
-                    {
-                        callback.Sent();
+                        if (response.IsSuccessStatusCode)
+                        {
+                            callback.Sent();
+                        }
+                        else
+                        {
+                            callback.Failed();
+                        }
                     }
-                    else
+                    catch (Exception ex)
                     {
+                        _logger.LogError("An error occured sending callback {code} with message {message}", callback.Code, ex.Message);
                         callback.Failed();
                     }
+
 
                     _callbackRepository.Update(callback);
                 }
