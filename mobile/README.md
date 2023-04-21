@@ -40,7 +40,6 @@ The app is meant to be used as a white-label, production-ready starting point fo
 ### Expo and EAS clients
 
 This app uses the Expo framework, and in order to work it needs additional tooling. Please refer to [their documentation](https://docs.expo.dev/get-started/installation/) to install the needed tools before proceeding.
-
 Moreover, we use the `eas-cli` to easily manage new builds, create new releases and distribute OTA updates. [Check out this page](https://docs.expo.dev/build/setup/) to get started
 
 ### Install project dependencies
@@ -76,16 +75,22 @@ First of all, check the following settings are correct:
 - execute the `direnv allow` in the terminal to make sure the correct env variables are loaded
 - Set the right value for the `defaultStablecoin` property in `mobile/src/config/config.ts`. For example, we have two different tokens for development and production purposes, and this needs to be changed depending on which build you want to run/deploy.
 
-After this initial checks, run:
+After this initial checks, create an Expo development build using the following command:
 
 ```bash
-npm start
+eas build --profile development
+```
+
+When the build is ready, you will be able to run the app using the following command (select the development build you just created when prompted)
+
+```bash
+npm start -- --dev-client
 ```
 
 This command starts a local server. You can either use a simulator on your computer or the Expo Go app installed on your phone to run the app. Refer to the Expo official docs for the most-updated information.
 
 > Sometimes the app might retain old cached data from previous builds, leading to unexpected behaviors.
-> Use `npm start -- -c` to clean the cache.
+> Use `npm start -- --dev-client -c` to clean the cache.
 
 ### Different builds for different purposes
 
