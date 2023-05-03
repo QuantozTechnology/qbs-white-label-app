@@ -3,7 +3,7 @@
 // of this distribution or at http://www.apache.org/licenses/LICENSE-2.0
 
 import { defaultBalancesResponse } from "../../api/balances/balances.mocks";
-import { linkingOpenUrlMock } from "../../jest/jest.setup";
+import {mockUseNavigationNavigate } from "../../jest/jest.setup";
 import { fireEvent, render, screen, within } from "../../jest/test-utils";
 import TokensSelection from "../TokensSelection";
 
@@ -46,7 +46,7 @@ describe("TokensSelection", () => {
     });
   });
 
-  it("goes to the token website on press of the external url icon", async () => {
+  it("goes to token details page on press of the external url icon", async () => {
     render(
       <TokensSelection
         isOpen={true}
@@ -63,7 +63,6 @@ describe("TokensSelection", () => {
     );
 
     fireEvent(tokenDetailsButtons[0], "onPress");
-
-    expect(linkingOpenUrlMock).toHaveBeenCalledWith("https://www.quantoz.com");
+    expect(mockUseNavigationNavigate).toHaveBeenCalledWith("TokenDetails", {"tokenCode": "SCEUR"})
   });
 });

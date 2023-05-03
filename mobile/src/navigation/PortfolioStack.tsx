@@ -11,6 +11,7 @@ import CreatePaymentRequest from "../screens/CreatePaymentRequest";
 import Funding from "../screens/Funding";
 import PortfolioOverview from "../screens/PortfolioOverview";
 import SummaryPaymentRequest from "../screens/SummaryPaymentRequest";
+import TokenDetails from "../screens/TokenDetails";
 import TransactionDetails from "../screens/TransactionDetails";
 import Withdraw from "../screens/Withdraw";
 import SendStackNavigator from "./SendStack";
@@ -108,6 +109,14 @@ export default function PortfolioStackNavigator() {
         options={{
           header: (props) => <CustomNavigationHeader {...props} />,
         }}
+      />
+      <PortfolioStack.Screen
+        name="TokenDetails"
+        component={TokenDetails}
+        options={({route}) => ({
+          title: route.params.tokenCode,
+          header: (props) => <CustomNavigationHeader {...props} />,
+        })}
       />
     </PortfolioStack.Navigator>
   );
