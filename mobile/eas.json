@@ -27,8 +27,7 @@
       "channel": "preview-store",
       "distribution": "store",
       "ios": {
-        "image": "macos-monterey-12.6-xcode-14.1",
-        "resourceClass": "m1-medium"
+        "image": "macos-monterey-12.6-xcode-14.1"
       },
       "env": {
         "APP_ENV": "production"
@@ -38,8 +37,7 @@
       "autoIncrement": true,
       "channel": "production",
       "ios": {
-        "image": "macos-monterey-12.6-xcode-14.1",
-        "resourceClass": "m1-medium"
+        "image": "macos-monterey-12.6-xcode-14.1"
       },
       "env": {
         "APP_ENV": "production"
