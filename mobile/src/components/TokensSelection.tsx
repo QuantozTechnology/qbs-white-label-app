@@ -3,11 +3,11 @@
 // of this distribution or at http://www.apache.org/licenses/LICENSE-2.0
 
 import { Feather } from "@expo/vector-icons";
+import { NavigationProp, useNavigation } from "@react-navigation/native";
 import { Actionsheet, Box, HStack, Icon, Pressable, Text } from "native-base";
 import { Dispatch, SetStateAction } from "react";
-import { Linking } from "react-native";
 import { Balances } from "../api/balances/balances.interface";
-import { defaultConfig } from "../config/config";
+import { PortfolioStackParamList } from "../navigation/PortfolioStack";
 import { displayFiatAmount } from "../utils/currencies";
 
 type TokensSelectionProps = {
@@ -25,10 +25,13 @@ function TokensSelection({
   setSelectedToken,
   tokens,
 }: TokensSelectionProps) {
+  const navigation = useNavigation<NavigationProp<PortfolioStackParamList>>();
+
   function handleTokenDetailsPress() {
     onClose();
-
-    Linking.openURL(defaultConfig.defaultStableCoin.websiteLink);
+    if(selectedToken != null){
+      navigation.navigate("TokenDetails", {tokenCode: selectedToken?.tokenCode}); 
+    }
   }
 
   return (
@@ -64,7 +67,7 @@ function TokensSelection({
                 >
                   <Icon
                     as={Feather}
-                    name="external-link"
+                    name="info"
                     size="6"
                     color={
                       tokenCode === selectedToken?.tokenCode
