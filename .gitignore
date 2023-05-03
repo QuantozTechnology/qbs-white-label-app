@@ -238,5 +238,6 @@ mobile/.vscode
 mobile/.expo
 .expo
 mobile/.envrc
+mobile/google-service-account.json
 AzureB2C/custom-policies/output
 /backend/core/src/Core.API/appsettings.Development.json

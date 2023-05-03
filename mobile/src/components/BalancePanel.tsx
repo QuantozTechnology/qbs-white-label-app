@@ -21,13 +21,13 @@ function BalancePanel({ selectedToken, setSelectedToken }: IBalancesPanel) {
   const { data: balances } = useBalances();
 
   return (
-    <VStack space={1} minH={270} accessibilityLabel="balance panel">
+    <VStack space={1} minH={290} accessibilityLabel="balance panel">
       <LinearGradient
         colors={["#324658", "#030c0c"]}
         style={{
           flex: 1,
           padding: 16,
-          paddingTop: 32,
+          paddingTop: 48,
           borderBottomRightRadius: 16,
           borderBottomLeftRadius: 16,
         }}
