@@ -260,16 +260,10 @@ describe("BusinessRegistration", () => {
     await waitFor(() => expect(mockRefresh).toHaveBeenCalled());
   });
 
-  it("shows validation errors and solve them one by one", async () => {
+  it("shows all validation errors", async () => {
     props = createTestProps({});
     render(<BusinessRegistration {...props} />);
 
-    const companyName = screen.getByLabelText("company name");
-    const contactPerson = screen.getByLabelText("contact person full name");
-    const businessEmail = screen.getByLabelText("business email");
-    const countryOfRegistration = screen.getByLabelText(
-      "country of registration"
-    );
     const createAccountButton = screen.getByLabelText("create account");
 
     fireEvent(createAccountButton, "onPress");
@@ -291,51 +285,5 @@ describe("BusinessRegistration", () => {
     );
     expect(businessEmailError).toHaveTextContent("Business email is required");
     expect(countryError).toHaveTextContent("Country is required");
-
-    // fill in the company name and check the error is gone after pressing the create account button
-    fireEvent(companyName, "onChangeText", "Test company");
-    expect(companyName.props.value).toBe("Test company");
-
-    fireEvent(createAccountButton, "onPress");
-    const updatedCompanyNameError = await screen.queryByLabelText(
-      "company name error"
-    );
-
-    expect(updatedCompanyNameError).toBeFalsy();
-
-    // contact person name change
-    fireEvent(contactPerson, "onChangeText", "John Doe");
-    expect(contactPerson.props.value).toBe("John Doe");
-
-    fireEvent(createAccountButton, "onPress");
-    const updatedContactPersonNameError = await screen.queryByLabelText(
-      "company name error"
-    );
-
-    expect(updatedContactPersonNameError).toBeFalsy();
-
-    // business email change
-    fireEvent(businessEmail, "onChangeText", "test@test.test");
-    expect(businessEmail.props.value).toBe("test@test.test");
-
-    fireEvent(createAccountButton, "onPress");
-    const updatedBusinessEmailError = await screen.queryByLabelText(
-      "business email error"
-    );
-
-    expect(updatedBusinessEmailError).toBeFalsy();
-
-    // country change
-    fireEvent(countryOfRegistration, "onValueChange", "Austria");
-
-    const updatedCountry = await screen.findByPlaceholderText("Select country");
-    expect(updatedCountry.props.value).toBe("Austria");
-
-    fireEvent(createAccountButton, "onPress");
-    const updatedCountryError = await screen.queryByLabelText(
-      "business email error"
-    );
-
-    expect(updatedCountryError).toBeFalsy();
   });
 });

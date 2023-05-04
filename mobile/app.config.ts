@@ -41,6 +41,7 @@ const AppConfig = {
   // This logic sets the correct env variables to use throughout the app
   // They can be read through the `expo-constants` package (https://docs.expo.dev/guides/environment-variables/#reading-environment-variables)
   extra: {
+    POSTMAN_MOCK_API_KEY: process.env.POSTMAN_MOCK_API_KEY,  
     API_URL: isDevEnv ? process.env.DEV_API_URL : process.env.PROD_API_URL,
     AUTH_AZURE_B2C_LOGIN_ISSUER: isDevEnv
       ? process.env.DEV_AUTH_AZURE_B2C_LOGIN_ISSUER
@@ -80,7 +81,7 @@ export default () => ({
     },
     updates: {
       fallbackToCacheTimeout: 1500,
-      url: "https://u.expo.dev/4a15d834-f9d3-4247-ab71-fabe26335f7a",
+      url: "https://u.expo.dev/508103fd-4d90-4213-98d1-045bdcd043b5",
     },
     assetBundlePatterns: ["**/*"],
     ios: {
