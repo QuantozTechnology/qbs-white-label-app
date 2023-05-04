@@ -16,8 +16,7 @@ export const mockPaymentsApi = axios.create({
   baseURL: mockApiUrl,
   headers: {
     // Postman mock headers
-    "x-api-key":
-      "PMAK-6322e61d6cf02e158f949ea6-3ee64a37a256cc22a675847ed4927a43ce",
+    "x-api-key": Constants.expoConfig?.extra?.POSTMAN_MOCK_API_KEY,
     "x-api-version": "1.0",
   },
 });

@@ -1,10 +1,10 @@
 import { Feather } from "@expo/vector-icons";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { Icon, Pressable } from "native-base";
+import { Icon, Pressable} from "native-base";
 import { Linking } from "react-native";
 import { useToken } from "../api/tokens/tokens";
 import DataDisplayField from "../components/DataDisplayField";
-import FullScreenLoadingSpinner from "../components/FullScreenLoadingSpinner";
+import DataDisplayFieldSkeleton from "../components/DataDisplayFieldSkeleton";
 import FullScreenMessage from "../components/FullScreenMessage";
 import ScreenWrapper from "../components/ScreenWrapper";
 import { PortfolioStackParamList } from "../navigation/PortfolioStack";
@@ -20,7 +20,12 @@ function TokenDetails({route}: Props){
   }
 
   if(status === "loading"){
-    return <FullScreenLoadingSpinner />
+    return <ScreenWrapper space={1} flex={1} px={-4}>
+      <DataDisplayFieldSkeleton />
+      <DataDisplayFieldSkeleton />
+      <DataDisplayFieldSkeleton />
+      <DataDisplayFieldSkeleton />
+    </ScreenWrapper>
   }
 
   const {asset, validator, owner, schema} = data.value;
