@@ -4,18 +4,20 @@
 
 using Core.Domain.Abstractions;
 using Core.Domain.Repositories;
+using Core.Infrastructure.Compliance;
 using Core.Infrastructure.Compliance.IPLocator;
 using Core.Infrastructure.Compliance.Sanctionlist;
-using Core.Infrastructure.Compliance;
 using Core.Infrastructure.CustomerFileStorage;
+using Core.Infrastructure.Email;
+using Core.Infrastructure.Jobs;
+using Core.Infrastructure.Nexus;
 using Core.Infrastructure.Nexus.Repositories;
 using Core.Infrastructure.Nexus.SigningService;
 using Microsoft.Extensions.Options;
 using Nexus.SDK.Shared.Http;
 using Nexus.Token.SDK.Extensions;
 using Quartz;
-using Core.Infrastructure.Jobs;
-using Core.Infrastructure.Nexus;
+using SendGrid;
 
 namespace Core.API.DependencyInjection
 {
@@ -30,7 +32,8 @@ namespace Core.API.DependencyInjection
                 .AddSigningService(configuration)
                 .AddBlobStorage(configuration)
                 .AddCompliance(configuration)
-                .AddBackgroundJobs(configuration);
+                .AddBackgroundJobs(configuration)
+                .AddEmailService(configuration);
 
             return services;
         }
@@ -75,6 +78,34 @@ namespace Core.API.DependencyInjection
 
                 client.BaseAddress = new Uri(baseUrl);
             });
+
+            return services;
+        }
+
+        private static IServiceCollection AddEmailService(this IServiceCollection services, IConfiguration configuration)
+        {
+            services.AddOptions<EmailServiceOptions>()
+                .Bind(configuration.GetSection("EmailServiceOptions"))
+                .ValidateDataAnnotationsRecursively()
+                .ValidateOnStart();
+
+            services.AddSingleton(sp => sp.GetRequiredService<IOptions<EmailServiceOptions>>().Value);
+
+            // Register SendGridClient dependency
+            services.AddSingleton<ISendGridClient>(sp =>
+            {
+                var options = sp.GetRequiredService<IOptions<EmailServiceOptions>>().Value;
+                return new SendGridClient(options.ApiKey);
+            });
+
+            // Register EmailService dependency
+            services.AddScoped<IEmailService, EmailService>(provider =>
+            {
+                var sendGridClient = provider.GetService<ISendGridClient>();
+                var emailServiceOptions = provider.GetService<IOptions<EmailServiceOptions>>().Value;
+                return new EmailService(sendGridClient, emailServiceOptions);
+            });
+
 
             return services;
         }

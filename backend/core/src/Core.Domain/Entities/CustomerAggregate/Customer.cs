@@ -212,7 +212,6 @@ namespace Core.Domain.Entities.CustomerAggregate
                 Amount = amount,
                 Memo = memo
             };
-
         }
     }
 }
