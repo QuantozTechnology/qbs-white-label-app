@@ -3,57 +3,88 @@
 // of this distribution or at http://www.apache.org/licenses/LICENSE-2.0
 
 import { NavigationProp, useNavigation } from "@react-navigation/native";
-import { HStack } from "native-base";
+import { Actionsheet, HStack, useDisclose } from "native-base";
 import { PortfolioStackParamList } from "../navigation/PortfolioStack";
 import ActionButton from "./ActionButton";
 
 function ActionButtonsBar() {
-  const navigation = useNavigation();
+  const { isOpen, onOpen, onClose } = useDisclose();
+  const navigation = useNavigation<NavigationProp<PortfolioStackParamList>>();
+
   return (
-    <HStack
-      justifyContent="space-around"
-      pt={2}
-      accessibilityLabel="action buttons"
-    >
-      <ActionButton
-        iconName="upload"
-        label="Send"
-        onPressCallback={() =>
-          navigation
-            .getParent<NavigationProp<PortfolioStackParamList>>()
-            .navigate("SendStack")
-        }
-      />
-      <ActionButton
-        iconName="download"
-        label="Receive"
-        onPressCallback={() =>
-          navigation
-            .getParent<NavigationProp<PortfolioStackParamList>>()
-            .navigate("CreatePaymentRequest")
-        }
-      />
-      <ActionButton
-        iconName="plus"
-        label="Fund"
-        onPressCallback={() =>
-          navigation
-            .getParent<NavigationProp<PortfolioStackParamList>>()
-            .navigate("Funding")
-        }
-        variant="outline"
-      />
-      <ActionButton
-        iconName="minus"
-        label="Withdraw"
-        onPressCallback={() =>
-          navigation
-            .getParent<NavigationProp<PortfolioStackParamList>>()
-            .navigate("Withdraw")
-        }
-        variant="outline"
-      />
-    </HStack>
+    <>
+      <HStack
+        justifyContent="space-around"
+        pt={2}
+        accessibilityLabel="action buttons"
+      >
+        <ActionButton
+          iconName="plus"
+          label="Buy"
+          onPressCallback={() =>
+            navigation.navigate("CreateOfferTabStack", {
+              screen: "CreateBuyOffer",
+            })
+          }
+        />
+        <ActionButton
+          iconName="minus"
+          label="Sell"
+          onPressCallback={() =>
+            navigation.navigate("CreateOfferTabStack", {
+              screen: "CreateSellOffer",
+            })
+          }
+        />
+        <ActionButton
+          iconName="upload"
+          label="Send"
+          onPressCallback={() =>
+            navigation
+              .getParent<NavigationProp<PortfolioStackParamList>>()
+              .navigate("SendStack")
+          }
+        />
+        <ActionButton
+          iconName="download"
+          label="Receive"
+          onPressCallback={() =>
+            navigation
+              .getParent<NavigationProp<PortfolioStackParamList>>()
+              .navigate("CreatePaymentRequest")
+          }
+        />
+        <ActionButton
+          iconName="ellipsis-v"
+          label="More"
+          onPressCallback={onOpen}
+        />
+      </HStack>
+      <Actionsheet isOpen={isOpen} onClose={onClose}>
+        <Actionsheet.Content>
+          <Actionsheet.Item
+            onPress={() => {
+              onClose();
+              navigation
+                .getParent<NavigationProp<PortfolioStackParamList>>()
+                .navigate("Funding");
+            }}
+          >
+            Fund
+          </Actionsheet.Item>
+          <Actionsheet.Item
+            onPress={() => {
+              onClose();
+              navigation
+                .getParent<NavigationProp<PortfolioStackParamList>>()
+                .navigate("Withdraw");
+            }}
+          >
+            Withdraw
+          </Actionsheet.Item>
+        </Actionsheet.Content>
+      </Actionsheet>
+    </>
   );
 }
 

@@ -205,7 +205,6 @@ function Funding({ navigation }: FundingProps) {
                 action={<CopyButton callback={() => handleCopy(bic)} />}
                 accessibilityLabel="bic"
               />
-              {/* TODO input the real account! */}
               <DataDisplayField
                 label="Message"
                 value={`${selectedToken?.tokenCode}:${accounts?.data.value.accountCode}`}

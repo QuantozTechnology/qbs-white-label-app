@@ -9,7 +9,6 @@ import { ZodSchema } from "zod";
  *
  * @param {ZodSchema} validationSchema - The Zod validation schema to use
  * @param {Record<string, any>} data - The data to validate
- * @param {() => void} [onSuccess] - A callback function to be executed on successful validation
  *
  * @returns {void | Record<string, string>} - Returns an object containing validation errors, if any, or void if successful
  */
@@ -17,14 +16,11 @@ import { ZodSchema } from "zod";
 export function validationCheck(
   validationSchema: ZodSchema,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  data: Record<string, any>,
-  onSuccess?: () => void
+  data: Record<string, any>
 ): void | Record<string, string> {
   const validationResult = validationSchema.safeParse(data);
 
-  if (validationResult.success) {
-    onSuccess && onSuccess();
-  } else {
+  if (!validationResult.success) {
     // set errors depending on the response
     const validationErrors = validationResult.error.issues.map((issue) => {
       return { [issue.path[0]]: issue.message };
@@ -32,4 +28,6 @@ export function validationCheck(
 
     return Object.assign({}, ...validationErrors);
   }
+
+  return;
 }
