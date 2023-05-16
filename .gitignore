@@ -235,7 +235,9 @@ _Pvt_Extensions
 # custom for this project
 mobile/coverage
 mobile/.vscode
+.vscode
 mobile/.expo
+mobile/junit.xml
 .expo
 mobile/.envrc
 mobile/google-service-account.json

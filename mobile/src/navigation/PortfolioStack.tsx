@@ -5,15 +5,20 @@
 import { Ionicons } from "@expo/vector-icons";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { Icon } from "native-base";
+import { Tokens } from "../api/tokens/tokens.interface";
 import { Transaction } from "../api/transactions/transactions.interface";
 import CustomNavigationHeader from "../components/CustomNavigationHeader";
+import AssetDetails from "../screens/AssetDetails";
+import AssetsOverview from "../screens/AssetsOverview";
 import CreatePaymentRequest from "../screens/CreatePaymentRequest";
 import Funding from "../screens/Funding";
 import PortfolioOverview from "../screens/PortfolioOverview";
+import ReviewOffer from "../screens/ReviewOffer";
 import SummaryPaymentRequest from "../screens/SummaryPaymentRequest";
 import TokenDetails from "../screens/TokenDetails";
 import TransactionDetails from "../screens/TransactionDetails";
 import Withdraw from "../screens/Withdraw";
+import CreateOfferTopTabsStack from "./CreateOfferTabsStack";
 import SendStackNavigator from "./SendStack";
 
 export type PortfolioStackParamList = {
@@ -38,6 +43,18 @@ export type PortfolioStackParamList = {
   Funding: undefined;
   Withdraw: undefined;
   TokenDetails: {
+    tokenCode: string;
+  };
+  CreateOfferTabStack:
+    | { screen: "CreateBuyOffer"; params: { token?: Tokens } }
+    | {
+        screen: "CreateSellOffer";
+        params: { token?: Tokens };
+      }
+    | undefined;
+  ReviewOffer: undefined;
+  AssetsOverview: { sourceScreen: "CreateBuyOffer" | "CreateSellOffer" };
+  AssetDetails: {
     tokenCode: string;
   };
 };
@@ -113,10 +130,66 @@ export default function PortfolioStackNavigator() {
       <PortfolioStack.Screen
         name="TokenDetails"
         component={TokenDetails}
-        options={({route}) => ({
+        options={({ route }) => ({
           title: route.params.tokenCode,
           header: (props) => <CustomNavigationHeader {...props} />,
         })}
+      />
+      <PortfolioStack.Screen
+        name="CreateOfferTabStack"
+        component={CreateOfferTopTabsStack}
+        options={{
+          title: "Create offer",
+          header: (props) => (
+            <CustomNavigationHeader
+              {...props}
+              customIcon={
+                <Icon
+                  as={Ionicons}
+                  name="close"
+                  size="xl"
+                  color="primary.500"
+                />
+              }
+            />
+          ),
+        }}
+      />
+      <PortfolioStack.Screen
+        name="ReviewOffer"
+        component={ReviewOffer}
+        options={{
+          title: "Review offer",
+          header: (props) => (
+            <CustomNavigationHeader
+              {...props}
+              customIcon={
+                <Icon
+                  as={Ionicons}
+                  name="close"
+                  size="xl"
+                  color="primary.500"
+                />
+              }
+            />
+          ),
+        }}
+      />
+      <PortfolioStack.Screen
+        name="AssetsOverview"
+        component={AssetsOverview}
+        options={{
+          title: "Assets",
+          header: (props) => <CustomNavigationHeader {...props} />,
+        }}
+      />
+      <PortfolioStack.Screen
+        name="AssetDetails"
+        component={AssetDetails}
+        options={{
+          title: "Asset details",
+          header: (props) => <CustomNavigationHeader {...props} />,
+        }}
       />
     </PortfolioStack.Navigator>
   );

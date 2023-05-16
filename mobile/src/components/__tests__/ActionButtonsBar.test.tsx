@@ -10,7 +10,7 @@ describe("ActionButtonsBar", () => {
   it("renders correctly", async () => {
     render(<ActionButtonsBar />);
     expect(await screen.findByLabelText("action buttons")).toBeTruthy();
-    expect(screen.getAllByLabelText("action button")).toHaveLength(4);
+    expect(screen.getAllByLabelText("action button")).toHaveLength(5);
   });
 
   it("navigates to correct screen when buttons are pressed", async () => {
@@ -19,17 +19,27 @@ describe("ActionButtonsBar", () => {
     const actionButtons = await screen.findAllByLabelText("action button");
 
     fireEvent.press(actionButtons[0]);
-    expect(mockUseNavigationNavigate).toHaveBeenCalledWith("SendStack");
+    expect(mockUseNavigationNavigate).toHaveBeenCalledWith(
+      "CreateOfferTabStack",
+      {
+        screen: "CreateBuyOffer",
+      }
+    );
 
     fireEvent.press(actionButtons[1]);
     expect(mockUseNavigationNavigate).toHaveBeenCalledWith(
-      "CreatePaymentRequest"
+      "CreateOfferTabStack",
+      {
+        screen: "CreateSellOffer",
+      }
     );
 
     fireEvent.press(actionButtons[2]);
-    expect(mockUseNavigationNavigate).toHaveBeenCalledWith("Funding");
+    expect(mockUseNavigationNavigate).toHaveBeenCalledWith("SendStack");
 
     fireEvent.press(actionButtons[3]);
-    expect(mockUseNavigationNavigate).toHaveBeenCalledWith("Withdraw");
+    expect(mockUseNavigationNavigate).toHaveBeenCalledWith(
+      "CreatePaymentRequest"
+    );
   });
 });

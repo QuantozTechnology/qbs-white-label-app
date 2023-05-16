@@ -15,10 +15,12 @@ import CustomTabBarIcon from "../components/CustomTabBarIcon";
 import UserProfileStack from "./UserProfileStack";
 import { TouchableOpacity } from "react-native";
 import PaymentRequestsNativeStackNavigator from "./PaymentRequestsStack";
+import OfferStackNavigator from "./OfferOverviewStack";
 
 export type AppBottomTabParamList = {
   PortfolioOverview: undefined;
   PaymentRequests: undefined;
+  Offers: undefined;
   UserProfileStack: undefined;
   Support: undefined;
 };
@@ -107,6 +109,24 @@ export default function AppBottomTabNavigator() {
             );
           },
           headerShown: false,
+        })}
+      />
+      <AppBottomTab.Screen
+        name="Offers"
+        component={OfferStackNavigator}
+        options={({ route }) => ({
+          tabBarStyle: {
+            display: getTabBarVisibility(route) ? "flex" : "none",
+          },
+          title: "Offers",
+          tabBarLabel({ focused }) {
+            return <CustomTabBarLabel focused={focused} label="Offers" />;
+          },
+          tabBarIcon: ({ focused }) => {
+            return (
+              <CustomTabBarIcon focused={focused} iconName="exchange-alt" />
+            );
+          },
         })}
       />
       <AppBottomTab.Screen

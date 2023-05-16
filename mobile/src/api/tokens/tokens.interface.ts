@@ -2,14 +2,25 @@
 // under the Apache License, Version 2.0. See the NOTICE file at the root
 // of this distribution or at http://www.apache.org/licenses/LICENSE-2.0
 
-import {z} from "zod";
+import { z } from "zod";
 
+// Available / owned tokens
+const TokensSchema = z.object({
+  code: z.string(),
+  name: z.string(),
+  issuerAddress: z.string(),
+  balance: z.string().nullable(),
+});
+
+export type Tokens = z.infer<typeof TokensSchema>;
+
+// token details
 const TokenDetailsSchema = z.object({
   tokenCode: z.string(),
-  validator: z.string().url(),
-  owner: z.string().url(),
-  asset: z.string().url(),
-  schema: z.string().url(),
+  validatorUrl: z.string().url(),
+  ownerUrl: z.string().url(),
+  assetUrl: z.string().url(),
+  schemaUrl: z.string().url(),
 });
 
 export type TokenDetails = z.infer<typeof TokenDetailsSchema>;

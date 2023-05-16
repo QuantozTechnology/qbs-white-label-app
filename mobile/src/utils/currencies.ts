@@ -19,7 +19,7 @@ type DisplayFiatAmountConfig = {
  * If the `amount` parameter is `undefined`, the function returns the string "N/A".
  */
 export function displayFiatAmount(
-  amount: number | undefined,
+  amount: number | null | undefined,
   options: DisplayFiatAmountConfig = {}
 ): string {
   if (amount == null) {
