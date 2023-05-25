@@ -4,13 +4,10 @@
 
 import { Tokens } from "../../api/tokens/tokens.interface";
 import { fireEvent, render, screen, waitFor } from "../../jest/test-utils";
-import { server } from "../../mocks/server";
-import { rest } from "msw";
-import { mockApiUrl } from "../../utils/axios";
 import CreateSellOffer from "../CreateSellOffer";
-import { APIError, ApiErrorCode } from "../../api/generic/error.interface";
 
 const mockReset = jest.fn();
+const mockParentNavigation = jest.fn();
 
 describe("CreateSellOffer screen", () => {
   const mockToken: Tokens = {
@@ -26,6 +23,7 @@ describe("CreateSellOffer screen", () => {
           routeNames: [],
         }),
         reset: mockReset,
+        navigate: mockParentNavigation,
       }),
     },
     route: {
@@ -109,46 +107,7 @@ describe("CreateSellOffer screen", () => {
     );
   });
 
-  it("fails to create an offer and displays an error message", async () => {
-    const apiError: APIError = {
-      Errors: [
-        {
-          Message: "Cannot create offer",
-          Code: ApiErrorCode.InternalServerError,
-          Target: null,
-        },
-      ],
-    };
-
-    server.use(
-      rest.post(`${mockApiUrl}/api/offers`, (_req, rest, ctx) => {
-        return rest(ctx.status(500), ctx.json(apiError));
-      })
-    );
-
-    props = createTestProps({});
-    render(<CreateSellOffer {...props} />);
-
-    // need to wait for balances to be loaded
-    await waitFor(() => {
-      expect(screen.getByLabelText("balance")).toHaveTextContent(
-        /^Balance: GOLD 100/
-      );
-    });
-    const amountInput = screen.getByLabelText("amount");
-    const priceInput = screen.getByLabelText("price");
-    const reviewButton = screen.getByLabelText("review");
-
-    fireEvent(amountInput, "onChangeText", "1");
-    fireEvent(priceInput, "onChangeText", "1");
-    fireEvent(reviewButton, "onPress");
-
-    expect(
-      await screen.findByLabelText("notification message description")
-    ).toHaveTextContent(/^Cannot create offer$/);
-  });
-
-  it("creates an offer successfully", async () => {
+  it("goes to the review screen for the created offer", async () => {
     props = createTestProps({});
     render(<CreateSellOffer {...props} />);
 
@@ -166,10 +125,21 @@ describe("CreateSellOffer screen", () => {
     fireEvent(priceInput, "onChangeText", "10");
     fireEvent(reviewButton, "onPress");
 
-    // TODO cannot test this for some reason, solving it in the future
-    expect(
-      await screen.findByLabelText("notification message description")
-    ).toHaveTextContent(/^Offer created successfully$/);
-    expect(mockReset).toHaveBeenCalled();
+    expect(mockParentNavigation).toHaveBeenCalledWith("ReviewCreatedOffer", {
+      offer: {
+        action: "Sell",
+        destinationToken: { amount: 10, tokenCode: "SCEUR" },
+        offerCode: null,
+        options: {
+          expiresOn: null,
+          isOneOffPayment: false,
+          memo: null,
+          params: null,
+          payerCanChangeRequestedAmount: false,
+          shareName: false,
+        },
+        sourceToken: { amount: 100, tokenCode: "GOLD" },
+      },
+    });
   });
 });

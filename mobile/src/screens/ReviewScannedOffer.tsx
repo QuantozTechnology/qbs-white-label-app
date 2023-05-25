@@ -5,12 +5,12 @@
 import { Text } from "native-base";
 import ScreenWrapper from "../components/ScreenWrapper";
 
-function CreateOfferSummary() {
+function ReviewScannedOffer() {
   return (
-    <ScreenWrapper flex={1}>
-      <Text>CreateOfferSummary</Text>
+    <ScreenWrapper>
+      <Text>Review</Text>
     </ScreenWrapper>
   );
 }
 
-export default CreateOfferSummary;
+export default ReviewScannedOffer;

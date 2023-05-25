@@ -5,10 +5,10 @@
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { Text } from "native-base";
 import ScreenWrapper from "../components/ScreenWrapper";
-import { OfferOverviewStackParamList } from "../navigation/OfferOverviewStack";
+import { OffersStackParamList } from "../navigation/OffersStack";
 
 type AssetDetailsProps = NativeStackScreenProps<
-  OfferOverviewStackParamList,
+  OffersStackParamList,
   "AssetDetails"
 >;
 

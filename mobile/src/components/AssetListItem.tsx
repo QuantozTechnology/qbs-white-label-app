@@ -11,8 +11,8 @@ import {
 } from "@react-navigation/native";
 import { HStack, Icon, IconButton, Pressable, Text } from "native-base";
 import { Tokens } from "../api/tokens/tokens.interface";
-import { CreateOfferTabsParamList } from "../navigation/CreateOfferTabsStack";
-import { OfferOverviewStackParamList } from "../navigation/OfferOverviewStack";
+import { CreateBuyOfferStackParamList } from "../navigation/CreateBuyOfferStack";
+import { OffersStackParamList } from "../navigation/OffersStack";
 import { displayFiatAmount } from "../utils/currencies";
 
 type AssetListItemProps = {
@@ -20,11 +20,10 @@ type AssetListItemProps = {
 };
 
 function AssetListItem({ asset }: AssetListItemProps) {
-  const navigation =
-    useNavigation<NavigationProp<OfferOverviewStackParamList>>();
+  const navigation = useNavigation<NavigationProp<OffersStackParamList>>();
 
   const route =
-    useRoute<RouteProp<CreateOfferTabsParamList, "CreateBuyOffer">>();
+    useRoute<RouteProp<CreateBuyOfferStackParamList, "AssetsOverview">>();
   const { code, name, balance } = asset;
 
   return (
@@ -58,10 +57,23 @@ function AssetListItem({ asset }: AssetListItemProps) {
   }
 
   function handleAssetListItemPress() {
-    navigation.navigate("CreateOfferTabStack", {
-      screen: route.params.sourceScreen,
-      params: { token: asset },
-    });
+    if (route.params.sourceScreen === "CreateBuyOffer") {
+      navigation.navigate("CreateOfferTabStack", {
+        screen: "CreateBuyOfferStack",
+        params: {
+          screen: "CreateBuyOffer",
+          params: { token: asset },
+        },
+      });
+    } else {
+      navigation.navigate("CreateOfferTabStack", {
+        screen: "CreateSellOfferStack",
+        params: {
+          screen: "CreateSellOffer",
+          params: { token: asset },
+        },
+      });
+    }
   }
 }
 
