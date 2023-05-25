@@ -8,7 +8,7 @@ import DateTimePicker, {
 } from "@react-native-community/datetimepicker";
 import { NavigationProp } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   Button,
   Checkbox,
@@ -20,18 +20,12 @@ import {
   ScrollView,
   Select,
   Text,
-  Toast,
   VStack,
 } from "native-base";
 import { useEffect, useRef, useState } from "react";
-import { createOffer } from "../api/offers/offers";
 import { getAvailableTokens, getOwnedTokens } from "../api/tokens/tokens";
 import { Tokens } from "../api/tokens/tokens.interface";
 import ScreenWrapper from "../components/ScreenWrapper";
-import { CreateOfferTabsParamList } from "../navigation/CreateOfferTabsStack";
-import { PortfolioStackParamList } from "../navigation/PortfolioStack";
-import Notification from "../components/Notification";
-import { AxiosError } from "axios";
 import { validationCheck } from "../utils/validation/errors";
 import { z } from "zod";
 import { defaultConfig } from "../config/config";
@@ -43,9 +37,11 @@ import {
 import { Platform, TextInput } from "react-native";
 import { displayFiatAmount } from "../utils/currencies";
 import { CreateOfferPayload } from "../api/offers/offers.interface";
+import { CreateSellOfferStackParamList } from "../navigation/CreateSellOfferStack";
+import { OffersStackParamList } from "../navigation/OffersStack";
 
 type Props = NativeStackScreenProps<
-  CreateOfferTabsParamList,
+  CreateSellOfferStackParamList,
   "CreateSellOffer"
 >;
 
@@ -62,64 +58,6 @@ function CreateSellOffer({ navigation, route }: Props) {
   const [validationErrors, setValidationErrors] = useState<{
     [key: string]: string | undefined;
   }>({});
-
-  const { mutate: createNewOffer, isLoading: isCreatingOffer } = useMutation({
-    mutationFn: createOffer,
-    onSuccess() {
-      Toast.show({
-        render: () => (
-          <Notification
-            message="Offer created successfully"
-            variant="success"
-            isToastNotification
-          />
-        ),
-      });
-
-      queryClient.invalidateQueries({
-        queryKey: ["offers"],
-        refetchType: "all",
-      });
-
-      const parentNavigation = navigation.getParent();
-      const parentState = navigation.getParent()?.getState();
-
-      if (parentState?.routeNames.includes("Portfolio")) {
-        parentNavigation?.reset({
-          index: 0,
-          routes: [
-            {
-              name: "Portfolio",
-            },
-          ],
-        });
-      } else {
-        parentNavigation?.reset({
-          index: 0,
-          routes: [
-            {
-              name: "OffersList",
-            },
-          ],
-        });
-      }
-    },
-    onError(error) {
-      Toast.show({
-        render: () => (
-          <Notification
-            message={
-              error instanceof AxiosError
-                ? error.response?.data.Errors[0].Message
-                : error
-            }
-            variant="error"
-            isToastNotification
-          />
-        ),
-      });
-    },
-  });
 
   // ref to focus the amount input once the user has selected a token
   const amountRef = useRef<TextInput | null>(null);
@@ -335,13 +273,7 @@ function CreateSellOffer({ navigation, route }: Props) {
           </FormControl>
         </VStack>
       </ScrollView>
-      <Button
-        accessibilityLabel="review"
-        onPress={handleReviewPress}
-        isDisabled={isCreatingOffer}
-        isLoading={isCreatingOffer}
-        isLoadingText="Creating offer..."
-      >
+      <Button accessibilityLabel="review" onPress={handleReviewPress}>
         Review
       </Button>
       <Modal isOpen={showIosDatePicker}>
@@ -362,7 +294,7 @@ function CreateSellOffer({ navigation, route }: Props) {
 
   function handleAssetPress() {
     navigation
-      .getParent<NavigationProp<PortfolioStackParamList>>()
+      .getParent<NavigationProp<OffersStackParamList>>()
       .navigate("AssetsOverview", { sourceScreen: "CreateSellOffer" });
   }
 
@@ -418,13 +350,13 @@ function CreateSellOffer({ navigation, route }: Props) {
     } else {
       if (amount != null && price != null && selectedToken != null) {
         const payload: CreateOfferPayload = {
-          action: "Buy",
+          action: "Sell",
           sourceToken: {
-            tokenCode: defaultConfig.defaultStableCoin.code,
+            tokenCode: selectedToken.code,
             amount: parseFloat(amount) * parseFloat(price),
           },
           destinationToken: {
-            tokenCode: selectedToken?.code,
+            tokenCode: defaultConfig.defaultStableCoin.code,
             amount: parseFloat(amount),
           },
           options: {
@@ -435,9 +367,12 @@ function CreateSellOffer({ navigation, route }: Props) {
             memo: null,
             params: null,
           },
+          offerCode: null,
         };
 
-        createNewOffer(payload);
+        navigation
+          .getParent<NavigationProp<OffersStackParamList>>()
+          .navigate("ReviewCreatedOffer", { offer: payload });
       }
     }
   }

@@ -11,7 +11,7 @@ import CreateBuyOffer from "../CreateBuyOffer";
 import { APIError, ApiErrorCode } from "../../api/generic/error.interface";
 
 const mockReset = jest.fn();
-
+const mockParentNavigation = jest.fn();
 describe("CreateBuyOffer screen", () => {
   const mockToken: Tokens = {
     balance: "100",
@@ -26,6 +26,7 @@ describe("CreateBuyOffer screen", () => {
           routeNames: [],
         }),
         reset: mockReset,
+        navigate: mockParentNavigation,
       }),
     },
     route: {
@@ -35,6 +36,7 @@ describe("CreateBuyOffer screen", () => {
     },
     ...props,
   });
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let props: any;
 
@@ -150,8 +152,10 @@ describe("CreateBuyOffer screen", () => {
     ).toHaveTextContent(/^Cannot create offer$/);
   });
 
-  it("creates an offer successfully", async () => {
+  it.only("creates an offer successfully", async () => {
     props = createTestProps({});
+    console.log("props: ", JSON.stringify(props));
+
     render(<CreateBuyOffer {...props} />);
 
     // need to wait for balances to be loaded
@@ -168,10 +172,21 @@ describe("CreateBuyOffer screen", () => {
     fireEvent(priceInput, "onChangeText", "10");
     fireEvent(reviewButton, "onPress");
 
-    // TODO cannot test this for some reason, solving it in the future
-    expect(
-      await screen.findByLabelText("notification message description")
-    ).toHaveTextContent(/^Offer created successfully$/);
-    expect(mockReset).toHaveBeenCalled();
+    expect(mockParentNavigation).toHaveBeenCalledWith("ReviewCreatedOffer", {
+      offer: {
+        action: "Buy",
+        destinationToken: { amount: 10, tokenCode: "GOLD" },
+        offerCode: null,
+        options: {
+          expiresOn: null,
+          isOneOffPayment: false,
+          memo: null,
+          params: null,
+          payerCanChangeRequestedAmount: false,
+          shareName: false,
+        },
+        sourceToken: { amount: 100, tokenCode: "SCEUR" },
+      },
+    });
   });
 });

@@ -22,8 +22,14 @@ function ActionButtonsBar() {
           iconName="plus"
           label="Buy"
           onPressCallback={() =>
-            navigation.navigate("CreateOfferTabStack", {
-              screen: "CreateBuyOffer",
+            navigation.navigate("OffersStack", {
+              screen: "CreateOfferTabStack",
+              params: {
+                screen: "CreateBuyOfferStack",
+                params: {
+                  screen: "CreateBuyOffer",
+                },
+              },
             })
           }
         />
@@ -31,8 +37,14 @@ function ActionButtonsBar() {
           iconName="minus"
           label="Sell"
           onPressCallback={() =>
-            navigation.navigate("CreateOfferTabStack", {
-              screen: "CreateSellOffer",
+            navigation.navigate("OffersStack", {
+              screen: "CreateOfferTabStack",
+              params: {
+                screen: "CreateSellOfferStack",
+                params: {
+                  screen: "CreateSellOffer",
+                },
+              },
             })
           }
         />

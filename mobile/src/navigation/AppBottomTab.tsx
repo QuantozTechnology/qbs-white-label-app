@@ -15,7 +15,7 @@ import CustomTabBarIcon from "../components/CustomTabBarIcon";
 import UserProfileStack from "./UserProfileStack";
 import { TouchableOpacity } from "react-native";
 import PaymentRequestsNativeStackNavigator from "./PaymentRequestsStack";
-import OfferStackNavigator from "./OfferOverviewStack";
+import OffersStackNavigator from "./OffersStack";
 
 export type AppBottomTabParamList = {
   PortfolioOverview: undefined;
@@ -33,6 +33,7 @@ export default function AppBottomTabNavigator() {
   const getTabBarVisibility = (route: Partial<Route<string>>) => {
     const routeName = getFocusedRouteNameFromRoute(route);
     // list of screens on which we do not show the bottom tab
+
     const hideOnScreens = [
       "TransactionDetails",
       "CreatePaymentRequest",
@@ -49,6 +50,11 @@ export default function AppBottomTabNavigator() {
       "UpgradeAccountStack",
       "PaymentRequestDetails",
       "TokenDetails",
+      "OffersStack",
+      "CreateOfferTabStack",
+      "AssetsOverview",
+      "AssetDetails",
+      "ReviewCreatedOffer",
     ];
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     return hideOnScreens.indexOf(routeName!) <= -1;
@@ -113,7 +119,7 @@ export default function AppBottomTabNavigator() {
       />
       <AppBottomTab.Screen
         name="Offers"
-        component={OfferStackNavigator}
+        component={OffersStackNavigator}
         options={({ route }) => ({
           tabBarStyle: {
             display: getTabBarVisibility(route) ? "flex" : "none",
@@ -164,7 +170,7 @@ export default function AppBottomTabNavigator() {
             );
           },
         }}
-      ></AppBottomTab.Screen>
+      />
     </AppBottomTab.Navigator>
   );
 }

@@ -29,6 +29,7 @@ const CreateOfferPayloadSchema = z.object({
   sourceToken: CreateOfferTokenSchema,
   destinationToken: CreateOfferTokenSchema,
   options: CreateOfferOptionsSchema.nullable(),
+  offerCode: z.string().nullable(),
 });
 
 export type CreateOfferPayload = z.infer<typeof CreateOfferPayloadSchema>;

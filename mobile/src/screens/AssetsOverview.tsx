@@ -6,10 +6,10 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import AvailableAssetsList from "../components/AvailableAssetsList";
 import OwnedAssetsList from "../components/OwnedAssetsList";
 import ScreenWrapper from "../components/ScreenWrapper";
-import { CreateOfferStackParamList } from "../navigation/CreateOfferStack";
+import { OffersStackParamList } from "../navigation/OffersStack";
 
 type AssetsOverviewProps = NativeStackScreenProps<
-  CreateOfferStackParamList,
+  OffersStackParamList,
   "AssetsOverview"
 >;
 
