@@ -30,7 +30,7 @@ function TokenDetails({ route }: Props) {
     );
   }
 
-  const { assetUrl, validatorUrl, ownerUrl, schemaUrl } = data.value;
+  const { assetUrl, validatorUrl, issuerUrl, schemaUrl } = data.value;
 
   function handleUrlPress(url: string) {
     Linking.openURL(url);
@@ -60,11 +60,11 @@ function TokenDetails({ route }: Props) {
       <DataDisplayField
         accessibilityLabel="issuer"
         label="Issuer"
-        value={ownerUrl}
+        value={issuerUrl}
         action={
           <Pressable
             accessibilityLabel="go to issuer page"
-            onPress={() => handleUrlPress(ownerUrl)}
+            onPress={() => handleUrlPress(issuerUrl)}
             mr={4}
           >
             <Icon

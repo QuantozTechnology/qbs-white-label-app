@@ -18,7 +18,7 @@ export type Tokens = z.infer<typeof TokensSchema>;
 const TokenDetailsSchema = z.object({
   tokenCode: z.string(),
   validatorUrl: z.string().url(),
-  ownerUrl: z.string().url(),
+  issuerUrl: z.string().url(),
   assetUrl: z.string().url(),
   schemaUrl: z.string().url(),
 });

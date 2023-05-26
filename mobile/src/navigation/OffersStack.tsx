@@ -15,23 +15,23 @@ import CreateOfferTopTabsStack from "./CreateOfferTabsStack";
 
 export type OffersStackParamList = {
   CreateOfferTabStack:
-  | {
-    screen: "CreateBuyOfferStack";
-    params: {
-      screen: "CreateBuyOffer";
-      params: { token?: Tokens };
-    };
-  }
-  | {
-    screen: "CreateSellOfferStack";
-    params: {
-      screen: "CreateSellOffer";
-      params: {
-        token?: Tokens;
-      };
-    };
-  }
-  | undefined;
+    | {
+        screen: "CreateBuyOfferStack";
+        params: {
+          screen: "CreateBuyOffer";
+          params: { token?: Tokens };
+        };
+      }
+    | {
+        screen: "CreateSellOfferStack";
+        params: {
+          screen: "CreateSellOffer";
+          params: {
+            token?: Tokens;
+          };
+        };
+      }
+    | undefined;
   ReviewCreatedOffer: {
     offer: CreateOfferPayload;
   };
@@ -111,7 +111,26 @@ export default function OffersStackNavigator() {
           header: (props) => <CustomNavigationHeader {...props} />,
         }}
       />
-      <OffersStack.Screen name="AssetDetails" component={AssetDetails} />
+      <OffersStack.Screen
+        name="AssetDetails"
+        component={AssetDetails}
+        options={({ route }) => ({
+          title: route.params.tokenCode,
+          header: (props) => (
+            <CustomNavigationHeader
+              {...props}
+              customIcon={
+                <Icon
+                  as={Ionicons}
+                  name="close"
+                  size="xl"
+                  color="primary.500"
+                />
+              }
+            />
+          ),
+        })}
+      />
       <OffersStack.Screen
         name="ReviewScannedOffer"
         component={ReviewScannedOffer}

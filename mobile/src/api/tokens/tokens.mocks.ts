@@ -11,7 +11,7 @@ export const tokenDetailsDefaultMock: GenericApiResponse<TokenDetails> = {
   value: {
     tokenCode: "SCEUR",
     assetUrl: "https://www.example.com",
-    ownerUrl: "https://www.example.com",
+    issuerUrl: "https://www.example.com",
     validatorUrl: "https://www.example.com",
     schemaUrl: "https://www.example.com",
   },
