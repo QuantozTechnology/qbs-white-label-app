@@ -43,7 +43,9 @@ function AssetListItem({ asset }: AssetListItemProps) {
             }
             onPress={handleAssetDetailsPress}
           />
-          <Text>{name}</Text>
+          <Text>
+            {name} ({code})
+          </Text>
         </HStack>
         {balance !== null && (
           <Text>{displayFiatAmount(parseFloat(balance))}</Text>

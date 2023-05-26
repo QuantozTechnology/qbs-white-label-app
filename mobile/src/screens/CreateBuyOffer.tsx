@@ -22,9 +22,8 @@ import {
   Text,
   VStack,
 } from "native-base";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { Platform } from "react-native";
-import { TextInput } from "react-native-gesture-handler";
 import { z } from "zod";
 import { useBalances } from "../api/balances/balances";
 import { CreateOfferPayload } from "../api/offers/offers.interface";
@@ -40,6 +39,7 @@ import {
 import { validationCheck } from "../utils/validation/errors";
 import { OffersStackParamList } from "../navigation/OffersStack";
 import { CreateBuyOfferStackParamList } from "../navigation/CreateBuyOfferStack";
+import CustomButtonSelect from "../components/CustomButtonSelect";
 
 type Props = NativeStackScreenProps<
   CreateBuyOfferStackParamList,
@@ -62,7 +62,6 @@ function CreateBuyOffer({ navigation, route }: Props) {
 
   const { data: balances, status: balancesStatus } = useBalances();
   // ref to focus the amount input once the user has selected a token
-  const amountRef = useRef<TextInput | null>(null);
 
   useEffect(() => {
     // Prefetch the owned tokens which the user can select, since it's most likely to happen every time
@@ -85,9 +84,7 @@ function CreateBuyOffer({ navigation, route }: Props) {
   }, []);
 
   useEffect(() => {
-    if (selectedToken != null && amountRef.current) {
-      amountRef.current.focus();
-
+    if (selectedToken != null) {
       // remove validation error if present
       setValidationErrors({ ...validationErrors, selectedToken: undefined });
     }
@@ -140,16 +137,10 @@ function CreateBuyOffer({ navigation, route }: Props) {
       <ScrollView>
         <FormControl isInvalid={validationErrors["selectedToken"] != null}>
           <FormControl.Label>Asset</FormControl.Label>
-          <Input
-            accessibilityLabel="select token"
-            type="text"
-            placeholder="Select token"
-            value={
-              selectedToken != null
-                ? `${selectedToken?.name} (${selectedToken?.code})`
-                : undefined
-            }
-            onPressIn={handleAssetPress}
+          <CustomButtonSelect
+            value={selectedToken}
+            valueCustomText={`${selectedToken?.name} (${selectedToken?.code})`}
+            onPressCallback={handleAssetPress}
           />
           <FormControl.ErrorMessage accessibilityLabel="select token error">
             {validationErrors["selectedToken"]}
@@ -164,7 +155,6 @@ function CreateBuyOffer({ navigation, route }: Props) {
             accessibilityLabel="amount"
             type="text"
             value={amount}
-            ref={amountRef}
             keyboardType="numeric"
             onChangeText={(value) => {
               setAmount(value);
@@ -184,7 +174,7 @@ function CreateBuyOffer({ navigation, route }: Props) {
                 setValidationErrors({ ...validationErrors, amount: undefined });
               }
             }}
-            isDisabled={selectedToken == null}
+            // isDisabled={selectedToken == null}
           />
           <FormControl.ErrorMessage accessibilityLabel="amount error">
             {validationErrors["amount"]}
@@ -222,7 +212,7 @@ function CreateBuyOffer({ navigation, route }: Props) {
                   });
                 }
               }}
-              isDisabled={selectedToken == null}
+              // isDisabled={selectedToken == null}
               flex={1}
             />
             <InputRightAddon>
@@ -395,8 +385,6 @@ function CreateBuyOffer({ navigation, route }: Props) {
           },
           offerCode: null,
         };
-
-        console.log("Navigation: ", JSON.stringify(navigation));
 
         navigation
           .getParent<NavigationProp<OffersStackParamList>>()

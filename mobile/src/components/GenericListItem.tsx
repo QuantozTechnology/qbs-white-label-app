@@ -1,9 +1,10 @@
-import { HStack, Text } from "native-base";
+import { Box, HStack, Text } from "native-base";
+import { ReactNode } from "react";
 import { AccessibilityProps } from "react-native";
 
 type Props = {
   leftContent: string;
-  rightContent: string;
+  rightContent: ReactNode;
   bold?: boolean;
 };
 
@@ -32,13 +33,17 @@ function GenericListItem({
       >
         {leftContent}
       </Text>
-      <Text
-        fontSize={bold ? "xl" : "lg"}
-        fontWeight={bold ? 600 : 400}
-        accessibilityLabel="content"
-      >
-        {rightContent}
-      </Text>
+      {typeof rightContent === "string" ? (
+        <Text
+          fontSize={bold ? "xl" : "lg"}
+          fontWeight={bold ? 600 : 400}
+          accessibilityLabel="content"
+        >
+          {rightContent}
+        </Text>
+      ) : (
+        <Box accessibilityLabel="content">{rightContent}</Box>
+      )}
     </HStack>
   );
 }
