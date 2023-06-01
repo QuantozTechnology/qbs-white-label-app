@@ -1,7 +1,7 @@
 import { Skeleton } from "native-base";
 import ScreenWrapper from "../../components/ScreenWrapper";
 
-function AssetsListSkeleton() {
+function TokensListSkeleton() {
   return (
     <ScreenWrapper space={2} px={-4}>
       <Skeleton w={32} h={4} />
@@ -13,4 +13,4 @@ function AssetsListSkeleton() {
   );
 }
 
-export default AssetsListSkeleton;
+export default TokensListSkeleton;

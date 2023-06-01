@@ -52,8 +52,8 @@ export default function AppBottomTabNavigator() {
       "TokenDetails",
       "OffersStack",
       "CreateOfferTabStack",
-      "AssetsOverview",
-      "AssetDetails",
+      "TokensOverview",
+      "TokenDetails",
       "ReviewCreatedOffer",
     ];
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion

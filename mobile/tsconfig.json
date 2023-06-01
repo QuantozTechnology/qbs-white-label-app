@@ -4,5 +4,6 @@
     "strict": true,
     "resolveJsonModule": true
   },
+  "exclude": ["dist"],
   "extends": "expo/tsconfig.base"
 }

@@ -79,7 +79,7 @@ export const defaultTransactionsResponseMock: GenericApiResponse<
 };
 
 export const transactionMocks = [
-  rest.get(`${backendApiUrl}/api/transactions`, (req, rest, ctx) => {
+  rest.get(`${backendApiUrl}/api/transactions`, (_req, rest, ctx) => {
     return rest(
       ctx.status(200),
       ctx.set(

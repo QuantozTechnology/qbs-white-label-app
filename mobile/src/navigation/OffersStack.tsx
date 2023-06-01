@@ -4,14 +4,14 @@ import { Icon, IconButton } from "native-base";
 import { CreateOfferPayload } from "../api/offers/offers.interface";
 import { Tokens } from "../api/tokens/tokens.interface";
 import CustomNavigationHeader from "../components/CustomNavigationHeader";
-import AssetDetails from "../screens/AssetDetails";
-import AssetsOverview from "../screens/AssetsOverview";
+import TokenDetails from "../screens/TokenDetails";
+import TokensOverview from "../screens/TokensOverview";
 import OfferDetails from "../screens/OfferDetails";
-import OffersList from "../screens/OffersList";
 import ReviewCreatedOffer from "../screens/ReviewCreatedOffer";
 import ReviewScannedOffer from "../screens/ReviewScannedOffer";
 import ShareOffer from "../screens/ShareOffer";
 import CreateOfferTopTabsStack from "./CreateOfferTabsStack";
+import OffersTabsStackNavigator from "./OffersListTabsStack";
 
 export type OffersStackParamList = {
   CreateOfferTabStack:
@@ -36,8 +36,8 @@ export type OffersStackParamList = {
     offer: CreateOfferPayload;
   };
   ShareOffer: undefined;
-  AssetsOverview: { sourceScreen: "CreateBuyOffer" | "CreateSellOffer" };
-  AssetDetails: { tokenCode: string };
+  TokensOverview: { sourceScreen: "CreateBuyOffer" | "CreateSellOffer" };
+  TokenDetails: { tokenCode: string };
   OffersList: undefined;
   OfferDetails: undefined;
   ReviewScannedOffer: undefined;
@@ -50,7 +50,7 @@ export default function OffersStackNavigator() {
     <OffersStack.Navigator>
       <OffersStack.Screen
         name="OffersList"
-        component={OffersList}
+        component={OffersTabsStackNavigator}
         options={({ navigation }) => ({
           title: "Offers",
           header: (props) => (
@@ -104,16 +104,16 @@ export default function OffersStackNavigator() {
       />
       <OffersStack.Screen name="ShareOffer" component={ShareOffer} />
       <OffersStack.Screen
-        name="AssetsOverview"
-        component={AssetsOverview}
+        name="TokensOverview"
+        component={TokensOverview}
         options={{
           title: "Assets",
           header: (props) => <CustomNavigationHeader {...props} />,
         }}
       />
       <OffersStack.Screen
-        name="AssetDetails"
-        component={AssetDetails}
+        name="TokenDetails"
+        component={TokenDetails}
         options={({ route }) => ({
           title: route.params.tokenCode,
           header: (props) => (

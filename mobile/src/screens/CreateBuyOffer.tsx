@@ -140,7 +140,7 @@ function CreateBuyOffer({ navigation, route }: Props) {
           <CustomButtonSelect
             value={selectedToken}
             valueCustomText={`${selectedToken?.name} (${selectedToken?.code})`}
-            onPressCallback={handleAssetPress}
+            onPressCallback={handleTokenPress}
           />
           <FormControl.ErrorMessage accessibilityLabel="select token error">
             {validationErrors["selectedToken"]}
@@ -308,10 +308,10 @@ function CreateBuyOffer({ navigation, route }: Props) {
     </ScreenWrapper>
   );
 
-  function handleAssetPress() {
+  function handleTokenPress() {
     navigation
       .getParent<NavigationProp<OffersStackParamList>>()
-      .navigate("AssetsOverview", { sourceScreen: "CreateBuyOffer" });
+      .navigate("TokensOverview", { sourceScreen: "CreateBuyOffer" });
   }
 
   function onExpirationDateChange(

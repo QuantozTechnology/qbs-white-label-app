@@ -13,9 +13,9 @@ import { biometricValidation } from "../utils/biometric";
 import { Linking } from "react-native";
 
 export const mockRefresh = jest.fn();
-export let mockClipboardCopy: jest.SpyInstance;
-export let authMock: jest.SpyInstance;
-export let customerContextMock: jest.SpyInstance;
+export let mockClipboardCopy;
+export let authMock;
+export let customerContextMock;
 
 // Needed after update to Jest 29
 global.setImmediate =

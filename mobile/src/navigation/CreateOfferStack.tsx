@@ -6,15 +6,15 @@ import { Ionicons } from "@expo/vector-icons";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { Icon } from "native-base";
 import CustomNavigationHeader from "../components/CustomNavigationHeader";
-import AssetDetails from "../screens/AssetDetails";
-import AssetsOverview from "../screens/AssetsOverview";
+import TokenDetails from "../screens/TokenDetails";
+import TokensOverview from "../screens/TokensOverview";
 import CreateOfferSummary from "../screens/CreateOfferSummary";
 import ShareOffer from "../screens/ShareOffer";
 import CreateOfferTopTabsStack from "./CreateOfferTabsStack";
 
 export type CreateOfferStackParamList = {
-  AssetsOverview: { sourceScreen: "CreateBuyOffer" | "CreateSellOffer" };
-  AssetDetails: { tokenCode: string };
+  TokensOverview: { sourceScreen: "CreateBuyOffer" | "CreateSellOffer" };
+  TokenDetails: { tokenCode: string };
   CreateOfferSummary: undefined;
   ShareOffer: undefined;
   CreateOfferTabsStack: undefined;
@@ -35,8 +35,8 @@ export default function CreateOfferStackNavigator() {
         }}
       />
       <CreateOfferStack.Screen
-        name="AssetsOverview"
-        component={AssetsOverview}
+        name="TokensOverview"
+        component={TokensOverview}
         options={{
           title: "Assets",
           header: (props) => (
@@ -55,8 +55,8 @@ export default function CreateOfferStackNavigator() {
         }}
       />
       <CreateOfferStack.Screen
-        name="AssetDetails"
-        component={AssetDetails}
+        name="TokenDetails"
+        component={TokenDetails}
         options={{
           title: "Details",
           header: (props) => <CustomNavigationHeader {...props} />,

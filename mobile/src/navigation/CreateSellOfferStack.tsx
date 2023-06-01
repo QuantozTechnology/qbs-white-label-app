@@ -5,8 +5,8 @@
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { Tokens } from "../api/tokens/tokens.interface";
 import CustomNavigationHeader from "../components/CustomNavigationHeader";
-import AssetDetails from "../screens/AssetDetails";
-import AssetsOverview from "../screens/AssetsOverview";
+import TokenDetails from "../screens/TokenDetails";
+import TokensOverview from "../screens/TokensOverview";
 import CreateSellOffer from "../screens/CreateSellOffer";
 
 export type CreateSellOfferStackParamList = {
@@ -14,8 +14,8 @@ export type CreateSellOfferStackParamList = {
     token?: Tokens;
     sourceScreen: "CreateSellOffer";
   };
-  AssetsOverview: { sourceScreen: "CreateSellOffer" };
-  AssetDetails: { tokenCode: string };
+  TokensOverview: { sourceScreen: "CreateSellOffer" };
+  TokenDetails: { tokenCode: string };
 };
 
 const CreateSellOfferStack =
@@ -32,16 +32,16 @@ export default function CreateSellOfferStackNavigator() {
         }}
       />
       <CreateSellOfferStack.Screen
-        name="AssetsOverview"
-        component={AssetsOverview}
+        name="TokensOverview"
+        component={TokensOverview}
         options={{
           title: "Assets",
           header: (props) => <CustomNavigationHeader {...props} />,
         }}
       />
       <CreateSellOfferStack.Screen
-        name="AssetDetails"
-        component={AssetDetails}
+        name="TokenDetails"
+        component={TokenDetails}
         options={{
           title: "Details",
           header: (props) => <CustomNavigationHeader {...props} />,
