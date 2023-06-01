@@ -3,24 +3,24 @@
 // of this distribution or at http://www.apache.org/licenses/LICENSE-2.0
 
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import AvailableAssetsList from "../components/AvailableAssetsList";
-import OwnedAssetsList from "../components/OwnedAssetsList";
+import AvailableTokensList from "../components/AvailableTokensList";
+import OwnedTokensList from "../components/OwnedTokensList";
 import ScreenWrapper from "../components/ScreenWrapper";
 import { OffersStackParamList } from "../navigation/OffersStack";
 
-type AssetsOverviewProps = NativeStackScreenProps<
+type TokensOverviewProps = NativeStackScreenProps<
   OffersStackParamList,
-  "AssetsOverview"
+  "TokensOverview"
 >;
 
-function AssetsOverview({ route }: AssetsOverviewProps) {
+function TokensOverview({ route }: TokensOverviewProps) {
   const { sourceScreen } = route.params;
   return (
     <ScreenWrapper flex={1}>
-      <OwnedAssetsList />
-      {sourceScreen === "CreateBuyOffer" && <AvailableAssetsList />}
+      <OwnedTokensList />
+      {sourceScreen === "CreateBuyOffer" && <AvailableTokensList />}
     </ScreenWrapper>
   );
 }
 
-export default AssetsOverview;
+export default TokensOverview;

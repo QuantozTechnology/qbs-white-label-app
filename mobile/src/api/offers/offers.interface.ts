@@ -33,3 +33,57 @@ const CreateOfferPayloadSchema = z.object({
 });
 
 export type CreateOfferPayload = z.infer<typeof CreateOfferPayloadSchema>;
+
+// GET offers
+const OfferTokenSchema = z.object({
+  tokenCode: z.string(),
+  totalAmount: z.number(),
+  remainingAmount: z.number().nullable(),
+});
+
+const OfferSchema = z.object({
+  offerCode: z.string(),
+  customerCode: z.string(),
+  action: z.enum(["Buy", "Sell"]),
+  sourceToken: OfferTokenSchema,
+  destinationToken: OfferTokenSchema,
+  options: z.object({
+    isOneOffPayment: z.boolean(),
+    payerCanChangeRequestedAmount: z.boolean(),
+    expiresOn: z.null(),
+    memo: z.null(),
+    shareName: z.boolean(),
+    params: z.null(),
+  }),
+  publicKey: z.string(),
+  isMerchant: z.boolean(),
+  status: z.enum(["Open", "Closed", "Expired", "Partial"]),
+  merchantSettings: z
+    .object({
+      callbackUrl: z.string().url(),
+      returnUrl: z.string().url(),
+    })
+    .nullable(),
+  createdOn: z.string(),
+  updatedOn: z.string(),
+  callbacks: z.object({
+    code: z.string(),
+    status: z.string(),
+  }),
+  payments: z.array(
+    z.object({
+      transactionCode: z.string(),
+      senderPublicKey: z.string(),
+      receiverPublicKey: z.string(),
+      amount: z.number(),
+      tokenCode: z.string(),
+      memo: z.string().nullable(),
+    })
+  ),
+});
+
+const OffersSchema = z.object({
+  value: z.array(OfferSchema),
+});
+export type Offer = z.infer<typeof OfferSchema>;
+export type Offers = z.infer<typeof OffersSchema>;

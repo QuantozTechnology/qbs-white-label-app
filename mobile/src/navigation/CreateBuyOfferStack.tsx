@@ -5,8 +5,8 @@
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { Tokens } from "../api/tokens/tokens.interface";
 import CustomNavigationHeader from "../components/CustomNavigationHeader";
-import AssetDetails from "../screens/AssetDetails";
-import AssetsOverview from "../screens/AssetsOverview";
+import TokenDetails from "../screens/TokenDetails";
+import TokensOverview from "../screens/TokensOverview";
 import CreateBuyOffer from "../screens/CreateBuyOffer";
 
 export type CreateBuyOfferStackParamList = {
@@ -14,8 +14,8 @@ export type CreateBuyOfferStackParamList = {
     token?: Tokens;
     sourceScreen: "CreateBuyOffer";
   };
-  AssetsOverview: { sourceScreen: "CreateBuyOffer" };
-  AssetDetails: { tokenCode: string };
+  TokensOverview: { sourceScreen: "CreateBuyOffer" };
+  TokenDetails: { tokenCode: string };
 };
 
 const CreateBuyOfferStack =
@@ -32,16 +32,16 @@ export default function CreateBuyOfferStackNavigator() {
         }}
       />
       <CreateBuyOfferStack.Screen
-        name="AssetsOverview"
-        component={AssetsOverview}
+        name="TokensOverview"
+        component={TokensOverview}
         options={{
           title: "Assets",
           header: (props) => <CustomNavigationHeader {...props} />,
         }}
       />
       <CreateBuyOfferStack.Screen
-        name="AssetDetails"
-        component={AssetDetails}
+        name="TokenDetails"
+        component={TokenDetails}
         options={{
           title: "Details",
           header: (props) => <CustomNavigationHeader {...props} />,

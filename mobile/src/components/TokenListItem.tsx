@@ -15,19 +15,18 @@ import { CreateBuyOfferStackParamList } from "../navigation/CreateBuyOfferStack"
 import { OffersStackParamList } from "../navigation/OffersStack";
 import { displayFiatAmount } from "../utils/currencies";
 
-type AssetListItemProps = {
-  asset: Tokens;
+type TokenListItemProps = {
+  token: Tokens;
 };
 
-function AssetListItem({ asset }: AssetListItemProps) {
+function TokenListItem({ token }: TokenListItemProps) {
   const navigation = useNavigation<NavigationProp<OffersStackParamList>>();
-
   const route =
-    useRoute<RouteProp<CreateBuyOfferStackParamList, "AssetsOverview">>();
-  const { code, name, balance } = asset;
+    useRoute<RouteProp<CreateBuyOfferStackParamList, "TokensOverview">>();
+  const { code, name, balance } = token;
 
   return (
-    <Pressable onPress={handleAssetListItemPress}>
+    <Pressable onPress={handleTokenListItemPress}>
       <HStack
         alignItems="center"
         justifyContent="space-between"
@@ -41,7 +40,7 @@ function AssetListItem({ asset }: AssetListItemProps) {
             icon={
               <Icon as={Ionicons} name="information-circle-outline" size="md" />
             }
-            onPress={handleAssetDetailsPress}
+            onPress={handleTokenDetailsPress}
           />
           <Text>
             {name} ({code})
@@ -54,17 +53,17 @@ function AssetListItem({ asset }: AssetListItemProps) {
     </Pressable>
   );
 
-  function handleAssetDetailsPress() {
-    navigation.navigate("AssetDetails", { tokenCode: code });
+  function handleTokenDetailsPress() {
+    navigation.navigate("TokenDetails", { tokenCode: code });
   }
 
-  function handleAssetListItemPress() {
+  function handleTokenListItemPress() {
     if (route.params.sourceScreen === "CreateBuyOffer") {
       navigation.navigate("CreateOfferTabStack", {
         screen: "CreateBuyOfferStack",
         params: {
           screen: "CreateBuyOffer",
-          params: { token: asset },
+          params: { token: token },
         },
       });
     } else {
@@ -72,11 +71,11 @@ function AssetListItem({ asset }: AssetListItemProps) {
         screen: "CreateSellOfferStack",
         params: {
           screen: "CreateSellOffer",
-          params: { token: asset },
+          params: { token: token },
         },
       });
     }
   }
 }
 
-export default AssetListItem;
+export default TokenListItem;

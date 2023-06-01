@@ -2,13 +2,18 @@
 // under the Apache License, Version 2.0. See the NOTICE file at the root
 // of this distribution or at http://www.apache.org/licenses/LICENSE-2.0
 
-import { Text } from "native-base";
+import { MaterialTopTabScreenProps } from "@react-navigation/material-top-tabs";
+import OffersListComponent from "../components/OffersList";
 import ScreenWrapper from "../components/ScreenWrapper";
+import { OffersListStackParamList } from "../navigation/OffersListTabsStack";
 
-function OffersList() {
+type OffersListProps = MaterialTopTabScreenProps<OffersListStackParamList>;
+
+function OffersList({ route }: OffersListProps) {
+  const { offerStatus } = route.params;
   return (
     <ScreenWrapper flex={1}>
-      <Text>OffersOverview</Text>
+      <OffersListComponent type={offerStatus} />
     </ScreenWrapper>
   );
 }

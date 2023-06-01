@@ -5,14 +5,14 @@
 import { Button, Heading, VStack } from "native-base";
 import { Fragment } from "react";
 import { useOwnedTokens } from "../api/tokens/tokens";
-import AssetsListSkeleton from "../screens/skeletons/AssetsListSkeleton";
+import TokensListSkeleton from "../screens/skeletons/TokensListSkeleton";
 import { ImageIdentifier } from "../utils/images";
-import AssetListItem from "./AssetListItem";
+import TokenListItem from "./TokenListItem";
 import FullScreenMessage from "./FullScreenMessage";
 import NoMoreButton from "./NoMoreButton";
 import ScreenWrapper from "./ScreenWrapper";
 
-function OwnedAssetsList() {
+function OwnedTokensList() {
   const { data, status, hasNextPage, isFetchingNextPage, fetchNextPage } =
     useOwnedTokens();
 
@@ -27,7 +27,7 @@ function OwnedAssetsList() {
   }
 
   if (status === "loading") {
-    return <AssetsListSkeleton />;
+    return <TokensListSkeleton />;
   }
 
   if (data.pages[0].value.length === 0) {
@@ -49,8 +49,8 @@ function OwnedAssetsList() {
       </Heading>
       {data.pages.map((page, i) => (
         <Fragment key={i}>
-          {page.value.map((asset) => (
-            <AssetListItem key={asset.code} asset={asset} />
+          {page.value.map((token) => (
+            <TokenListItem key={token.code} token={token} />
           ))}
         </Fragment>
       ))}
@@ -69,4 +69,4 @@ function OwnedAssetsList() {
   );
 }
 
-export default OwnedAssetsList;
+export default OwnedTokensList;

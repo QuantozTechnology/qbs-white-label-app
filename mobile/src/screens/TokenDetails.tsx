@@ -1,27 +1,34 @@
+// Copyright 2023 Quantoz Technology B.V. and contributors. Licensed
+// under the Apache License, Version 2.0. See the NOTICE file at the root
+// of this distribution or at http://www.apache.org/licenses/LICENSE-2.0
+
 import { Feather } from "@expo/vector-icons";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { Icon, Pressable } from "native-base";
+import { Icon, IconButton } from "native-base";
 import { Linking } from "react-native";
 import { useTokenDetails } from "../api/tokens/tokens";
-import DataDisplayField from "../components/DataDisplayField";
 import DataDisplayFieldSkeleton from "../components/DataDisplayFieldSkeleton";
 import FullScreenMessage from "../components/FullScreenMessage";
+import GenericListItem from "../components/GenericListItem";
 import ScreenWrapper from "../components/ScreenWrapper";
-import { PortfolioStackParamList } from "../navigation/PortfolioStack";
+import { OffersStackParamList } from "../navigation/OffersStack";
 
-type Props = NativeStackScreenProps<PortfolioStackParamList, "TokenDetails">;
+type TokenDetailsProps = NativeStackScreenProps<
+  OffersStackParamList,
+  "TokenDetails"
+>;
 
-function TokenDetails({ route }: Props) {
+function TokenDetails({ route }: TokenDetailsProps) {
   const { tokenCode } = route.params;
-  const { data, status } = useTokenDetails({ tokenCode });
+  const { data: details, status } = useTokenDetails({ tokenCode });
 
   if (status === "error") {
-    return <FullScreenMessage message="Error loading the token details" />;
+    return <FullScreenMessage message="Cannot retrieve token details" />;
   }
 
   if (status === "loading") {
     return (
-      <ScreenWrapper space={1} flex={1} px={-4}>
+      <ScreenWrapper flex={1} space={2}>
         <DataDisplayFieldSkeleton />
         <DataDisplayFieldSkeleton />
         <DataDisplayFieldSkeleton />
@@ -30,92 +37,58 @@ function TokenDetails({ route }: Props) {
     );
   }
 
-  const { assetUrl, validatorUrl, issuerUrl, schemaUrl } = data.value;
-
-  function handleUrlPress(url: string) {
-    Linking.openURL(url);
-  }
-
   return (
-    <ScreenWrapper flex={1} px={-4}>
-      <DataDisplayField
+    <ScreenWrapper flex={1} space={2}>
+      <GenericListItem
         accessibilityLabel="asset info"
-        label="Asset info"
-        value={assetUrl}
-        action={
-          <Pressable
-            accessibilityLabel="go to asset info page"
-            onPress={() => handleUrlPress(assetUrl)}
-            mr={4}
-          >
-            <Icon
-              as={Feather}
-              name="external-link"
-              color="primary.500"
-              size="md"
-            />
-          </Pressable>
+        leftContent="Asset info"
+        rightContent={
+          <IconButton
+            accessibilityLabel="go to asset info website"
+            icon={<Icon as={Feather} name="external-link" />}
+            onPress={() => handleGoToUrl(details.value.assetUrl)}
+          />
         }
       />
-      <DataDisplayField
-        accessibilityLabel="issuer"
-        label="Issuer"
-        value={issuerUrl}
-        action={
-          <Pressable
-            accessibilityLabel="go to issuer page"
-            onPress={() => handleUrlPress(issuerUrl)}
-            mr={4}
-          >
-            <Icon
-              as={Feather}
-              name="external-link"
-              color="primary.500"
-              size="md"
-            />
-          </Pressable>
+      <GenericListItem
+        accessibilityLabel="issuer info"
+        leftContent="Issuer"
+        rightContent={
+          <IconButton
+            accessibilityLabel="go to issuer info website"
+            icon={<Icon as={Feather} name="external-link" />}
+            onPress={() => handleGoToUrl(details.value.issuerUrl)}
+          />
         }
       />
-      <DataDisplayField
-        accessibilityLabel="validator"
-        label="Validator"
-        value={validatorUrl}
-        action={
-          <Pressable
-            accessibilityLabel="go to validator page"
-            onPress={() => handleUrlPress(validatorUrl)}
-            mr={4}
-          >
-            <Icon
-              as={Feather}
-              name="external-link"
-              color="primary.500"
-              size="md"
-            />
-          </Pressable>
+      <GenericListItem
+        accessibilityLabel="validator info"
+        leftContent="Validator"
+        rightContent={
+          <IconButton
+            accessibilityLabel="go to validator info website"
+            icon={<Icon as={Feather} name="external-link" />}
+            onPress={() => handleGoToUrl(details.value.validatorUrl)}
+          />
         }
       />
-      <DataDisplayField
-        accessibilityLabel="schema"
-        label="Schema"
-        value={schemaUrl}
-        action={
-          <Pressable
-            accessibilityLabel="go to schema page"
-            onPress={() => handleUrlPress(schemaUrl)}
-            mr={4}
-          >
-            <Icon
-              as={Feather}
-              name="external-link"
-              color="primary.500"
-              size="md"
-            />
-          </Pressable>
+      <GenericListItem
+        accessibilityLabel="schema info"
+        leftContent="Schema"
+        rightContent={
+          <IconButton
+            accessibilityLabel="go to schema info website"
+            icon={<Icon as={Feather} name="external-link" />}
+            onPress={() => handleGoToUrl(details.value.schemaUrl)}
+          />
         }
       />
     </ScreenWrapper>
   );
+
+  function handleGoToUrl(url: string) {
+    Linking.openURL(url);
+  }
 }
 
 export default TokenDetails;

@@ -282,7 +282,7 @@ function CreateSellOffer({ navigation, route }: Props) {
   function handleAssetPress() {
     navigation
       .getParent<NavigationProp<OffersStackParamList>>()
-      .navigate("AssetsOverview", { sourceScreen: "CreateSellOffer" });
+      .navigate("TokensOverview", { sourceScreen: "CreateSellOffer" });
   }
 
   function onExpirationDateChange(
