@@ -74,7 +74,9 @@ function ProfileInfo<T extends ConsumerData | MerchantData>({
         />
         <DataDisplayField
           label="Date of birth"
-          value={formatDate(DateOfBirth)}
+          value={DateOfBirth.includes("T")
+            ? formatDate(DateOfBirth)
+            : DateOfBirth}
           accessibilityLabel="date of birth"
         />
         <DataDisplayField
