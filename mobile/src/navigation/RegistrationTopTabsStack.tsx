@@ -14,8 +14,9 @@ export type RegistrationStackParamList = {
   Feedback: FeedbackProps;
 };
 
-const RegistrationTopTabs =
-  createMaterialTopTabNavigator<RegistrationStackParamList>();
+const RegistrationTopTabs = createMaterialTopTabNavigator<
+  RegistrationStackParamList
+>();
 
 export default function RegistrationTopTabsStack() {
   const { colors } = customTheme;

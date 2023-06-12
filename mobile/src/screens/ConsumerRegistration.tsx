@@ -10,13 +10,11 @@ import {
   Input,
   KeyboardAvoidingView,
   ScrollView,
-  Select,
   Text,
   useToast,
   VStack,
 } from "native-base";
 import { useRef, useState } from "react";
-import countries from "../utils/world.json";
 import { createCustomer } from "../api/customer/customer";
 import { CreateCustomerPayloadSchema } from "../api/customer/customer.interface";
 import { APIError } from "../api/generic/error.interface";
@@ -31,6 +29,7 @@ import { Masks, useMaskedInputProps } from "react-native-mask-input";
 import { validationCheck } from "../utils/validation/errors";
 import * as Linking from "expo-linking";
 import { useCustomerState } from "../context/CustomerContext";
+import CustomCountrySelect from "../components/CustomSelect";
 
 function ConsumerRegistration() {
   const auth = useAuth();
@@ -41,6 +40,7 @@ function ConsumerRegistration() {
   const [country, setCountry] = useState<string>();
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [termsAccepted, setTermsAccepted] = useState(false);
+  const [open, setOpen] = useState(false);
 
   const toast = useToast();
   const customerContext = useCustomerState();
@@ -59,7 +59,7 @@ function ConsumerRegistration() {
       onError(error) {
         const axiosError = error as AxiosError<APIError>;
 
-        if (!toast.isActive(apiErrorToastId))
+        if (!toast.isActive(apiErrorToastId)) {
           toast.show({
             render: () => (
               <Notification
@@ -70,23 +70,19 @@ function ConsumerRegistration() {
             ),
             id: apiErrorToastId,
           });
+        }
       },
     });
 
   const onCreateAccountPress = async () => {
-    const userSession = await auth?.userSession;
+    const userSession = auth?.userSession;
 
     if (userSession != null) {
       const result = validationCheck(CreateCustomerPayloadSchema, {
         reference: userSession.objectId,
         firstName: firstName,
         lastName: lastName,
-        dateOfBirth:
-          dateOfBirth &&
-          dateOfBirth.split("/").length === 3 &&
-          dateOfBirth.split("/")[2].length === 4
-            ? new Date(dateOfBirth.split("/").reverse().join("/")).toISOString()
-            : undefined,
+        dateOfBirth,
         countryOfResidence: country,
         email: userSession.email,
         phone: userSession.phone,
@@ -105,9 +101,7 @@ function ConsumerRegistration() {
             reference: userSession.objectId,
             firstName: firstName,
             lastName: lastName,
-            dateOfBirth: new Date(
-              dateOfBirth.split("/").reverse().join("/")
-            ).toISOString(),
+            dateOfBirth,
             countryOfResidence: country,
             email: userSession.email,
             phone: userSession.phone,
@@ -118,11 +112,6 @@ function ConsumerRegistration() {
       }
     }
   };
-
-  // simplify countries object
-  const minimalCountriesList = countries
-    .map(({ name }) => ({ name }))
-    .sort((a, b) => (a.name > b.name ? 1 : -1));
 
   // passing props for masked input to NativeBase input
   const maskedInputProps = useMaskedInputProps({
@@ -175,7 +164,6 @@ function ConsumerRegistration() {
                 </FormControl.ErrorMessage>
               </VStack>
             </FormControl>
-            {/* <VStack space={0}> */}
             <FormControl isRequired isInvalid={"dateOfBirth" in errors}>
               <FormControl.Label>Date of birth (DD/MM/YYYY)</FormControl.Label>
               <Input
@@ -188,18 +176,16 @@ function ConsumerRegistration() {
                 {errors["dateOfBirth"]}
               </FormControl.ErrorMessage>
             </FormControl>
-            <FormControl isRequired isInvalid={"countryOfResidence" in errors}>
+            <FormControl isInvalid={"countryOfResidence" in errors}>
               <FormControl.Label>Country of residence</FormControl.Label>
-              <Select
+              <CustomCountrySelect
+                country={country}
+                setCountry={setCountry}
+                open={open}
+                setOpen={setOpen}
+                hasValidationError={"countryOfResidence" in errors}
                 accessibilityLabel="country of residence"
-                placeholder="Select your country"
-                onValueChange={setCountry}
-                selectedValue={country}
-              >
-                {minimalCountriesList.map(({ name }) => (
-                  <Select.Item key={name} label={name} value={name} />
-                ))}
-              </Select>
+              />
               <FormControl.ErrorMessage accessibilityLabel="country error">
                 {errors["countryOfResidence"]}
               </FormControl.ErrorMessage>
