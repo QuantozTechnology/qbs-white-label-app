@@ -216,7 +216,7 @@
         {
             IsGenerating = true;
             var account = await _accountService.GetAccountAsync();
-            Console.WriteLine("Account:" + account);
+
             if (account.IsSuccess)
             {
                 LoggedInAccountCode = account.Value.AccountCode;
