@@ -66,12 +66,6 @@
 
                                     <div class="row">
                                         <div class="col-md-6 mb-4">
-                                            <label class="form-label" for="form3Example1m">Account Code:</label>
-                                            <InputText @bind-Value="CreatePaymentRequest.AccountCode" min="0" class="form-control form-control-lg" />
-                                        </div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-md-6 mb-4">
                                             <div class="form-outline">
                                                 <label class="form-label" for="form3Example1m">Amount:</label>
                                                 <InputNumber @bind-Value="CreatePaymentRequest.Amount" min="0" class="form-control form-control-lg" />
@@ -153,6 +147,8 @@
     private bool IsGenerating { get; set; }
     private bool IsLoading { get; set; }
 
+    private string? LoggedInAccountCode { get; set; }
+
     private PaymentRequest CreatePaymentRequest = new()
         {
             TokenCode = "",
@@ -213,12 +209,28 @@
                 {
                     ReturnUrl = $"{Navigation.BaseUri}paymentrequests/merchant"
                 },
-                AccountCode = CreatePaymentRequest.AccountCode
+                AccountCode = string.Empty
             };
 
         try
         {
             IsGenerating = true;
+            var account = await _accountService.GetAccountAsync();
+
+            if (account.IsSuccess)
+            {
+                LoggedInAccountCode = account.Value.AccountCode;
+
+                if (!string.IsNullOrWhiteSpace(LoggedInAccountCode))
+                {
+                    command.AccountCode = LoggedInAccountCode;
+                }
+            }
+            else
+            {
+                Error = account.Error.Errors.ElementAt(0).Message;
+            }
+
             var result = await _merchantService.CreatePaymentRequestAsync(command);
 
             if (result.IsSuccess)
@@ -244,7 +256,6 @@
         [StringLength(12)]
         public required string TokenCode { get; set; }
 
-        [Required]
         [StringLength(12)]
         public required string AccountCode { get; set; }
 
