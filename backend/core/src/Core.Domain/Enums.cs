@@ -52,4 +52,13 @@ namespace Core.Domain
         Cancelled,
         Expired
     }
+
+    public enum OfferStatus
+    {
+        Open,
+        Closed,
+        Processing,
+        Cancelled,
+        Expired
+    }
 }

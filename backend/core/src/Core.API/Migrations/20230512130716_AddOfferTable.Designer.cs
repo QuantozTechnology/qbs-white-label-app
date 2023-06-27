@@ -4,6 +4,7 @@ using Core.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Core.API.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    partial class DatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20230512130716_AddOfferTable")]
+    partial class AddOfferTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -106,11 +109,6 @@ namespace Core.API.Migrations
                         .HasColumnType("nvarchar(12)")
                         .HasColumnName("DestinationTokenCode");
 
-                    b.Property<decimal?>("DestinationTokenRemainingAmount")
-                        .HasPrecision(18, 8)
-                        .HasColumnType("decimal(18,8)")
-                        .HasColumnName("DestinationTokenRemAmount");
-
                     b.Property<bool>("IsMerchant")
                         .HasColumnType("bit")
                         .HasColumnName("IsMerchant");
@@ -127,10 +125,14 @@ namespace Core.API.Migrations
                         .HasColumnType("nvarchar(40)")
                         .HasColumnName("OfferCode");
 
-                    b.Property<decimal>("PricePerUnit")
+                    b.Property<int>("OfferStatus")
+                        .HasColumnType("int")
+                        .HasColumnName("OfferStatus");
+
+                    b.Property<decimal?>("PaidAmount")
                         .HasPrecision(18, 8)
                         .HasColumnType("decimal(18,8)")
-                        .HasColumnName("PricePerUnit");
+                        .HasColumnName("PaidAmount");
 
                     b.Property<string>("PublicKey")
                         .IsRequired()
@@ -148,15 +150,6 @@ namespace Core.API.Migrations
                         .HasMaxLength(12)
                         .HasColumnType("nvarchar(12)")
                         .HasColumnName("SourceTokenCode");
-
-                    b.Property<decimal?>("SourceTokenRemainingAmount")
-                        .HasPrecision(18, 8)
-                        .HasColumnType("decimal(18,8)")
-                        .HasColumnName("SourceTokenRemAmount");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("int")
-                        .HasColumnName("OfferStatus");
 
                     b.Property<DateTimeOffset?>("UpdatedOn")
                         .HasColumnType("datetimeoffset")
