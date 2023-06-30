@@ -59,7 +59,7 @@ function ConsumerRegistration() {
       onError(error) {
         const axiosError = error as AxiosError<APIError>;
 
-        if (!toast.isActive(apiErrorToastId))
+        if (!toast.isActive(apiErrorToastId)) {
           toast.show({
             render: () => (
               <Notification
@@ -70,6 +70,7 @@ function ConsumerRegistration() {
             ),
             id: apiErrorToastId,
           });
+        }
       },
     });
 
@@ -85,7 +86,7 @@ function ConsumerRegistration() {
           dateOfBirth &&
           dateOfBirth.split("/").length === 3 &&
           dateOfBirth.split("/")[2].length === 4
-            ? new Date(dateOfBirth.split("/").reverse().join("/")).toISOString()
+            ? new Date(dateOfBirth.split("/").reverse().join("-")).toISOString()
             : undefined,
         countryOfResidence: country,
         email: userSession.email,
@@ -106,7 +107,7 @@ function ConsumerRegistration() {
             firstName: firstName,
             lastName: lastName,
             dateOfBirth: new Date(
-              dateOfBirth.split("/").reverse().join("/")
+              dateOfBirth.split("/").reverse().join("-")
             ).toISOString(),
             countryOfResidence: country,
             email: userSession.email,

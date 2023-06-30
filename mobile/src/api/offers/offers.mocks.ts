@@ -3,7 +3,7 @@
 // of this distribution or at http://www.apache.org/licenses/LICENSE-2.0
 
 import { rest } from "msw";
-import { mockApiUrl } from "../../utils/axios";
+import { backendApiUrl, mockApiUrl } from "../../utils/axios";
 import { Offers } from "./offers.interface";
 
 export const mockOffers: Offers = {
@@ -58,7 +58,7 @@ export const mockOffers: Offers = {
 };
 
 export const offersMocks = [
-  rest.post(`${mockApiUrl}/api/offers`, (_req, rest, ctx) => {
+  rest.post(`${backendApiUrl}/api/offers`, (_req, rest, ctx) => {
     return rest(ctx.status(201), ctx.json({}));
   }),
   rest.get(`${mockApiUrl}/api/offers`, (_req, rest, ctx) => {

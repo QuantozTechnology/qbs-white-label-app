@@ -2,6 +2,7 @@
 // under the Apache License, Version 2.0. See the NOTICE file at the root
 // of this distribution or at http://www.apache.org/licenses/LICENSE-2.0
 
+import { CreateOfferPayload } from "../../api/offers/offers.interface";
 import { Tokens } from "../../api/tokens/tokens.interface";
 import { fireEvent, render, screen, waitFor } from "../../jest/test-utils";
 import CreateSellOffer from "../CreateSellOffer";
@@ -125,21 +126,24 @@ describe("CreateSellOffer screen", () => {
     fireEvent(priceInput, "onChangeText", "10");
     fireEvent(reviewButton, "onPress");
 
-    expect(mockParentNavigation).toHaveBeenCalledWith("ReviewCreatedOffer", {
-      offer: {
-        action: "Sell",
-        destinationToken: { amount: 10, tokenCode: "SCEUR" },
-        offerCode: null,
-        options: {
-          expiresOn: null,
-          isOneOffPayment: false,
-          memo: null,
-          params: null,
-          payerCanChangeRequestedAmount: false,
-          shareName: false,
-        },
-        sourceToken: { amount: 100, tokenCode: "GOLD" },
+    const mockCreatedSellOffer: CreateOfferPayload = {
+      action: "Sell",
+      destinationToken: { amount: 10, tokenCode: "SCEUR" },
+      offerCode: null,
+      pricePerUnit: 10,
+      options: {
+        expiresOn: null,
+        isOneOffPayment: false,
+        memo: null,
+        params: null,
+        payerCanChangeRequestedAmount: false,
+        shareName: false,
       },
+      sourceToken: { amount: 100, tokenCode: "GOLD" },
+    };
+
+    expect(mockParentNavigation).toHaveBeenCalledWith("ReviewCreatedOffer", {
+      offer: mockCreatedSellOffer,
     });
   });
 });

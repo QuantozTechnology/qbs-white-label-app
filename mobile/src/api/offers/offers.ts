@@ -4,17 +4,13 @@
 
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { AxiosResponse } from "axios";
-import { mockPaymentsApi } from "../../utils/axios";
+import { mockPaymentsApi, paymentsApi } from "../../utils/axios";
 import { CreateOfferPayload, Offers } from "./offers.interface";
 
 export function createOffer(
   payload: CreateOfferPayload
 ): Promise<AxiosResponse<unknown, CreateOfferPayload>> {
-  return mockPaymentsApi.post("/api/offers", payload, {
-    headers: {
-      "x-mock-response-code": 201,
-    },
-  });
+  return paymentsApi.post("/api/offers", payload);
 }
 
 // GET offers

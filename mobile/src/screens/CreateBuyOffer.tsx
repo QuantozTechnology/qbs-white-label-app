@@ -375,6 +375,7 @@ function CreateBuyOffer({ navigation, route }: Props) {
             tokenCode: selectedToken?.code,
             amount: parseFloat(amount),
           },
+          pricePerUnit: parseFloat(price),
           options: {
             expiresOn: expiresOn?.getTime() ?? null,
             shareName: includePersonalInfo,
