@@ -28,6 +28,7 @@ const CreateOfferPayloadSchema = z.object({
   action: z.enum(["Buy", "Sell"]),
   sourceToken: CreateOfferTokenSchema,
   destinationToken: CreateOfferTokenSchema,
+  pricePerUnit: z.number(),
   options: CreateOfferOptionsSchema.nullable(),
   offerCode: z.string().nullable(),
 });
