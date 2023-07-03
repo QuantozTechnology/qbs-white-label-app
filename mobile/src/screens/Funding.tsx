@@ -124,6 +124,8 @@ function Funding({ navigation }: FundingProps) {
           <BalancesList
             selectedToken={selectedToken}
             setSelectedToken={setSelectedToken}
+            onOpenTokenList={onOpen}
+            theme="light"
           />
         </VStack>
         <VStack space={1}>
@@ -180,6 +182,8 @@ function Funding({ navigation }: FundingProps) {
                   <BalancesList
                     selectedToken={selectedToken}
                     setSelectedToken={setSelectedToken}
+                    onOpenTokenList={onOpen}
+                    theme="light"
                   />
                 </Pressable>
               </VStack>

@@ -49,7 +49,14 @@ export function usePaymentRequest(
 
 // GET all payment requests for a customer
 
-export async function getPaymentRequests({ pageParam = 1, type }) {
+interface GetPaymentRequestParams extends UsePaymentRequestsProps {
+  pageParam?: number;
+}
+
+export async function getPaymentRequests({
+  pageParam = 1,
+  type,
+}: GetPaymentRequestParams) {
   const url =
     type != null
       ? `/api/paymentrequests?page=${pageParam}&pageSize=10&status=${type}`

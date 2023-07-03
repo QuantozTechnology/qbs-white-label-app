@@ -21,7 +21,7 @@ function BalancePanel({ selectedToken, setSelectedToken }: IBalancesPanel) {
   const { data: balances } = useBalances();
 
   return (
-    <VStack space={1} minH={290} accessibilityLabel="balance panel">
+    <VStack space={1} minH={270} accessibilityLabel="balance panel">
       <LinearGradient
         colors={["#324658", "#030c0c"]}
         style={{
@@ -32,14 +32,11 @@ function BalancePanel({ selectedToken, setSelectedToken }: IBalancesPanel) {
           borderBottomLeftRadius: 16,
         }}
       >
-        <Pressable
-          onPress={onOpen}
-          accessibilityLabel="open tokens list"
-          py={3}
-        >
+        <Pressable onPress={onOpen} accessibilityLabel="open tokens list">
           <BalancesList
             selectedToken={selectedToken}
             setSelectedToken={setSelectedToken}
+            onOpenTokenList={onOpen}
           />
         </Pressable>
         <ActionButtonsBar />

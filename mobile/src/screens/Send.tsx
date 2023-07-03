@@ -12,9 +12,11 @@ import {
   FormControl,
   Input,
   KeyboardAvoidingView,
+  Pressable,
   ScrollView,
   Text,
   Toast,
+  useDisclose,
   VStack,
 } from "native-base";
 import { useEffect, useRef, useState } from "react";
@@ -28,6 +30,7 @@ import FullScreenLoadingSpinner from "../components/FullScreenLoadingSpinner";
 import FullScreenMessage from "../components/FullScreenMessage";
 import Notification from "../components/Notification";
 import ScreenWrapper from "../components/ScreenWrapper";
+import TokensSelection from "../components/TokensSelection";
 import { defaultConfig } from "../config/config";
 import { PortfolioStackParamList } from "../navigation/PortfolioStack";
 import { SendStackParamList } from "../navigation/SendStack";
@@ -41,7 +44,7 @@ type Props = NativeStackScreenProps<SendStackParamList, "Send">;
 
 function Send({ navigation, route }: Props) {
   const { data: balances, status: balancesStatus } = useBalances();
-
+  const { isOpen, onOpen, onClose } = useDisclose();
   const { mutate: createSend, isLoading: isCreatingPayment } = useMutation({
     mutationFn: createPaymentForAccount,
     onSuccess() {
@@ -196,12 +199,16 @@ function Send({ navigation, route }: Props) {
       >
         <ScrollView>
           <VStack space={2} flex={1} pb={4}>
-            <BalancesList
-              selectedToken={balances.value.find(
-                ({ tokenCode }) => tokenCode === selectedToken.tokenCode
-              )}
-              setSelectedToken={setSelectedToken}
-            />
+            <Pressable onPress={onOpen}>
+              <BalancesList
+                selectedToken={balances.value.find(
+                  ({ tokenCode }) => tokenCode === selectedToken.tokenCode
+                )}
+                setSelectedToken={setSelectedToken}
+                onOpenTokenList={onOpen}
+                theme="light"
+              />
+            </Pressable>
             <FormControl
               isRequired
               isInvalid={validationErrors?.accountCode != null}
@@ -300,6 +307,15 @@ function Send({ navigation, route }: Props) {
           Send
         </Button>
       </KeyboardAvoidingView>
+      {balances && (
+        <TokensSelection
+          isOpen={isOpen}
+          onClose={onClose}
+          selectedToken={selectedToken}
+          setSelectedToken={setSelectedToken}
+          tokens={balances.value}
+        />
+      )}
     </ScreenWrapper>
   );
 

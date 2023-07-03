@@ -3,13 +3,19 @@
 // of this distribution or at http://www.apache.org/licenses/LICENSE-2.0
 
 import { MaterialTopTabScreenProps } from "@react-navigation/material-top-tabs";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import OffersListComponent from "../components/OffersList";
 import ScreenWrapper from "../components/ScreenWrapper";
+import { OfferOverviewStackParamList } from "../navigation/OfferOverviewStack";
 import { OffersListStackParamList } from "../navigation/OffersListTabsStack";
 
-type OffersListProps = MaterialTopTabScreenProps<OffersListStackParamList>;
+type OffersListProps = NativeStackScreenProps<
+  OfferOverviewStackParamList,
+  "OffersList"
+>;
 
-function OffersList({ route }: OffersListProps) {
+type OffersTabsProps = MaterialTopTabScreenProps<OffersListStackParamList>;
+function OffersList({ route }: OffersListProps | OffersTabsProps) {
   const { offerStatus } = route.params;
   return (
     <ScreenWrapper flex={1}>

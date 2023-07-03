@@ -12,10 +12,16 @@ import TokensOverview from "../screens/TokensOverview";
 import OfferDetails from "../screens/OfferDetails";
 import OffersList from "../screens/OffersList";
 import CreateOfferTopTabsStack from "./CreateOfferTabsStack";
+import { Offer } from "../api/offers/offers.interface";
 
 export type OfferOverviewStackParamList = {
-  OffersList: undefined;
-  OfferDetails: undefined;
+  OffersList: {
+    offerStatus: "Open" | "Closed";
+  };
+  OfferDetails: {
+    offer: Offer;
+    offerStatus: "Open" | "Closed";
+  };
   CreateOfferTabStack:
     | { screen: "CreateBuyOffer"; params: { token?: Tokens } }
     | { screen: "CreateSellOffer"; params: { token?: Tokens } }

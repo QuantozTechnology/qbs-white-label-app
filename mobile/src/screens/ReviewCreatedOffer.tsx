@@ -20,7 +20,7 @@ type ReviewCreatedOfferProps = NativeStackScreenProps<
 >;
 
 function ReviewCreatedOffer({ navigation, route }: ReviewCreatedOfferProps) {
-  const { action, sourceToken, destinationToken, options } = route.params.offer;
+  const { action, sourceToken, destinationToken } = route.params.offer;
 
   const queryClient = useQueryClient();
   const { mutate: createNewOffer, isLoading: isCreatingOffer } = useMutation({
@@ -83,28 +83,26 @@ function ReviewCreatedOffer({ navigation, route }: ReviewCreatedOfferProps) {
 
   // TODO use the actual fee, doing this because it's still being discussed
   const isBuyOffer = action === "Buy";
-  const fee = isBuyOffer ? 0.8 : -0.8;
+  const fee = isBuyOffer ? "0.80" : "-0.80";
+
+  console.log("params: ", JSON.stringify(route.params.offer));
 
   return (
     <ScreenWrapper flex={1}>
       <VStack flex={1} space={4}>
-        <ReviewOfferAmount
-          action={action}
-          destinationToken={destinationToken}
-          sourceToken={sourceToken}
-          options={options}
-        />
+        <ReviewOfferAmount offer={route.params.offer} />
         <GenericListItem
           accessibilityLabel="price"
           leftContent="Price"
           rightContent={`${displayFiatAmount(
-            sourceToken.amount / destinationToken.amount
+            parseFloat(sourceToken.totalAmount) /
+              parseFloat(destinationToken.totalAmount)
           )} ${sourceToken.tokenCode}/${destinationToken.tokenCode}`}
         />
         <GenericListItem
           accessibilityLabel="gross total"
           leftContent={isBuyOffer ? "Purchase" : "Selling"}
-          rightContent={displayFiatAmount(sourceToken.amount, {
+          rightContent={displayFiatAmount(sourceToken.totalAmount, {
             currency: sourceToken.tokenCode,
           })}
         />
@@ -120,9 +118,12 @@ function ReviewCreatedOffer({ navigation, route }: ReviewCreatedOfferProps) {
         <GenericListItem
           accessibilityLabel="net total"
           leftContent="Total"
-          rightContent={displayFiatAmount(sourceToken.amount + fee, {
-            currency: sourceToken.tokenCode,
-          })}
+          rightContent={displayFiatAmount(
+            parseFloat(sourceToken.totalAmount) + parseFloat(fee),
+            {
+              currency: sourceToken.tokenCode,
+            }
+          )}
           bold
         />
       </VStack>

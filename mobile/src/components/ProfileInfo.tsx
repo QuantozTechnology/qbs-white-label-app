@@ -5,21 +5,22 @@
 import { Feather } from "@expo/vector-icons";
 import { Icon, IconButton, Toast, VStack } from "native-base";
 
-import { ConsumerData, MerchantData } from "../api/customer/customer.interface";
+import {
+  ConsumerData,
+  isConsumerData,
+  MerchantData,
+} from "../api/customer/customer.interface";
 import { useAuth } from "../auth/AuthContext";
 import { formatDate } from "../utils/dates";
 import DataDisplayField from "./DataDisplayField";
 import Notification from "./Notification";
 
-type Props<T> = {
+type Props = {
   email: string;
-  userData: T;
+  userData: ConsumerData | MerchantData;
 };
 
-function ProfileInfo<T extends ConsumerData | MerchantData>({
-  email,
-  userData,
-}: Props<T>) {
+function ProfileInfo({ email, userData }: Props) {
   const auth = useAuth();
 
   async function handleChangePassword() {
@@ -46,7 +47,7 @@ function ProfileInfo<T extends ConsumerData | MerchantData>({
     }
   }
   // customer is consumer
-  if ("FirstName" in userData) {
+  if (isConsumerData(userData)) {
     const { FirstName, LastName, CountryOfResidence, DateOfBirth, Phone } =
       userData;
 
