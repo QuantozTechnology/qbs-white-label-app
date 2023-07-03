@@ -38,9 +38,11 @@ export type CreateOfferPayload = z.infer<typeof CreateOfferPayloadSchema>;
 // GET offers
 const OfferTokenSchema = z.object({
   tokenCode: z.string(),
-  totalAmount: z.number(),
-  remainingAmount: z.number().nullable(),
+  totalAmount: z.string(),
+  remainingAmount: z.string().nullable(),
 });
+
+export type OfferToken = z.infer<typeof OfferTokenSchema>;
 
 const OfferSchema = z.object({
   offerCode: z.string(),
@@ -76,7 +78,7 @@ const OfferSchema = z.object({
       transactionCode: z.string(),
       senderPublicKey: z.string(),
       receiverPublicKey: z.string(),
-      amount: z.number(),
+      amount: z.string(),
       tokenCode: z.string(),
       memo: z.string().nullable(),
     })

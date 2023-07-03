@@ -3,76 +3,87 @@
 // of this distribution or at http://www.apache.org/licenses/LICENSE-2.0
 
 import { FontAwesome5 } from "@expo/vector-icons";
-import { Badge, HStack, Icon, Text, VStack } from "native-base";
+import { NavigationProp, useNavigation } from "@react-navigation/native";
+import { Badge, HStack, Icon, Pressable, Text, VStack } from "native-base";
 import { Offer } from "../api/offers/offers.interface";
+import { OffersStackParamList } from "../navigation/OffersStack";
 import { displayFiatAmount } from "../utils/currencies";
 
 type OfferProps = {
   offer: Offer;
+  offerStatus: "Open" | "Closed";
 };
 
-function OfferListItem({ offer }: OfferProps) {
-  const { action, status: offerStatus, sourceToken, destinationToken } = offer;
+function OfferListItem({ offer, offerStatus }: OfferProps) {
+  const { action, status, sourceToken, destinationToken } = offer;
+  const navigation = useNavigation<NavigationProp<OffersStackParamList>>();
 
   // TODO add Partial status
   return (
-    <HStack
-      bg="white"
-      alignItems="center"
-      p={4}
-      rounded="md"
-      accessibilityLabel="offer"
+    <Pressable
+      onPress={() =>
+        navigation.navigate("OfferDetails", { offer, offerStatus })
+      }
     >
-      <VStack flex={1}>
-        <HStack space={2}>
+      <HStack
+        bg="white"
+        alignItems="center"
+        p={4}
+        m={1}
+        rounded="md"
+        accessibilityLabel="offer"
+      >
+        <VStack flex={1}>
+          <HStack space={2}>
+            <Text
+              fontWeight={600}
+              fontSize="md"
+              accessibilityLabel="source action"
+            >
+              {action}
+            </Text>
+            {status === "Partial" && (
+              <Badge
+                variant="subtle"
+                colorScheme="info"
+                rounded="sm"
+                accessibilityLabel="partial offer badge"
+              >
+                Partial
+              </Badge>
+            )}
+          </HStack>
+          <Text fontSize="md" accessibilityLabel="source amount">
+            {action === "Buy"
+              ? displayFiatAmount(destinationToken.totalAmount, {
+                  currency: destinationToken.tokenCode,
+                })
+              : displayFiatAmount(sourceToken.totalAmount, {
+                  currency: sourceToken.tokenCode,
+                })}
+          </Text>
+        </VStack>
+        <Icon as={FontAwesome5} name="exchange-alt" />
+        <VStack flex={1} alignItems="flex-end">
           <Text
             fontWeight={600}
             fontSize="md"
-            accessibilityLabel="source action"
+            accessibilityLabel="destination action"
           >
-            {action}
+            {action === "Buy" ? "Sell" : "Buy"}
           </Text>
-          {offerStatus === "Partial" && (
-            <Badge
-              variant="subtle"
-              colorScheme="info"
-              rounded="sm"
-              accessibilityLabel="partial offer badge"
-            >
-              Partial
-            </Badge>
-          )}
-        </HStack>
-        <Text fontSize="md" accessibilityLabel="source amount">
-          {action === "Buy"
-            ? displayFiatAmount(destinationToken.totalAmount, {
-                currency: destinationToken.tokenCode,
-              })
-            : displayFiatAmount(sourceToken.totalAmount, {
-                currency: sourceToken.tokenCode,
-              })}
-        </Text>
-      </VStack>
-      <Icon as={FontAwesome5} name="exchange-alt" />
-      <VStack flex={1} alignItems="flex-end">
-        <Text
-          fontWeight={600}
-          fontSize="md"
-          accessibilityLabel="destination action"
-        >
-          {action === "Buy" ? "Sell" : "Buy"}
-        </Text>
-        <Text fontSize="md" accessibilityLabel="destination amount">
-          {action === "Buy"
-            ? displayFiatAmount(sourceToken.totalAmount, {
-                currency: sourceToken.tokenCode,
-              })
-            : displayFiatAmount(destinationToken.totalAmount, {
-                currency: destinationToken.tokenCode,
-              })}
-        </Text>
-      </VStack>
-    </HStack>
+          <Text fontSize="md" accessibilityLabel="destination amount">
+            {action === "Buy"
+              ? displayFiatAmount(sourceToken.totalAmount, {
+                  currency: sourceToken.tokenCode,
+                })
+              : displayFiatAmount(destinationToken.totalAmount, {
+                  currency: destinationToken.tokenCode,
+                })}
+          </Text>
+        </VStack>
+      </HStack>
+    </Pressable>
   );
 }
 

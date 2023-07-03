@@ -145,7 +145,7 @@ function TransactionsList({ selectedToken }: TransactionsListProps) {
         sections={sectionsData}
         renderItem={({ item }) => <TransactionsListItem transaction={item} />}
         renderSectionHeader={({ section: { date } }) => (
-          <View bg="primary.100" px={4}>
+          <View bg="gray.50" px={4}>
             <Text py={1}>{date}</Text>
           </View>
         )}
@@ -157,7 +157,7 @@ function TransactionsList({ selectedToken }: TransactionsListProps) {
         ListFooterComponent={
           !hasNextPage ? (
             <Stack alignItems="center" py={8}>
-              <Box bg="primary.100" w="2/3" p={2} rounded="full">
+              <Box bg="gray.50" w="2/3" p={2} rounded="full">
                 <Text textAlign="center" color="gray.400" fontWeight="bold">
                   No more transactions to show
                 </Text>

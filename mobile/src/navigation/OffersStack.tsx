@@ -1,7 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { Icon, IconButton } from "native-base";
-import { CreateOfferPayload } from "../api/offers/offers.interface";
+import { CreateOfferPayload, Offer } from "../api/offers/offers.interface";
 import { Tokens } from "../api/tokens/tokens.interface";
 import CustomNavigationHeader from "../components/CustomNavigationHeader";
 import TokenDetails from "../screens/TokenDetails";
@@ -39,7 +39,10 @@ export type OffersStackParamList = {
   TokensOverview: { sourceScreen: "CreateBuyOffer" | "CreateSellOffer" };
   TokenDetails: { tokenCode: string };
   OffersList: undefined;
-  OfferDetails: undefined;
+  OfferDetails: {
+    offer: Offer;
+    offerStatus: "Open" | "Closed";
+  };
   ReviewScannedOffer: undefined;
 };
 
@@ -69,9 +72,31 @@ export default function OffersStackNavigator() {
       <OffersStack.Screen
         name="OfferDetails"
         component={OfferDetails}
-        options={{
-          title: "Details",
-          header: (props) => <CustomNavigationHeader {...props} />,
+        options={({ route }) => {
+          return {
+            title: `${route.params.offer.action} order details`,
+            header: (props) => (
+              <CustomNavigationHeader
+                {...props}
+                customIcon={
+                  <Icon
+                    as={Ionicons}
+                    name="close"
+                    size="xl"
+                    color="primary.500"
+                  />
+                }
+                rightHeaderIcons={
+                  <Icon
+                    as={Ionicons}
+                    color="primary.500"
+                    size="lg"
+                    name="trash-outline"
+                  />
+                }
+              />
+            ),
+          };
         }}
       />
       <OffersStack.Screen

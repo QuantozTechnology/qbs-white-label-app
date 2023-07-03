@@ -120,10 +120,11 @@ function OffersList({ type }: OpenOffersListProps) {
     <VStack space={2}>
       <SectionList
         sections={sectionsData}
-        renderItem={({ item }) => <OfferListItem offer={item} />}
-        ItemSeparatorComponent={() => <View h={2} />}
+        renderItem={({ item }) => (
+          <OfferListItem offer={item} offerStatus={type} />
+        )}
         renderSectionHeader={({ section: { date } }) => (
-          <View bg="primary.100" px={4} pt={2}>
+          <View bg="gray.100" px={4} pt={2}>
             <Text py={1}>{date}</Text>
           </View>
         )}
