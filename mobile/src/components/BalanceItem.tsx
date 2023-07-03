@@ -42,7 +42,7 @@ function BalanceItem({ balance, isSelected, tokenCode }: BalanceItemProps) {
           color="white"
           accessibilityLabel="balance"
         >
-          {displayFiatAmount(balance, { alwaysRoundToTwoDecimals: true })}
+          {displayFiatAmount(balance, { decimals: 2 })}
         </Heading>
         <Text color="white" letterSpacing="xl" accessibilityLabel="token code">
           {tokenCode}

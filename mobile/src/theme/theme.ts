@@ -8,10 +8,16 @@ export const customTheme = extendTheme({
   colors: {
     // primary background color
     primary: {
-      100: "#f4f6f8",
-      200: "#e4f5ff",
+      50: "#f6fafd",
+      100: "#e2eff9",
+      200: "#cce4f5",
+      300: "#b5d8f0",
+      400: "#9bcaeb",
       500: "#189ad8",
-      900: "#09374e",
+      600: "#3baade",
+      700: "#1792cb",
+      800: "#1273a1",
+      900: "#0b445f",
     },
     error: {
       500: "#e61818",
@@ -30,11 +36,12 @@ export const customTheme = extendTheme({
     Button: {
       defaultProps: {
         _icon: {
-          color: "primary.500",
+          // color: "primary.500",
           mr: 1,
         },
-        borderColor: "primary.500",
+        // borderColor: "primary.500",
         rounded: "sm",
+        colorScheme: "primary",
       },
       sizes: {
         md: {
@@ -47,7 +54,7 @@ export const customTheme = extendTheme({
       },
       variants: {
         solid: {
-          background: "primary.500",
+          // background: "primary.500",
         },
         outline: {
           background: "white",

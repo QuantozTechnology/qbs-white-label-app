@@ -55,6 +55,7 @@ export default function AppBottomTabNavigator() {
       "TokensOverview",
       "TokenDetails",
       "ReviewCreatedOffer",
+      "OfferDetails",
     ];
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     return hideOnScreens.indexOf(routeName!) <= -1;

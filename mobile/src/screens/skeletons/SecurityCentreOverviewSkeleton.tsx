@@ -8,7 +8,7 @@ import TierOverviewSkeleton from "../../components/TierOverviewSkeleton";
 
 function SecurityCentreOverviewSkeleton() {
   return (
-    <VStack bg="primary.100">
+    <VStack bg="gray.50">
       <CustomerLimitsProgressSkeleton />
       <CustomerLimitsProgressSkeleton />
       <TierOverviewSkeleton />
