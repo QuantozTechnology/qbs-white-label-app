@@ -9,14 +9,15 @@ import { useEffect, useState } from "react";
 import CustomNavigationHeader from "../components/CustomNavigationHeader";
 import CancelOfferDialog from "../components/CancelOfferDialog";
 import ScreenWrapper from "../components/ScreenWrapper";
-import { OffersStackParamList } from "../navigation/OffersStack";
 import LargeHeaderCard from "../components/LargeHeaderCard";
 import { displayFiatAmount, getDecimalCount } from "../utils/currencies";
 import GenericListItem from "../components/GenericListItem";
 import { OfferToken } from "../api/offers/offers.interface";
+import { calculatePrice } from "../utils/offers";
+import { OfferOverviewStackParamList } from "../navigation/OfferOverviewStack";
 
 type OfferDetailsProps = NativeStackScreenProps<
-  OffersStackParamList,
+  OfferOverviewStackParamList,
   "OfferDetails"
 >;
 
@@ -152,36 +153,6 @@ function OfferDetails({ navigation, route }: OfferDetailsProps) {
     destinationToken: OfferToken
   ) {
     return action === "Buy" ? destinationToken : sourceToken;
-  }
-
-  function calculatePrice(
-    action: "Buy" | "Sell",
-    sourceToken: OfferToken,
-    destinationToken: OfferToken
-  ) {
-    const buyPrice =
-      parseFloat(sourceToken.totalAmount) /
-      parseFloat(destinationToken.totalAmount);
-    const sellPrice =
-      parseFloat(destinationToken.totalAmount) /
-      parseFloat(sourceToken.totalAmount);
-    const sourceTokenTotalDecimalsCount = getDecimalCount(
-      sourceToken.totalAmount
-    );
-    const destinationTokenTotalDecimalsCount = getDecimalCount(
-      destinationToken.totalAmount
-    );
-    let decimalsToShow =
-      action === "Buy"
-        ? sourceTokenTotalDecimalsCount - destinationTokenTotalDecimalsCount + 2
-        : destinationTokenTotalDecimalsCount -
-          sourceTokenTotalDecimalsCount +
-          2;
-    decimalsToShow = Math.max(0, Math.min(decimalsToShow, 8));
-
-    return displayFiatAmount(action === "Buy" ? buyPrice : sellPrice, {
-      decimals: decimalsToShow,
-    });
   }
 
   function isOfferPartiallyFilled(token: OfferToken) {

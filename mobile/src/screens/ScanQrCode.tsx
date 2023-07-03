@@ -5,22 +5,28 @@
 import { Ionicons } from "@expo/vector-icons";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { BarCodeEvent, BarCodeScanner } from "expo-barcode-scanner";
-import { Button, Icon, Spinner, Text, View, VStack } from "native-base";
+import { Button, Icon, Spinner, Text, Toast, View, VStack } from "native-base";
 import { useEffect, useState } from "react";
 import { Linking, StyleSheet } from "react-native";
 import { CreatePaymentRequestPayload } from "../api/paymentrequest/paymentRequest.interface";
 import FullScreenLoadingSpinner from "../components/FullScreenLoadingSpinner";
-import { SendStackParamList } from "../navigation/SendStack";
+import Notification from "../components/Notification";
+import { PortfolioStackParamList } from "../navigation/PortfolioStack";
+import { useIsFocused } from "@react-navigation/native";
 
 export interface PaymentRequestPayload extends CreatePaymentRequestPayload {
   canChangeAmount: boolean;
 }
 
-type Props = NativeStackScreenProps<SendStackParamList, "ScanQrCode">;
+type PortfolioProps = NativeStackScreenProps<
+  PortfolioStackParamList,
+  "ScanQrCode"
+>;
 
-function ScanQrCode({ navigation }: Props) {
+function ScanQrCode({ navigation }: PortfolioProps) {
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
   const [scanned, setScanned] = useState(false);
+  const isFocused = useIsFocused();
 
   useEffect(() => {
     async function getBarCodeScannerPermissions() {
@@ -32,9 +38,37 @@ function ScanQrCode({ navigation }: Props) {
     getBarCodeScannerPermissions();
   }, []);
 
+  useEffect(() => {
+    if (isFocused) {
+      setScanned(false);
+    }
+  }, [isFocused]);
+
   const handleBarCodeScanned = ({ data }: BarCodeEvent) => {
     setScanned(true);
-    navigation.navigate("SendSummary", { code: data });
+
+    const { type, code } = JSON.parse(data);
+
+    if (type === "offer") {
+      navigation.navigate("OffersStack", {
+        screen: "ReviewScannedOffer",
+        params: { code },
+      });
+    } else if (type === "payment-request") {
+      navigation.navigate("SendStack", {
+        screen: "SendSummary",
+        params: { code },
+      });
+    } else {
+      // Throw an error or return an error message if the data does not match either type
+      // throw new Error("Invalid transaction type");
+      Toast.show({
+        render: () => (
+          <Notification variant="error" message="QR code not valid" />
+        ),
+        duration: 3000,
+      });
+    }
   };
 
   if (hasPermission === null) {

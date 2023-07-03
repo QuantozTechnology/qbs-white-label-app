@@ -174,7 +174,7 @@ describe("CreateBuyOffer screen", () => {
 
     const mockCreatedOffer: CreateOfferPayload = {
       action: "Buy",
-      destinationToken: { amount: 10, tokenCode: "GOLD" },
+      destinationToken: { totalAmount: "10", tokenCode: "GOLD" },
       offerCode: null,
       pricePerUnit: 10,
       options: {
@@ -185,7 +185,7 @@ describe("CreateBuyOffer screen", () => {
         payerCanChangeRequestedAmount: false,
         shareName: false,
       },
-      sourceToken: { amount: 100, tokenCode: "SCEUR" },
+      sourceToken: { totalAmount: "100", tokenCode: "SCEUR" },
     };
 
     expect(mockParentNavigation).toHaveBeenCalledWith("ReviewCreatedOffer", {

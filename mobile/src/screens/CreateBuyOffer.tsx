@@ -174,7 +174,6 @@ function CreateBuyOffer({ navigation, route }: Props) {
                 setValidationErrors({ ...validationErrors, amount: undefined });
               }
             }}
-            // isDisabled={selectedToken == null}
           />
           <FormControl.ErrorMessage accessibilityLabel="amount error">
             {validationErrors["amount"]}
@@ -369,11 +368,11 @@ function CreateBuyOffer({ navigation, route }: Props) {
           action: "Buy",
           sourceToken: {
             tokenCode: defaultConfig.defaultStableCoin.code,
-            amount: parseFloat(amount) * parseFloat(price),
+            totalAmount: (parseFloat(amount) * parseFloat(price)).toString(),
           },
           destinationToken: {
             tokenCode: selectedToken?.code,
-            amount: parseFloat(amount),
+            totalAmount: amount,
           },
           pricePerUnit: parseFloat(price),
           options: {

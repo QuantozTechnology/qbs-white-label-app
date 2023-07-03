@@ -14,11 +14,15 @@ import ErrorBoundary from "./ErrorBoundary";
 type Props = {
   selectedToken: Balances | undefined;
   setSelectedToken: Dispatch<SetStateAction<Balances | undefined>>;
+  onOpenTokenList: () => void;
+  theme?: "dark" | "light";
 };
 
 // TODO remove eslint comment and implement token selection
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-function BalancesList({ selectedToken, setSelectedToken }: Props) {
+function BalancesList(
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  { selectedToken, setSelectedToken, onOpenTokenList, theme = "dark" }: Props
+) {
   const { data: balances, status } = useBalances();
 
   return (
@@ -52,6 +56,8 @@ function BalancesList({ selectedToken, setSelectedToken }: Props) {
               balance={balance}
               tokenCode={tokenCode}
               isSelected={tokenCode === selectedToken?.tokenCode}
+              onOpenTokenList={onOpenTokenList}
+              theme={theme}
             />
           ))
         )}

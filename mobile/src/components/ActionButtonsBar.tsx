@@ -19,6 +19,11 @@ function ActionButtonsBar() {
         accessibilityLabel="action buttons"
       >
         <ActionButton
+          iconName="qrcode"
+          label="Scan"
+          onPressCallback={() => navigation.navigate("ScanQrCode")}
+        />
+        <ActionButton
           iconName="plus"
           label="Buy"
           onPressCallback={() =>

@@ -7,7 +7,6 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { Icon, IconButton } from "native-base";
 import CustomNavigationHeader from "../components/CustomNavigationHeader";
 import Feedback from "../screens/Feedback";
-import ScanQrCode from "../screens/ScanQrCode";
 import Send from "../screens/Send";
 import SendSummary from "../screens/SendSummary";
 import { FeedbackProps } from "./WelcomeStack";
@@ -62,26 +61,6 @@ export default function SendStackNavigator() {
               />
             );
           },
-        }}
-      />
-      <SendStack.Screen
-        name="ScanQrCode"
-        component={ScanQrCode}
-        options={{
-          title: "Scan payment request",
-          header: (props) => (
-            <CustomNavigationHeader
-              {...props}
-              customIcon={
-                <Icon
-                  as={Ionicons}
-                  name="close"
-                  size="xl"
-                  color="primary.500"
-                />
-              }
-            />
-          ),
         }}
       />
       <SendStack.Screen

@@ -43,7 +43,9 @@ export type OffersStackParamList = {
     offer: Offer;
     offerStatus: "Open" | "Closed";
   };
-  ReviewScannedOffer: undefined;
+  ReviewScannedOffer: {
+    code: string;
+  };
 };
 
 const OffersStack = createNativeStackNavigator<OffersStackParamList>();
@@ -159,6 +161,22 @@ export default function OffersStackNavigator() {
       <OffersStack.Screen
         name="ReviewScannedOffer"
         component={ReviewScannedOffer}
+        options={{
+          title: "Review offer",
+          header: (props) => (
+            <CustomNavigationHeader
+              {...props}
+              customIcon={
+                <Icon
+                  as={Ionicons}
+                  name="close"
+                  size="xl"
+                  color="primary.500"
+                />
+              }
+            />
+          ),
+        }}
       />
     </OffersStack.Navigator>
   );

@@ -9,14 +9,16 @@ import {
   FormControl,
   HStack,
   Input,
+  KeyboardAvoidingView,
+  Modal,
+  Pressable,
   ScrollView,
+  Select,
   Skeleton,
   Text,
-  VStack,
+  useDisclose,
   useToast,
-  Select,
-  Modal,
-  KeyboardAvoidingView,
+  VStack,
 } from "native-base";
 import { useBalances } from "../api/balances/balances";
 import { Balances } from "../api/balances/balances.interface";
@@ -49,6 +51,7 @@ import {
   CreatePaymentRequestPayload,
   CreatePaymentRequestPayloadSchema,
 } from "../api/paymentrequest/paymentRequest.interface";
+import TokensSelection from "../components/TokensSelection";
 
 type Props = NativeStackScreenProps<
   PortfolioStackParamList,
@@ -56,6 +59,7 @@ type Props = NativeStackScreenProps<
 >;
 
 function PaymentRequest({ navigation }: Props) {
+  const { isOpen, onOpen, onClose } = useDisclose();
   const toast = useToast();
   const { status: balancesStatus, data: balances } = useBalances();
 
@@ -88,7 +92,7 @@ function PaymentRequest({ navigation }: Props) {
     onError(error) {
       const axiosError = error as AxiosError<APIError>;
 
-      if (!toast.isActive("create-paymentrequest-error"))
+      if (!toast.isActive("create-paymentrequest-error")) {
         toast.show({
           render: () => (
             <Notification
@@ -102,6 +106,7 @@ function PaymentRequest({ navigation }: Props) {
           ),
           id: "create-paymentrequest-error",
         });
+      }
     },
   });
 
@@ -167,12 +172,16 @@ function PaymentRequest({ navigation }: Props) {
       >
         <VStack flex={1}>
           <ScrollView>
-            <BalancesList
-              selectedToken={balances.value.find(
-                ({ tokenCode }) => tokenCode === selectedToken.tokenCode
-              )}
-              setSelectedToken={setSelectedToken}
-            />
+            <Pressable onPress={onOpen}>
+              <BalancesList
+                selectedToken={balances.value.find(
+                  ({ tokenCode }) => tokenCode === selectedToken.tokenCode
+                )}
+                setSelectedToken={setSelectedToken}
+                onOpenTokenList={onOpen}
+                theme="light"
+              />
+            </Pressable>
             <VStack space={4}>
               <VStack space={2}>
                 <FormControl isRequired isInvalid={errors["amount"] != null}>
@@ -277,6 +286,15 @@ function PaymentRequest({ navigation }: Props) {
           </Modal.Body>
         </Modal.Content>
       </Modal>
+      {balances && (
+        <TokensSelection
+          isOpen={isOpen}
+          onClose={onClose}
+          selectedToken={selectedToken}
+          setSelectedToken={setSelectedToken}
+          tokens={balances.value}
+        />
+      )}
     </ScreenWrapper>
   );
 

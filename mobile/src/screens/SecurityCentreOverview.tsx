@@ -9,6 +9,7 @@ import { Button, Heading, Icon, Text, VStack } from "native-base";
 import { useState } from "react";
 import { ScrollView } from "react-native-gesture-handler";
 import { useCustomer } from "../api/customer/customer";
+import { isConsumerData } from "../api/customer/customer.interface";
 import { useTrustLevels } from "../api/labelpartner/trustlevels";
 import CustomerLimitsProgress from "../components/CustomerLimitsProgress";
 import FullScreenMessage from "../components/FullScreenMessage";
@@ -49,8 +50,9 @@ function SecurityCentreOverview({ navigation }: SecurityCentreProps) {
   const { isBusiness, data, trustLevel } = customer.data.value;
 
   const idCheckPending =
-    (data.IdFront != null && data.IdBack != null) || data.Passport != null;
-  const selfieCheckPending = data.Selfie != null;
+    (isConsumerData(data) && data.IdFront != null && data.IdBack != null) ||
+    (isConsumerData(data) && data.Passport != null);
+  const selfieCheckPending = isConsumerData(data) && data.Selfie != null;
   const tierCodes = Object.keys(trustLevels.value);
 
   return (

@@ -21,7 +21,7 @@ const CreateOfferOptionsSchema = z.object({
 
 const CreateOfferTokenSchema = z.object({
   tokenCode: z.string(),
-  amount: z.number(),
+  totalAmount: z.string(),
 });
 
 const CreateOfferPayloadSchema = z.object({
@@ -88,5 +88,10 @@ const OfferSchema = z.object({
 const OffersSchema = z.object({
   value: z.array(OfferSchema),
 });
+const OfferResponseSchema = z.object({
+  value: OfferSchema,
+});
+
 export type Offer = z.infer<typeof OfferSchema>;
+export type OfferResponse = z.infer<typeof OfferResponseSchema>;
 export type Offers = z.infer<typeof OffersSchema>;

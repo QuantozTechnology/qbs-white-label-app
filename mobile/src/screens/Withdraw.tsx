@@ -228,6 +228,8 @@ function Withdraw({ navigation }: Props) {
                     <BalancesList
                       selectedToken={selectedToken}
                       setSelectedToken={setSelectedToken}
+                      onOpenTokenList={onOpen}
+                      theme="light"
                     />
                   </Pressable>
                   <FormControl isRequired isInvalid={errors["amount"] != null}>
@@ -242,13 +244,15 @@ function Withdraw({ navigation }: Props) {
                       {errors["amount"]}
                     </FormControl.ErrorMessage>
                   </FormControl>
-                  <TokensSelection
-                    isOpen={isOpen}
-                    onClose={onClose}
-                    selectedToken={selectedToken}
-                    setSelectedToken={setSelectedToken}
-                    tokens={balances.value}
-                  />
+                  {balances && (
+                    <TokensSelection
+                      isOpen={isOpen}
+                      onClose={onClose}
+                      selectedToken={selectedToken}
+                      setSelectedToken={setSelectedToken}
+                      tokens={balances.value}
+                    />
+                  )}
                 </VStack>
               </>
             ) : null}
