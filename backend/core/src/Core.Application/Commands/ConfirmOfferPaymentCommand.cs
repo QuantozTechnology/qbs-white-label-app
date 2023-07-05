@@ -58,7 +58,7 @@ namespace Core.Application.Commands
 
             try
             {
-                var transactionCode = await _transactionRepository.CreatePaymentAsync(payment, request.IP, cancellationToken);
+                var transactionCode = await _transactionRepository.CreatePaymentsAsync(payments, request.IP, cancellationToken);
 
                 // If the transaction is successfully processed we set the transaction and update the payment request status to Paid
                 payment.SetTransactionCode(transactionCode);

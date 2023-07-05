@@ -11,21 +11,27 @@ namespace Core.Infrastructure.Nexus.SigningService
     {
         public static async Task<AlgorandSubmitSignatureRequest[]> SignAlgorandTransactionAsync(this ISigningService signingService, string publicKey, SignableResponse signableResponse)
         {
-            var algorandTransactions = signableResponse.BlockchainResponse.AlgorandTransactions;
-
-            if (algorandTransactions == null || !algorandTransactions.Any())
+            if (signableResponse.BlockchainResponse.RequiredSignatures == null)
             {
-                throw new InvalidOperationException("No Algorand transactions to sign");
+                throw new InvalidOperationException("Invalid blockchain response, are you using the correct key pair?");
             }
 
-            var algorandTransaction = algorandTransactions.First();
-            var encodedTransaction = algorandTransaction.EncodedTransaction;
+            var unsignedTransactions = signableResponse.BlockchainResponse.RequiredSignatures
+                .Where(r => r.PublicKey == publicKey);
 
-            var request = new SignRequest(Blockchain.ALGORAND, publicKey, encodedTransaction);
-            var signedTransaction = await signingService.Sign(request);
+            var submitRequests = unsignedTransactions.Select(async unsignedTransaction =>
+            {
+                var encodedUnsignedTransaction = unsignedTransaction.EncodedTransaction;
+                var hash = unsignedTransaction.Hash;
 
-            var submitRequest = new AlgorandSubmitSignatureRequest(algorandTransaction.Hash, publicKey, signedTransaction);
-            return new AlgorandSubmitSignatureRequest[] { submitRequest };
+                var request = new SignRequest(Blockchain.ALGORAND, publicKey, encodedUnsignedTransaction);
+
+                var encodedSignedTransaction = await signingService.Sign(request);
+
+                return new AlgorandSubmitSignatureRequest(hash, publicKey, encodedSignedTransaction);
+            });
+
+            return await Task.WhenAll(submitRequests);
         }
 
         public static async Task<IEnumerable<StellarSubmitSignatureRequest>> SignStellarTransactionEnvelopeAsync(this ISigningService signingService, string publicKey, SignableResponse signableResponse)

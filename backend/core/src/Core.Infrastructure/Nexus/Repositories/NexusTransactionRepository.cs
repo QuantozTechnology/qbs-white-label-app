@@ -8,7 +8,10 @@ using Core.Domain.Primitives;
 using Core.Domain.Repositories;
 using Core.Infrastructure.Nexus.SigningService;
 using Nexus.Token.SDK;
+using Nexus.Token.SDK.KeyPairs;
+using Nexus.Token.SDK.Requests;
 using Nexus.Token.SDK.Responses;
+using Nexus.Token.SDK.Security;
 
 namespace Core.Infrastructure.Nexus.Repositories
 {
@@ -36,6 +39,16 @@ namespace Core.Infrastructure.Nexus.Repositories
             return _tokenSettings.Blockchain switch
             {
                 Blockchain.STELLAR => await CreateStellarPayment(payment, ip),
+                Blockchain.ALGORAND => await CreateAlgorandPayment(payment, ip),
+                _ => throw new CustomErrorsException("NexusSDKError", _tokenSettings.Blockchain.ToString(), "Blockchain not supported"),
+            };
+        }
+
+        public async Task<string> CreatePaymentsAsync(Payment[] payments, string? ip = null, CancellationToken cancellationToken = default)
+        {
+            return _tokenSettings.Blockchain switch
+            {
+                Blockchain.STELLAR => await CreateStellarPayments(payments, ip),
                 Blockchain.ALGORAND => await CreateAlgorandPayment(payment, ip),
                 _ => throw new CustomErrorsException("NexusSDKError", _tokenSettings.Blockchain.ToString(), "Blockchain not supported"),
             };
@@ -181,6 +194,23 @@ namespace Core.Infrastructure.Nexus.Repositories
 
                 return signableResponse.TokenOperationResponse!.FirstOrDefault()!.Code;
             }
+        }
+
+        private async Task<string> CreateStellarPayments(Payment[] payments, string? ip = null)
+        {
+            var paymentDefinitions = payments.Select(payment => new PaymentDefinition
+            (
+                payment.SenderPublicKey,
+                payment.ReceiverPublicKey,
+                payment.TokenCode,
+                payment.Amount))
+                .ToArray();
+
+            var signableResponse = await _tokenServer.Operations.CreatePaymentsAsync(paymentDefinitions);
+
+
+
+            return signableResponse.TokenOperationResponse!.FirstOrDefault()!.Code;
         }
 
         private async Task CreateStellarWithdraw(Withdraw withdraw, string? ip = null)
