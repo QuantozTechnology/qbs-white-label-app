@@ -59,4 +59,24 @@ namespace Core.Presentation.Models.Requests
     {
         public bool? ShareName { get; set; } = false;
     }
+
+    public class ConfirmOfferRequest
+    {
+        [Required]
+        public required string OfferCode { get; set; }
+
+        [Required]
+        public required decimal Amount { get; set; }
+
+        public ConfirmOfferPaymentCommand ToCommand(string customerCode, string ip)
+        {
+            return new ConfirmOfferPaymentCommand
+            {
+                CustomerCode = customerCode,
+                PaymentRequestCode = PaymentRequestCode,
+                Amount = Amount,
+                IP = ip
+            };
+        }
+    }
 }

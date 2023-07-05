@@ -85,5 +85,18 @@ namespace Core.Presentation.Controllers
             var response = ConstructCustomResponse(fees, WithdrawFeesResponse.FromWithdrawFees);
             return Ok(response);
         }
+
+        [HttpPost("payments/confirm/offer", Name = "ConfirmOfferPayment")]
+        [ProducesResponseType(typeof(CustomResponse<EmptyCustomResponse>), 201)]
+        [ProducesResponseType(typeof(CustomErrorsResponse), 400)]
+        [ProducesResponseType(typeof(CustomErrorsResponse), 404)]
+        [ProducesResponseType(typeof(CustomErrorsResponse), 500)]
+        [RequiredScope("Transaction.Create")]
+        public async Task<IActionResult> ConfirmOfferPaymentAsync([FromBody] ConfirmOfferRequest request)
+        {
+            var command = request.ToCommand(GetUserId(), GetIP());
+            await _sender.Send(command);
+            return CreatedAtRoute("GetTransactions", null, new EmptyCustomResponse());
+        }
     }
 }

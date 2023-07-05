@@ -77,6 +77,28 @@ namespace Core.Domain.Entities.OfferAggregate
             };
         }
 
+        public void Processing()
+        {
+            // we only set it to processing if we need to process this offer sequentially
+            if (Options.IsOneOffPayment)
+            {
+                UpdatedOn = DateTimeProvider.UtcNow;
+                Status = OfferStatus.Processing;
+            }
+        }
+
+        public bool HasExpired()
+        {
+            return Status == OfferStatus.Expired;
+        }
+
+        public bool CanBeProcessed()
+        {
+            var isOneOffAndProcessing = Options.IsOneOffPayment && Status == OfferStatus.Processing;
+            var isNotOneOffAndOpen = !Options.IsOneOffPayment && Status == OfferStatus.Open;
+            return isOneOffAndProcessing || isNotOneOffAndOpen;
+        }
+
         // Required for EF Core
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
         public Offer() { }
