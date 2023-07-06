@@ -20,6 +20,7 @@ type AppDefaultConfig = {
     bic: string;
   };
   sharePaymentUrl: string;
+  shareOfferUrl: string;
   minSendAmount: number;
   maxPaymentMessageLength: number;
 };
@@ -40,6 +41,7 @@ export const defaultConfig: AppDefaultConfig = {
     bic: "NLABN12434",
   },
   sharePaymentUrl: `${backendApiUrl}/deeplinks/paymentrequests/`,
+  shareOfferUrl: `${backendApiUrl}/deeplinks/offers/`,
   minSendAmount: 0.01,
   maxPaymentMessageLength: 28,
 };
@@ -56,6 +58,13 @@ export const appNavigationState = {
                   path: "paymentrequests/:code",
                 },
               },
+            },
+          },
+        },
+        Offers: {
+          screens: {
+            ReviewScannedOffer: {
+              path: "offers/:code",
             },
           },
         },

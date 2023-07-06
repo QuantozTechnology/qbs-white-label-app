@@ -9,9 +9,9 @@ import TokensOverview from "../screens/TokensOverview";
 import OfferDetails from "../screens/OfferDetails";
 import ReviewCreatedOffer from "../screens/ReviewCreatedOffer";
 import ReviewScannedOffer from "../screens/ReviewScannedOffer";
-import ShareOffer from "../screens/ShareOffer";
 import CreateOfferTopTabsStack from "./CreateOfferTabsStack";
 import OffersTabsStackNavigator from "./OffersListTabsStack";
+import ShareOffer from "../screens/ShareOffer";
 
 export type OffersStackParamList = {
   CreateOfferTabStack:
@@ -35,7 +35,9 @@ export type OffersStackParamList = {
   ReviewCreatedOffer: {
     offer: CreateOfferPayload;
   };
-  ShareOffer: undefined;
+  ShareOffer: {
+    offer: Offer;
+  };
   TokensOverview: { sourceScreen: "CreateBuyOffer" | "CreateSellOffer" };
   TokenDetails: { tokenCode: string };
   OffersList: undefined;
@@ -129,7 +131,6 @@ export default function OffersStackNavigator() {
           header: (props) => <CustomNavigationHeader {...props} />,
         }}
       />
-      <OffersStack.Screen name="ShareOffer" component={ShareOffer} />
       <OffersStack.Screen
         name="TokensOverview"
         component={TokensOverview}
@@ -176,6 +177,14 @@ export default function OffersStackNavigator() {
               }
             />
           ),
+        }}
+      />
+      <OffersStack.Screen
+        name="ShareOffer"
+        component={ShareOffer}
+        options={{
+          title: "Share offer",
+          header: (props) => <CustomNavigationHeader {...props} />,
         }}
       />
     </OffersStack.Navigator>
