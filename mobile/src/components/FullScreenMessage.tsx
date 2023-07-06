@@ -40,12 +40,12 @@ function FullScreenMessage({
       p={4}
       justifyContent="center"
       alignItems="center"
-      height={noFullScreen ? "2/3" : "full"}
+      height={noFullScreen ? "auto" : "full"}
       accessibilityLabel="full screen message"
       space={3}
     >
       {icon}
-      <Box>
+      <Box mx={20}>
         {illustration && (
           <Image
             // any needed to cast from string of enum to type requested from source
