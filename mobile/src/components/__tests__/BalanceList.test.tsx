@@ -19,6 +19,7 @@ describe("BalancesList", () => {
       <BalancesList
         selectedToken={mockBalance}
         setSelectedToken={mockSetToken}
+        onOpenTokenList={jest.fn()}
       />
     );
 
@@ -39,6 +40,7 @@ describe("BalancesList", () => {
       <BalancesList
         selectedToken={mockBalance}
         setSelectedToken={mockSetToken}
+        onOpenTokenList={jest.fn()}
       />
     );
 
@@ -50,6 +52,7 @@ describe("BalancesList", () => {
       <BalancesList
         selectedToken={mockBalance}
         setSelectedToken={mockSetToken}
+        onOpenTokenList={jest.fn()}
       />
     );
 

@@ -63,7 +63,13 @@ function SummaryPaymentRequest({ route }: Props) {
           p={4}
           rounded="md"
         >
-          <QRCode value={paymentRequestCode} size={width * 0.5} />
+          <QRCode
+            value={JSON.stringify({
+              code: paymentRequestCode,
+              type: "payment-request",
+            })}
+            size={width * 0.5}
+          />
         </View>
         <ScrollView>
           <VStack pt={4}>

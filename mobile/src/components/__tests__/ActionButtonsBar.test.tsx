@@ -12,7 +12,16 @@ describe("ActionButtonsBar", () => {
   it("renders correctly", async () => {
     render(<ActionButtonsBar />);
     expect(await screen.findByLabelText("action buttons")).toBeTruthy();
-    expect(screen.getAllByLabelText("action button")).toHaveLength(5);
+    expect(screen.getAllByLabelText("action button")).toHaveLength(6);
+  });
+
+  it("navigates to scan screen", async () => {
+    render(<ActionButtonsBar />);
+
+    const actionButtons = await screen.findAllByLabelText("action button");
+
+    fireEvent.press(actionButtons[0]);
+    expect(mockUseNavigationNavigate).toHaveBeenCalledWith("ScanQrCode");
   });
 
   it("navigates to create buy offer screen", async () => {
@@ -20,7 +29,7 @@ describe("ActionButtonsBar", () => {
 
     const actionButtons = await screen.findAllByLabelText("action button");
 
-    fireEvent.press(actionButtons[0]);
+    fireEvent.press(actionButtons[1]);
     expect(mockUseNavigationNavigate).toHaveBeenCalledWith("OffersStack", {
       params: {
         params: {
@@ -37,7 +46,7 @@ describe("ActionButtonsBar", () => {
 
     const actionButtons = await screen.findAllByLabelText("action button");
 
-    fireEvent.press(actionButtons[1]);
+    fireEvent.press(actionButtons[2]);
     expect(mockUseNavigationNavigate).toHaveBeenCalledWith("OffersStack", {
       params: {
         params: {
@@ -54,7 +63,7 @@ describe("ActionButtonsBar", () => {
 
     const actionButtons = await screen.findAllByLabelText("action button");
 
-    fireEvent.press(actionButtons[2]);
+    fireEvent.press(actionButtons[3]);
     expect(mockUseNavigationNavigate).toHaveBeenCalledWith("SendStack");
   });
 
@@ -63,7 +72,7 @@ describe("ActionButtonsBar", () => {
 
     const actionButtons = await screen.findAllByLabelText("action button");
 
-    fireEvent.press(actionButtons[3]);
+    fireEvent.press(actionButtons[4]);
     expect(mockUseNavigationNavigate).toHaveBeenCalledWith(
       "CreatePaymentRequest"
     );

@@ -13,7 +13,7 @@ type ScreenWrapperProps = {
 function ScreenWrapper(props: ScreenWrapperProps & InterfaceVStackProps) {
   const { children, ...rest } = props;
   return (
-    <VStack p={4} background="primary.100" {...rest}>
+    <VStack p={4} background="gray.100" {...rest}>
       {children}
     </VStack>
   );

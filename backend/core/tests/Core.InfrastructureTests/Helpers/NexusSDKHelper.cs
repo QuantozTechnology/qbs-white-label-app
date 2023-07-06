@@ -43,7 +43,7 @@ namespace Core.InfrastructureTests.Helpers
 
         public static SignableResponse SignableResponse()
         {
-            var response = new BlockchainResponse("TestHash", "EncodedEnvelope", Array.Empty<AlgorandTransactionResponse>());
+            var response = new BlockchainResponse("TestHash", "EncodedEnvelope", Array.Empty<RequiredSignaturesResponse>());
             return new SignableResponse
             {
                 BlockchainResponse = response

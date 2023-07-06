@@ -2,52 +2,69 @@
 // under the Apache License, Version 2.0. See the NOTICE file at the root
 // of this distribution or at http://www.apache.org/licenses/LICENSE-2.0
 
-import { Heading, Text, View, VStack } from "native-base";
+import {
+  Heading,
+  HStack,
+  Icon,
+  IconButton,
+  Text,
+  View,
+  VStack,
+} from "native-base";
 import { AccessibilityProps } from "react-native";
 import { displayFiatAmount } from "../utils/currencies";
+import { Ionicons } from "@expo/vector-icons";
 
 interface BalanceItemProps extends AccessibilityProps {
   balance: number;
   tokenCode: string;
   isSelected: boolean;
+  onOpenTokenList: () => void;
+  theme?: "dark" | "light";
 }
 
-function BalanceItem({ balance, isSelected, tokenCode }: BalanceItemProps) {
+function BalanceItem({
+  balance,
+  isSelected,
+  tokenCode,
+  onOpenTokenList,
+  theme = "dark",
+}: BalanceItemProps) {
   return (
     <View
-      background="primary.500"
       p={2}
-      flex={1}
       rounded="xl"
       accessibilityLabel={`${
         isSelected ? "selected" : "non selected"
       } balance item`}
     >
-      {/* TODO does not wrap elements, needs fixed height. Not working well */}
-      {/* <LinearGradient
-        colors={["#189ad8", "#026a9c"]}
-        style={{
-          flex: 1,
-          position: "absolute",
-          left: 0,
-          right: 0,
-          top: 0,
-        }}
-        accessibilityLabel="balance item"
-      /> */}
-      <VStack p={3} justifyContent="center" alignItems="flex-start">
-        <Heading
-          size="2xl"
-          fontWeight="bold"
-          color="white"
-          accessibilityLabel="balance"
-        >
-          {displayFiatAmount(balance, { alwaysRoundToTwoDecimals: true })}
-        </Heading>
-        <Text color="white" letterSpacing="xl" accessibilityLabel="token code">
-          {tokenCode}
-        </Text>
-      </VStack>
+      <HStack alignItems="center">
+        <VStack p={3} justifyContent="center" alignItems="flex-start">
+          <Heading
+            size="3xl"
+            letterSpacing="md"
+            fontWeight="bold"
+            color={theme === "dark" ? "white" : "primary.900"}
+            accessibilityLabel="balance"
+          >
+            {displayFiatAmount(balance, { decimals: 2 })}
+          </Heading>
+          <Text
+            color={theme === "dark" ? "white" : "primary.900"}
+            letterSpacing="xl"
+            accessibilityLabel="token code"
+          >
+            {tokenCode}
+          </Text>
+        </VStack>
+        <IconButton
+          bg={theme === "dark" ? "primary.900" : "primary.500"}
+          icon={<Icon as={Ionicons} name="chevron-down" color="white" />}
+          rounded="full"
+          size="xs"
+          onPress={onOpenTokenList}
+        ></IconButton>
+      </HStack>
     </View>
   );
 }

@@ -9,7 +9,6 @@ import CustomNavigationHeader from "../components/CustomNavigationHeader";
 import TokenDetails from "../screens/TokenDetails";
 import TokensOverview from "../screens/TokensOverview";
 import CreateOfferSummary from "../screens/CreateOfferSummary";
-import ShareOffer from "../screens/ShareOffer";
 import CreateOfferTopTabsStack from "./CreateOfferTabsStack";
 
 export type CreateOfferStackParamList = {
@@ -60,26 +59,6 @@ export default function CreateOfferStackNavigator() {
         options={{
           title: "Details",
           header: (props) => <CustomNavigationHeader {...props} />,
-        }}
-      />
-      <CreateOfferStack.Screen
-        name="ShareOffer"
-        component={ShareOffer}
-        options={{
-          title: "Share",
-          header: (props) => (
-            <CustomNavigationHeader
-              {...props}
-              customIcon={
-                <Icon
-                  as={Ionicons}
-                  name="close"
-                  size="xl"
-                  color="primary.500"
-                />
-              }
-            />
-          ),
         }}
       />
       <CreateOfferStack.Screen

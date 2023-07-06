@@ -31,5 +31,8 @@ namespace Web.Portal
     {
         [Required]
         public required string PaymentRequests { get; set; }
+
+        [Required]
+        public required string Offers { get; set; }
     }
 }

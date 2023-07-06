@@ -1,7 +1,7 @@
 import { APIError, ApiErrorCode } from "../../api/generic/error.interface";
 import { rest } from "msw";
 import { server } from "../../mocks/server";
-import { mockApiUrl } from "../../utils/axios";
+import { backendApiUrl } from "../../utils/axios";
 import { CreateOfferPayload } from "../../api/offers/offers.interface";
 import {
   fireEvent,
@@ -17,7 +17,7 @@ describe("ReviewCreatedOffer", () => {
     action: "Buy",
     destinationToken: {
       tokenCode: "GOLD",
-      amount: 10,
+      totalAmount: "10.00",
     },
     options: {
       params: null,
@@ -27,10 +27,11 @@ describe("ReviewCreatedOffer", () => {
       shareName: false,
       isOneOffPayment: false,
     },
+    pricePerUnit: 1,
     offerCode: null,
     sourceToken: {
       tokenCode: "SCEUR",
-      amount: 10,
+      totalAmount: "10.00",
     },
   };
 
@@ -116,7 +117,7 @@ describe("ReviewCreatedOffer", () => {
     };
 
     server.use(
-      rest.post(`${mockApiUrl}/api/offers`, (_req, rest, ctx) => {
+      rest.post(`${backendApiUrl}/api/offers`, (_req, rest, ctx) => {
         return rest(ctx.status(500), ctx.json(apiError));
       })
     );

@@ -11,7 +11,6 @@ import {
   VStack,
 } from "native-base";
 import { useCustomer } from "../api/customer/customer";
-import { ConsumerData, MerchantData } from "../api/customer/customer.interface";
 import AllCapsSectionHeading from "../components/AllCapsSectionHeading";
 import FullScreenMessage from "../components/FullScreenMessage";
 import ProfileInfo from "../components/ProfileInfo";
@@ -66,7 +65,7 @@ function UserProfile({ navigation }: Props) {
     );
   }
 
-  const { bankAccountNumber, isBusiness, data, email } = customer.data.value;
+  const { bankAccountNumber, data, email } = customer.data.value;
   const { accountCode } = account.data.value;
 
   return (
@@ -95,12 +94,7 @@ function UserProfile({ navigation }: Props) {
               />
             }
           />
-          <ProfileInfo<
-            typeof isBusiness extends boolean ? MerchantData : ConsumerData
-          >
-            email={email}
-            userData={data}
-          />
+          <ProfileInfo email={email} userData={data} />
           <VStack space={3} p={4}>
             <Button
               onPress={handleUpgradeAccountPress}

@@ -11,7 +11,7 @@ export type Customer = {
   email: string;
   status: string;
   bankAccountNumber: string | null;
-  data: Record<keyof ConsumerData | keyof MerchantData, string>;
+  data: ConsumerData | MerchantData;
   isBusiness: boolean;
 };
 
@@ -32,6 +32,18 @@ export type MerchantData = {
   ContactPersonFullName: string;
   CountryOfRegistration: string;
 };
+
+export function isConsumerData(
+  data: ConsumerData | MerchantData
+): data is ConsumerData {
+  return (data as ConsumerData).FirstName !== undefined;
+}
+
+export function isMerchantData(
+  data: ConsumerData | MerchantData
+): data is MerchantData {
+  return (data as MerchantData).CompanyName !== undefined;
+}
 
 export const CreateCustomerPayloadSchema = z.object({
   reference: z.string(),

@@ -9,6 +9,7 @@ import { rest } from "msw";
 import { mockApiUrl } from "../../utils/axios";
 import CreateBuyOffer from "../CreateBuyOffer";
 import { APIError, ApiErrorCode } from "../../api/generic/error.interface";
+import { CreateOfferPayload } from "../../api/offers/offers.interface";
 
 const mockReset = jest.fn();
 const mockParentNavigation = jest.fn();
@@ -154,7 +155,6 @@ describe("CreateBuyOffer screen", () => {
 
   it.only("creates an offer successfully", async () => {
     props = createTestProps({});
-    console.log("props: ", JSON.stringify(props));
 
     render(<CreateBuyOffer {...props} />);
 
@@ -172,21 +172,24 @@ describe("CreateBuyOffer screen", () => {
     fireEvent(priceInput, "onChangeText", "10");
     fireEvent(reviewButton, "onPress");
 
-    expect(mockParentNavigation).toHaveBeenCalledWith("ReviewCreatedOffer", {
-      offer: {
-        action: "Buy",
-        destinationToken: { amount: 10, tokenCode: "GOLD" },
-        offerCode: null,
-        options: {
-          expiresOn: null,
-          isOneOffPayment: false,
-          memo: null,
-          params: null,
-          payerCanChangeRequestedAmount: false,
-          shareName: false,
-        },
-        sourceToken: { amount: 100, tokenCode: "SCEUR" },
+    const mockCreatedOffer: CreateOfferPayload = {
+      action: "Buy",
+      destinationToken: { totalAmount: "10", tokenCode: "GOLD" },
+      offerCode: null,
+      pricePerUnit: 10,
+      options: {
+        expiresOn: null,
+        isOneOffPayment: false,
+        memo: null,
+        params: null,
+        payerCanChangeRequestedAmount: false,
+        shareName: false,
       },
+      sourceToken: { totalAmount: "100", tokenCode: "SCEUR" },
+    };
+
+    expect(mockParentNavigation).toHaveBeenCalledWith("ReviewCreatedOffer", {
+      offer: mockCreatedOffer,
     });
   });
 });

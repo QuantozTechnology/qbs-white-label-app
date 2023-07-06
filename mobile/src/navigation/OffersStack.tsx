@@ -1,7 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { Icon, IconButton } from "native-base";
-import { CreateOfferPayload } from "../api/offers/offers.interface";
+import { CreateOfferPayload, Offer } from "../api/offers/offers.interface";
 import { Tokens } from "../api/tokens/tokens.interface";
 import CustomNavigationHeader from "../components/CustomNavigationHeader";
 import TokenDetails from "../screens/TokenDetails";
@@ -9,9 +9,9 @@ import TokensOverview from "../screens/TokensOverview";
 import OfferDetails from "../screens/OfferDetails";
 import ReviewCreatedOffer from "../screens/ReviewCreatedOffer";
 import ReviewScannedOffer from "../screens/ReviewScannedOffer";
-import ShareOffer from "../screens/ShareOffer";
 import CreateOfferTopTabsStack from "./CreateOfferTabsStack";
 import OffersTabsStackNavigator from "./OffersListTabsStack";
+import ShareOffer from "../screens/ShareOffer";
 
 export type OffersStackParamList = {
   CreateOfferTabStack:
@@ -35,12 +35,19 @@ export type OffersStackParamList = {
   ReviewCreatedOffer: {
     offer: CreateOfferPayload;
   };
-  ShareOffer: undefined;
+  ShareOffer: {
+    offer: Offer;
+  };
   TokensOverview: { sourceScreen: "CreateBuyOffer" | "CreateSellOffer" };
   TokenDetails: { tokenCode: string };
   OffersList: undefined;
-  OfferDetails: undefined;
-  ReviewScannedOffer: undefined;
+  OfferDetails: {
+    offer: Offer;
+    offerStatus: "Open" | "Closed";
+  };
+  ReviewScannedOffer: {
+    code: string;
+  };
 };
 
 const OffersStack = createNativeStackNavigator<OffersStackParamList>();
@@ -69,9 +76,31 @@ export default function OffersStackNavigator() {
       <OffersStack.Screen
         name="OfferDetails"
         component={OfferDetails}
-        options={{
-          title: "Details",
-          header: (props) => <CustomNavigationHeader {...props} />,
+        options={({ route }) => {
+          return {
+            title: `${route.params.offer.action} order details`,
+            header: (props) => (
+              <CustomNavigationHeader
+                {...props}
+                customIcon={
+                  <Icon
+                    as={Ionicons}
+                    name="close"
+                    size="xl"
+                    color="primary.500"
+                  />
+                }
+                rightHeaderIcons={
+                  <Icon
+                    as={Ionicons}
+                    color="primary.500"
+                    size="lg"
+                    name="trash-outline"
+                  />
+                }
+              />
+            ),
+          };
         }}
       />
       <OffersStack.Screen
@@ -102,7 +131,6 @@ export default function OffersStackNavigator() {
           header: (props) => <CustomNavigationHeader {...props} />,
         }}
       />
-      <OffersStack.Screen name="ShareOffer" component={ShareOffer} />
       <OffersStack.Screen
         name="TokensOverview"
         component={TokensOverview}
@@ -134,6 +162,30 @@ export default function OffersStackNavigator() {
       <OffersStack.Screen
         name="ReviewScannedOffer"
         component={ReviewScannedOffer}
+        options={{
+          title: "Review offer",
+          header: (props) => (
+            <CustomNavigationHeader
+              {...props}
+              customIcon={
+                <Icon
+                  as={Ionicons}
+                  name="close"
+                  size="xl"
+                  color="primary.500"
+                />
+              }
+            />
+          ),
+        }}
+      />
+      <OffersStack.Screen
+        name="ShareOffer"
+        component={ShareOffer}
+        options={{
+          title: "Share offer",
+          header: (props) => <CustomNavigationHeader {...props} />,
+        }}
       />
     </OffersStack.Navigator>
   );

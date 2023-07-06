@@ -5,17 +5,17 @@ import OfferListItem from "../OfferListItem";
 
 describe("OfferListItem", () => {
   it("shows expected values (buy offer)", () => {
-    render(<OfferListItem offer={mockOffers.value[0]} />);
+    render(<OfferListItem offer={mockOffers.value[0]} offerStatus="Open" />);
 
     expect(screen.getByLabelText("source action")).toHaveTextContent(/^Buy$/);
     expect(screen.getByLabelText("source amount")).toHaveTextContent(
-      /^PLAT 500.00$/
+      /^PLAT 500.000$/
     );
     expect(screen.getByLabelText("destination action")).toHaveTextContent(
       /^Sell$/
     );
     expect(screen.getByLabelText("destination amount")).toHaveTextContent(
-      /^SCEUR 5.00$/
+      /^SCEUR 100.00$/
     );
   });
 
@@ -25,22 +25,22 @@ describe("OfferListItem", () => {
     );
     mockSellOffer.action = "Sell";
 
-    render(<OfferListItem offer={mockSellOffer} />);
+    render(<OfferListItem offer={mockSellOffer} offerStatus="Open" />);
 
     expect(screen.getByLabelText("source action")).toHaveTextContent(/^Sell$/);
     expect(screen.getByLabelText("source amount")).toHaveTextContent(
-      /^SCEUR 5.00$/
+      /^SCEUR 100.00$/
     );
     expect(screen.getByLabelText("destination action")).toHaveTextContent(
       /^Buy$/
     );
     expect(screen.getByLabelText("destination amount")).toHaveTextContent(
-      /^PLAT 500.00$/
+      /^PLAT 500.000$/
     );
   });
 
   it("shows the partial badge if order is partially filled", () => {
-    render(<OfferListItem offer={mockOffers.value[0]} />);
+    render(<OfferListItem offer={mockOffers.value[0]} offerStatus="Open" />);
 
     expect(screen.getByLabelText("partial offer badge")).toBeOnTheScreen();
   });

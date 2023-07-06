@@ -4,10 +4,9 @@
 
 import { rest } from "msw";
 import { backendApiUrl } from "../../utils/axios";
-import { GenericApiResponse } from "../utils/api.interface";
-import { IWithdrawFees } from "./withdraw.interface";
+import { WithdrawResponse } from "./withdraw.interface";
 
-export const defaultWithdrawFeeResponse: GenericApiResponse<IWithdrawFees> = {
+export const defaultWithdrawFeeResponse: WithdrawResponse = {
   value: {
     executedFiat: 10,
     fees: {

@@ -27,14 +27,13 @@ namespace Core.Infrastructure.Nexus.SigningService
                 var request = new SignRequest(Blockchain.ALGORAND, publicKey, encodedUnsignedTransaction);
 
                 var encodedSignedTransaction = await signingService.Sign(request);
-
                 return new AlgorandSubmitSignatureRequest(hash, publicKey, encodedSignedTransaction);
             });
 
             return await Task.WhenAll(submitRequests);
         }
 
-        public static async Task<IEnumerable<StellarSubmitSignatureRequest>> SignStellarTransactionEnvelopeAsync(this ISigningService signingService, string publicKey, SignableResponse signableResponse)
+        public static async Task<StellarSubmitSignatureRequest[]> SignStellarTransactionEnvelopeAsync(this ISigningService signingService, string publicKey, SignableResponse signableResponse)
         {
             if (signableResponse.BlockchainResponse.RequiredSignatures == null)
             {

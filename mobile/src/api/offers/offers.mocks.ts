@@ -3,7 +3,7 @@
 // of this distribution or at http://www.apache.org/licenses/LICENSE-2.0
 
 import { rest } from "msw";
-import { mockApiUrl } from "../../utils/axios";
+import { backendApiUrl, mockApiUrl } from "../../utils/axios";
 import { Offers } from "./offers.interface";
 
 export const mockOffers: Offers = {
@@ -14,13 +14,13 @@ export const mockOffers: Offers = {
       action: "Buy",
       sourceToken: {
         tokenCode: "SCEUR",
-        totalAmount: 5.0,
+        totalAmount: "100.00",
         remainingAmount: null,
       },
       destinationToken: {
         tokenCode: "PLAT",
-        totalAmount: 500.0,
-        remainingAmount: 400.0,
+        totalAmount: "500.000",
+        remainingAmount: "400.000",
       },
       options: {
         isOneOffPayment: true,
@@ -48,7 +48,7 @@ export const mockOffers: Offers = {
           transactionCode: "123456789",
           senderPublicKey: "0x123456789abcdef",
           receiverPublicKey: "0x987654321fedcba",
-          amount: 100.0,
+          amount: "100.0",
           tokenCode: "PLAT",
           memo: null,
         },
@@ -58,7 +58,7 @@ export const mockOffers: Offers = {
 };
 
 export const offersMocks = [
-  rest.post(`${mockApiUrl}/api/offers`, (_req, rest, ctx) => {
+  rest.post(`${backendApiUrl}/api/offers`, (_req, rest, ctx) => {
     return rest(ctx.status(201), ctx.json({}));
   }),
   rest.get(`${mockApiUrl}/api/offers`, (_req, rest, ctx) => {

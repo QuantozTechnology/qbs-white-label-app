@@ -21,13 +21,14 @@ const CreateOfferOptionsSchema = z.object({
 
 const CreateOfferTokenSchema = z.object({
   tokenCode: z.string(),
-  amount: z.number(),
+  totalAmount: z.string(),
 });
 
 const CreateOfferPayloadSchema = z.object({
   action: z.enum(["Buy", "Sell"]),
   sourceToken: CreateOfferTokenSchema,
   destinationToken: CreateOfferTokenSchema,
+  pricePerUnit: z.number(),
   options: CreateOfferOptionsSchema.nullable(),
   offerCode: z.string().nullable(),
 });
@@ -37,9 +38,11 @@ export type CreateOfferPayload = z.infer<typeof CreateOfferPayloadSchema>;
 // GET offers
 const OfferTokenSchema = z.object({
   tokenCode: z.string(),
-  totalAmount: z.number(),
-  remainingAmount: z.number().nullable(),
+  totalAmount: z.string(),
+  remainingAmount: z.string().nullable(),
 });
+
+export type OfferToken = z.infer<typeof OfferTokenSchema>;
 
 const OfferSchema = z.object({
   offerCode: z.string(),
@@ -75,7 +78,7 @@ const OfferSchema = z.object({
       transactionCode: z.string(),
       senderPublicKey: z.string(),
       receiverPublicKey: z.string(),
-      amount: z.number(),
+      amount: z.string(),
       tokenCode: z.string(),
       memo: z.string().nullable(),
     })
@@ -85,5 +88,10 @@ const OfferSchema = z.object({
 const OffersSchema = z.object({
   value: z.array(OfferSchema),
 });
+const OfferResponseSchema = z.object({
+  value: OfferSchema,
+});
+
 export type Offer = z.infer<typeof OfferSchema>;
+export type OfferResponse = z.infer<typeof OfferResponseSchema>;
 export type Offers = z.infer<typeof OffersSchema>;

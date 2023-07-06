@@ -340,12 +340,13 @@ function CreateSellOffer({ navigation, route }: Props) {
           action: "Sell",
           sourceToken: {
             tokenCode: selectedToken.code,
-            amount: parseFloat(amount) * parseFloat(price),
+            totalAmount: (parseFloat(amount) * parseFloat(price)).toString(),
           },
           destinationToken: {
             tokenCode: defaultConfig.defaultStableCoin.code,
-            amount: parseFloat(amount),
+            totalAmount: amount,
           },
+          pricePerUnit: parseFloat(price),
           options: {
             expiresOn: expiresOn?.getTime() ?? null,
             shareName: includePersonalInfo,

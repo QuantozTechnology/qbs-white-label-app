@@ -11,6 +11,7 @@ import CustomNavigationHeader from "../components/CustomNavigationHeader";
 import CreatePaymentRequest from "../screens/CreatePaymentRequest";
 import Funding from "../screens/Funding";
 import PortfolioOverview from "../screens/PortfolioOverview";
+import ScanQrCode from "../screens/ScanQrCode";
 import SummaryPaymentRequest from "../screens/SummaryPaymentRequest";
 import TokenDetails from "../screens/TokenDetails";
 import TransactionDetails from "../screens/TransactionDetails";
@@ -35,6 +36,10 @@ export type PortfolioStackParamList = {
           amount: number;
           message?: string;
         };
+      }
+    | {
+        screen: "SendSummary";
+        params: { code: string };
       }
     | undefined;
   Funding: undefined;
@@ -63,7 +68,9 @@ export type PortfolioStackParamList = {
               };
             };
       }
+    | { screen: "ReviewScannedOffer"; params: { code: string } }
     | undefined;
+  ScanQrCode: undefined;
 };
 
 const PortfolioStack = createNativeStackNavigator<PortfolioStackParamList>();
@@ -147,6 +154,16 @@ export default function PortfolioStackNavigator() {
         component={OffersStackNavigator}
         options={{
           headerShown: false,
+        }}
+      />
+      <PortfolioStack.Screen
+        name="ScanQrCode"
+        component={ScanQrCode}
+        options={{
+          title: "Scan",
+          header: (props) => {
+            return <CustomNavigationHeader {...props} />;
+          },
         }}
       />
     </PortfolioStack.Navigator>
