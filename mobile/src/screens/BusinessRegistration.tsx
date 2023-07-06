@@ -170,7 +170,8 @@ function BusinessRegistration({ navigation }: Props) {
                   returnKeyType="next"
                   onSubmitEditing={() =>
                     // @ts-ignore it works, but it complains about the current property possibly undefined
-                    contactPersonFullNameInput.current.focus()}
+                    contactPersonFullNameInput.current.focus()
+                  }
                   blurOnSubmit={false}
                 />
                 <FormControl.ErrorMessage accessibilityLabel="company name error">
@@ -195,7 +196,8 @@ function BusinessRegistration({ navigation }: Props) {
                   returnKeyType="next"
                   onSubmitEditing={() =>
                     // @ts-ignore it works, but it complains about the current property possibly undefined
-                    businessEmailInput.current.focus()}
+                    businessEmailInput.current.focus()
+                  }
                   blurOnSubmit={false}
                 />
                 <FormControl.ErrorMessage accessibilityLabel="contact person full name error">
@@ -218,7 +220,8 @@ function BusinessRegistration({ navigation }: Props) {
                   returnKeyType="next"
                   onSubmitEditing={() =>
                     // @ts-ignore it works, but it complains about the current property possibly undefined
-                    countryOfRegistrationInput.current.focus()}
+                    countryOfRegistrationInput.current.focus()
+                  }
                   blurOnSubmit={false}
                 />
                 <FormControl.ErrorMessage accessibilityLabel="business email error">
@@ -298,7 +301,7 @@ function BusinessRegistration({ navigation }: Props) {
 
   async function validateInput(
     fieldId: z.infer<typeof BusinessRegistrationSchemaKeys>,
-    value: string | boolean,
+    value: string | boolean
   ) {
     try {
       validateFormData({ [fieldId]: value });

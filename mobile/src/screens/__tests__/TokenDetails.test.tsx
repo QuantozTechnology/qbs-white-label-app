@@ -4,7 +4,7 @@
 
 import { rest } from "msw";
 import { genericApiError } from "../../api/generic/error.interface";
-import { linkingOpenUrlMock} from "../../jest/jest.setup";
+import { linkingOpenUrlMock } from "../../jest/jest.setup";
 import { fireEvent, render, screen, within } from "../../jest/test-utils";
 import { server } from "../../mocks/server";
 import { mockApiUrl } from "../../utils/axios";
@@ -13,7 +13,7 @@ import TokenDetails from "../TokenDetails";
 describe("TokenDetails", () => {
   const createTestProps = (props: Record<string, unknown>) => ({
     route: {
-      params: {tokenCode: "SCEUR"},
+      params: { tokenCode: "SCEUR" },
     },
     ...props,
   });
@@ -23,21 +23,25 @@ describe("TokenDetails", () => {
 
   it("shows the UI for correctly loaded tokens", async () => {
     props = createTestProps({});
-    render(
-      <TokenDetails
-        {...props}
-      />
-    );
-    
+    render(<TokenDetails {...props} />);
+
     const assetInfo = await screen.findByLabelText("asset info");
     const issuer = await screen.findByLabelText("issuer");
     const validator = await screen.findByLabelText("validator");
-    const schema =  await screen.findByLabelText("schema");
+    const schema = await screen.findByLabelText("schema");
 
-    expect(within(assetInfo).getByLabelText("value")).toHaveTextContent("https://www.example.com");
-    expect(within(issuer).getByLabelText("value")).toHaveTextContent("https://www.example.com");
-    expect(within(validator).getByLabelText("value")).toHaveTextContent("https://www.example.com");
-    expect(within(schema).getByLabelText("value")).toHaveTextContent("https://www.example.com");
+    expect(within(assetInfo).getByLabelText("value")).toHaveTextContent(
+      "https://www.example.com"
+    );
+    expect(within(issuer).getByLabelText("value")).toHaveTextContent(
+      "https://www.example.com"
+    );
+    expect(within(validator).getByLabelText("value")).toHaveTextContent(
+      "https://www.example.com"
+    );
+    expect(within(schema).getByLabelText("value")).toHaveTextContent(
+      "https://www.example.com"
+    );
   });
 
   it("shows an error when the API call for token details fails", async () => {
@@ -48,24 +52,20 @@ describe("TokenDetails", () => {
     );
 
     props = createTestProps({});
-    render(
-      <TokenDetails
-        {...props}
-      />
-    );
+    render(<TokenDetails {...props} />);
 
-    expect(await screen.findByLabelText("full screen message description")).toHaveTextContent(/^Error loading the token details$/);
+    expect(
+      await screen.findByLabelText("full screen message description")
+    ).toHaveTextContent(/^Error loading the token details$/);
   });
 
   it("goes to the related webpage on press of the external url icon", async () => {
     props = createTestProps({});
-    render(
-      <TokenDetails
-        {...props}
-      />
+    render(<TokenDetails {...props} />);
+    const assetEntryLink = await screen.findByLabelText(
+      "go to asset info page"
     );
-    const assetEntryLink = await screen.findByLabelText("go to asset info page");
-    fireEvent(assetEntryLink, "onPress")
+    fireEvent(assetEntryLink, "onPress");
 
     expect(linkingOpenUrlMock).toHaveBeenCalledWith("https://www.example.com");
   });

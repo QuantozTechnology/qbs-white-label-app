@@ -3,7 +3,7 @@
 // of this distribution or at http://www.apache.org/licenses/LICENSE-2.0
 
 import { defaultBalancesResponse } from "../../api/balances/balances.mocks";
-import {mockUseNavigationNavigate } from "../../jest/jest.setup";
+import { mockUseNavigationNavigate } from "../../jest/jest.setup";
 import { fireEvent, render, screen, within } from "../../jest/test-utils";
 import TokensSelection from "../TokensSelection";
 
@@ -63,6 +63,8 @@ describe("TokensSelection", () => {
     );
 
     fireEvent(tokenDetailsButtons[0], "onPress");
-    expect(mockUseNavigationNavigate).toHaveBeenCalledWith("TokenDetails", {"tokenCode": "SCEUR"})
+    expect(mockUseNavigationNavigate).toHaveBeenCalledWith("TokenDetails", {
+      tokenCode: "SCEUR",
+    });
   });
 });

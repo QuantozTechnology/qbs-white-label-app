@@ -29,8 +29,10 @@ function TokensSelection({
 
   function handleTokenDetailsPress() {
     onClose();
-    if(selectedToken != null){
-      navigation.navigate("TokenDetails", {tokenCode: selectedToken?.tokenCode}); 
+    if (selectedToken != null) {
+      navigation.navigate("TokenDetails", {
+        tokenCode: selectedToken?.tokenCode,
+      });
     }
   }
 

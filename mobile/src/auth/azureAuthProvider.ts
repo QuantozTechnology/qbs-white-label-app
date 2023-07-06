@@ -122,7 +122,7 @@ export const azureAuthProvider = (): IAsyncAuthProvider => {
       });
 
       const discovery = await AuthSession.fetchDiscoveryAsync(
-        Constants.expoConfig?.extra?.AUTH_AZURE_B2C_PASSWORD_ISSUER,
+        Constants.expoConfig?.extra?.AUTH_AZURE_B2C_PASSWORD_ISSUER
       );
 
       const nonce = await AuthSession.generateHexStringAsync(20);
@@ -245,11 +245,11 @@ export const azureAuthProvider = (): IAsyncAuthProvider => {
    * @param  {EndSessionRequest} request
    */
   async function endSession(
-    request: EndSessionRequest,
+    request: EndSessionRequest
   ): Promise<EndSessionResponse> {
     try {
       const discovery = await AuthSession.fetchDiscoveryAsync(
-        Constants.expoConfig?.extra?.AUTH_AZURE_B2C_LOGIN_ISSUER,
+        Constants.expoConfig?.extra?.AUTH_AZURE_B2C_LOGIN_ISSUER
       );
 
       if (!discovery.endSessionEndpoint) {
@@ -278,7 +278,7 @@ export const azureAuthProvider = (): IAsyncAuthProvider => {
   async function refresh(request: RefreshRequest): Promise<TokenResponse> {
     try {
       const discovery = await AuthSession.fetchDiscoveryAsync(
-        Constants.expoConfig?.extra?.AUTH_AZURE_B2C_LOGIN_ISSUER,
+        Constants.expoConfig?.extra?.AUTH_AZURE_B2C_LOGIN_ISSUER
       );
       const config: AuthSession.RefreshTokenRequestConfig = {
         clientId: Constants.expoConfig?.extra?.AUTH_AZURE_B2C_CLIENT_ID,
@@ -296,7 +296,7 @@ export const azureAuthProvider = (): IAsyncAuthProvider => {
           !validIdToken(
             request.nonce,
             result.idToken,
-            Constants.expoConfig?.extra?.AUTH_AZURE_B2C_LOGIN_ISSUER,
+            Constants.expoConfig?.extra?.AUTH_AZURE_B2C_LOGIN_ISSUER
           )
         ) {
           return error(AuthErrorEnum.REFRESH_INVALID_ID_TOKEN);
@@ -343,13 +343,11 @@ function validIdToken(nonce: string, jwtIdToken: string, issuer: string) {
 
 enum AuthErrorEnum {
   UNHANDLED_ERROR = "An error occured that could not be handled",
-  AUTH_INVALID_RESPONSE =
-  "Authorization prompt resulted in an invalid response",
+  AUTH_INVALID_RESPONSE = "Authorization prompt resulted in an invalid response",
   AUTH_INVALID_STATE = "Authorization redirect had invalid state parameter",
   AUTH_CANCELLED = "Authorization prompt was cancelled",
   AUTH_DISMISSED = "Authorization prompt was dismissed",
-  END_SESSION_ENDPOINT_NOT_FOUND =
-  "The end session endpoint was not found during discovery",
+  END_SESSION_ENDPOINT_NOT_FOUND = "The end session endpoint was not found during discovery",
   EX_INVALID_ID_TOKEN = "The exchanged id token is invalid",
   EX_INVALID_RESPONSE = "Exchanging resulted in an invalid response",
   REFRESH_INVALID_ID_TOKEN = "The refreshed id token is invalid",

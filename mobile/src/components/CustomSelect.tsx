@@ -13,11 +13,16 @@ type CustomCountrySelectProps = {
   hasValidationError: boolean;
 };
 
-interface Props extends CustomCountrySelectProps, AccessibilityProps { }
+interface Props extends CustomCountrySelectProps, AccessibilityProps {}
 
-function CustomCountrySelect(
-  { open, setOpen, country, setCountry, hasValidationError, ...rest }: Props,
-) {
+function CustomCountrySelect({
+  open,
+  setOpen,
+  country,
+  setCountry,
+  hasValidationError,
+  ...rest
+}: Props) {
   // need to do this to avoid a typescript error from DropDownPicker
   const dropdownCountries = countries.map(({ name, testID }) => ({
     label: name,
@@ -26,9 +31,7 @@ function CustomCountrySelect(
   }));
 
   return (
-    <Box
-      {...rest}
-    >
+    <Box {...rest}>
       <DropDownPicker
         placeholder="Select a country"
         open={open}
