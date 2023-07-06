@@ -41,7 +41,7 @@ describe("OfferDetails", () => {
       ).toHaveTextContent(/^Price$/);
       expect(
         within(screen.getByLabelText("price")).getByLabelText("content")
-      ).toHaveTextContent(/^0.20 SCEUR\/PLAT$/);
+      ).toHaveTextContent(/^0.2 SCEUR\/PLAT$/);
       expect(
         within(screen.getByLabelText("fee")).getByLabelText("label")
       ).toHaveTextContent(/^Fee$/);

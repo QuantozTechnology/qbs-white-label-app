@@ -26,7 +26,7 @@ export function calculatePrice(
     action === "Buy"
       ? sourceTokenTotalDecimalsCount - destinationTokenTotalDecimalsCount + 2
       : destinationTokenTotalDecimalsCount - sourceTokenTotalDecimalsCount + 2;
-  decimalsToShow = Math.max(2, Math.min(decimalsToShow, 8));
+  decimalsToShow = Math.max(0, Math.min(decimalsToShow, 8));
 
   return displayFiatAmount(action === "Buy" ? buyPrice : sellPrice, {
     decimals: decimalsToShow,
