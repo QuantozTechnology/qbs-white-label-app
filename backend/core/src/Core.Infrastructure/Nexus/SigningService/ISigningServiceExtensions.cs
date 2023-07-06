@@ -9,38 +9,52 @@ namespace Core.Infrastructure.Nexus.SigningService
 {
     public static class ISigningServiceExtensions
     {
-        public static async Task<AlgorandSubmitRequest[]> SignAlgorandTransactionAsync(this ISigningService signingService, string publicKey, SignableResponse signableResponse)
+        public static async Task<AlgorandSubmitSignatureRequest[]> SignAlgorandTransactionAsync(this ISigningService signingService, string publicKey, SignableResponse signableResponse)
         {
-            var algorandTransactions = signableResponse.BlockchainResponse.AlgorandTransactions;
-
-            if (algorandTransactions == null || !algorandTransactions.Any())
+            if (signableResponse.BlockchainResponse.RequiredSignatures == null)
             {
-                throw new InvalidOperationException("No Algorand transactions to sign");
+                throw new InvalidOperationException("Invalid blockchain response, are you using the correct key pair?");
             }
 
-            var algorandTransaction = algorandTransactions.First();
-            var encodedTransaction = algorandTransaction.EncodedTransaction;
+            var unsignedTransactions = signableResponse.BlockchainResponse.RequiredSignatures
+                .Where(r => r.PublicKey == publicKey);
 
-            var request = new SignRequest(Blockchain.ALGORAND, publicKey, encodedTransaction);
-            var signedTransaction = await signingService.Sign(request);
+            var submitRequests = unsignedTransactions.Select(async unsignedTransaction =>
+            {
+                var encodedUnsignedTransaction = unsignedTransaction.EncodedTransaction;
+                var hash = unsignedTransaction.Hash;
 
-            var submitRequest = new AlgorandSubmitRequest(algorandTransaction.Hash, publicKey, signedTransaction);
-            return new AlgorandSubmitRequest[] { submitRequest };
+                var request = new SignRequest(Blockchain.ALGORAND, publicKey, encodedUnsignedTransaction);
+
+                var encodedSignedTransaction = await signingService.Sign(request);
+                return new AlgorandSubmitSignatureRequest(hash, publicKey, encodedSignedTransaction);
+            });
+
+            return await Task.WhenAll(submitRequests);
         }
 
-        public static async Task<StellarSubmitRequest> SignStellarTransactionEnvelopeAsync(this ISigningService signingService, string publicKey, SignableResponse signableResponse)
+        public static async Task<StellarSubmitSignatureRequest[]> SignStellarTransactionEnvelopeAsync(this ISigningService signingService, string publicKey, SignableResponse signableResponse)
         {
-            var encodedStellarEnvelope = signableResponse.BlockchainResponse.EncodedStellarEnvelope;
-
-            if (encodedStellarEnvelope == null)
+            if (signableResponse.BlockchainResponse.RequiredSignatures == null)
             {
-                throw new InvalidOperationException("No Stellar transaction envelopes to sign");
+                throw new InvalidOperationException("Invalid blockchain response, are you using the correct key pair?");
             }
 
-            var request = new SignRequest(Blockchain.STELLAR, publicKey, encodedStellarEnvelope);
-            var signedTransactionEnvelope = await signingService.Sign(request);
+            var unsignedTransactions = signableResponse.BlockchainResponse.RequiredSignatures
+                .Where(r => r.PublicKey == publicKey);
 
-            return new StellarSubmitRequest(signedTransactionEnvelope);
+            var submitRequests = unsignedTransactions.Select(async unsignedTransaction =>
+            {
+                var encodedUnsignedTransaction = unsignedTransaction.EncodedTransaction;
+                var hash = unsignedTransaction.Hash;
+
+                var request = new SignRequest(Blockchain.STELLAR, publicKey, encodedUnsignedTransaction);
+                var encodedSignedTransaction = await signingService.Sign(request);
+
+                return new StellarSubmitSignatureRequest(hash, publicKey, encodedSignedTransaction);
+            });
+
+            return await Task.WhenAll(submitRequests);
         }
     }
 }

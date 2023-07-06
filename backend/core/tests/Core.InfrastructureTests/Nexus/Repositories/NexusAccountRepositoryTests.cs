@@ -96,7 +96,7 @@ namespace Core.InfrastructureTests.Nexus.Repositories
                 .Returns(Task.FromResult(true));
             server.Setup(s => s.Accounts.CreateOnStellarAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<IEnumerable<string>>(), It.IsAny<string>()))
                 .Returns(Task.FromResult(NexusSDKHelper.SignableResponse()));
-            server.Setup(s => s.Submit.OnStellarAsync(It.IsAny<StellarSubmitRequest>()))
+            server.Setup(s => s.Submit.OnStellarAsync(It.IsAny<StellarSubmitSignatureRequest[]>()))
                 .Returns(Task.CompletedTask);
 
             var signingService = new Mock<ISigningService>();
