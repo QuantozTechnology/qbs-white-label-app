@@ -13,6 +13,7 @@ import OfferDetails from "../screens/OfferDetails";
 import OffersList from "../screens/OffersList";
 import CreateOfferTopTabsStack from "./CreateOfferTabsStack";
 import { Offer } from "../api/offers/offers.interface";
+import ShareOffer from "../screens/ShareOffer";
 
 export type OfferOverviewStackParamList = {
   OffersList: {
@@ -28,6 +29,9 @@ export type OfferOverviewStackParamList = {
     | undefined;
   TokensOverview: { sourceScreen: "CreateBuyOffer" | "CreateSellOffer" };
   TokenDetails: { tokenCode: string };
+  ShareOffer: {
+    offer: Offer;
+  };
 };
 
 const OfferStack = createNativeStackNavigator<OfferOverviewStackParamList>();
@@ -108,6 +112,14 @@ export default function OfferStackNavigator() {
         component={TokenDetails}
         options={{
           title: "Asset details",
+          header: (props) => <CustomNavigationHeader {...props} />,
+        }}
+      />
+      <OfferStack.Screen
+        name="ShareOffer"
+        component={ShareOffer}
+        options={{
+          title: "Share offer",
           header: (props) => <CustomNavigationHeader {...props} />,
         }}
       />

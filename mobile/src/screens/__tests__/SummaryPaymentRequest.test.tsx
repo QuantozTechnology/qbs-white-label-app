@@ -3,9 +3,10 @@
 // of this distribution or at http://www.apache.org/licenses/LICENSE-2.0
 
 import { rest } from "msw";
+import { Share } from "react-native";
 import { PaymentRequestResponse } from "../../api/paymentrequest/paymentRequest.interface";
 import { paymentRequestMocksDefaultResponse } from "../../api/paymentrequest/paymentRequest.mocks";
-import { render, screen, within } from "../../jest/test-utils";
+import { fireEvent, render, screen, within } from "../../jest/test-utils";
 import { server } from "../../mocks/server";
 import { backendApiUrl } from "../../utils/axios";
 import SummaryPaymentRequest from "../SummaryPaymentRequest";
@@ -131,5 +132,19 @@ describe("Summary payment request", () => {
     expect(amountCanBeChangedText).toHaveTextContent(
       /^can be changed by payer$/
     );
+  });
+  it("shows the OS share overlay when the button is pressed", async () => {
+    const shareSpy = jest.spyOn(Share, "share");
+
+    props = createTestProps({});
+    render(<SummaryPaymentRequest {...props} />);
+
+    const shareButton = await screen.findByLabelText("share");
+    fireEvent(shareButton, "onPress");
+
+    expect(shareSpy).toHaveBeenCalledWith({
+      message:
+        "Hi, I've created a payment request for SCEUR 10.00. You can pay through the Quantoz Payments app by tapping the following link. Thanks! http://test.com/deeplinks/paymentrequests/payment-request-code",
+    });
   });
 });

@@ -144,7 +144,9 @@ function OfferDetails({ navigation, route }: OfferDetailsProps) {
   }
 
   function handleShare() {
-    // TODO implement share functionality
+    navigation.navigate("ShareOffer", {
+      offer: route.params.offer,
+    });
   }
 
   function getOfferToken(
