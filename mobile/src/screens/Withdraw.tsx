@@ -31,6 +31,7 @@ import CustomerLimitsProgress from "../components/CustomerLimitsProgress";
 import CustomerLimitsProgressError from "../components/CustomerLimitsProgressError";
 import CustomerLimitsProgressSkeleton from "../components/CustomerLimitsProgressSkeleton";
 import DataDisplayField from "../components/DataDisplayField";
+import ErrorBoundary from "../components/ErrorBoundary";
 import FormControlSkeleton from "../components/FormControlSkeleton";
 import FullScreenMessage from "../components/FullScreenMessage";
 import Notification from "../components/Notification";
@@ -195,10 +196,20 @@ function Withdraw({ navigation }: Props) {
       >
         <ScrollView flex={1}>
           <VStack space={2} flex={1}>
-            <CustomerLimitsProgress
-              label="Monthly withdraw limits"
-              operationType="withdraw"
-            />
+            <ErrorBoundary
+              render={
+                <FullScreenMessage
+                  title="Oops"
+                  message="Cannot load limits, try later"
+                  noFullScreen
+                />
+              }
+            >
+              <CustomerLimitsProgress
+                label="Monthly withdraw limits"
+                operationType="withdraw"
+              />
+            </ErrorBoundary>
             {!hasBankAccount ? (
               <Box p={4} pt={2}>
                 <Notification

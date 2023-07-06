@@ -38,6 +38,7 @@ import { useAccount } from "../api/account/account";
 import { NavigationProp } from "@react-navigation/native";
 import { UserProfileStackParamList } from "../navigation/UserProfileStack";
 import { getPlatformOS } from "../utils/reactNative";
+import ErrorBoundary from "../components/ErrorBoundary";
 
 interface ICopyButton extends IIconButtonProps {
   callback: () => Promise<void>;
@@ -154,7 +155,17 @@ function Funding({ navigation }: FundingProps) {
         flex={1}
       >
         <ScrollView>
-          <CustomerLimitsProgress operationType="funding" />
+          <ErrorBoundary
+            render={
+              <FullScreenMessage
+                title="Oops"
+                message="Cannot load limits, try later"
+                noFullScreen
+              />
+            }
+          >
+            <CustomerLimitsProgress operationType="funding" />
+          </ErrorBoundary>
           {hasReachedLimits ? (
             <Notification
               title="Funding limit reached"
@@ -205,7 +216,6 @@ function Funding({ navigation }: FundingProps) {
                 action={<CopyButton callback={() => handleCopy(bic)} />}
                 accessibilityLabel="bic"
               />
-              {/* TODO input the real account! */}
               <DataDisplayField
                 label="Message"
                 value={`${selectedToken?.tokenCode}:${accounts?.data.value.accountCode}`}
