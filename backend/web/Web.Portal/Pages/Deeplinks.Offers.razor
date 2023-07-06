@@ -1,0 +1,31 @@
+﻿@* Copyright 2023 Quantoz Technology B.V. and contributors. Licensed
+    under the Apache License, Version 2.0. See the NOTICE file at the root
+    of this distribution or at http://www.apache.org/licenses/LICENSE-2.0 *@
+
+@page "/deeplinks/offers/{code}"
+
+@attribute [AllowAnonymous]
+@inject IConfiguration Configuration
+@inject NavigationManager Navigation
+
+<h3>Redirecting...</h3>
+
+@code {
+    [Parameter]
+    public string? Code { get; set; }
+
+    protected override Task OnInitializedAsync()
+    {
+        if (!string.IsNullOrWhiteSpace(Code))
+        {
+            var url = Configuration["Portal:Deeplinks:Offers"];
+
+            if (!string.IsNullOrWhiteSpace(url))
+            {
+                Navigation.NavigateTo(String.Format(url, Code));
+            }
+        }
+
+        return Task.FromResult(true);
+    }
+}
