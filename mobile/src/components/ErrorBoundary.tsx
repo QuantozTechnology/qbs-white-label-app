@@ -3,6 +3,7 @@
 // of this distribution or at http://www.apache.org/licenses/LICENSE-2.0
 
 import { Heading, Image, Text, VStack } from "native-base";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import React, { Component, ErrorInfo, ReactNode } from "react";
 
 interface Props {
