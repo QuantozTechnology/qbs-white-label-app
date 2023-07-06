@@ -50,15 +50,15 @@ export const CreateCustomerPayloadSchema = z.object({
         const reversedDate = date.split("/").reverse().join("-");
 
         // checks if input date is the same as the one created from its parts
-        return new Date(epochFromDate).toISOString().slice(
-          0,
-          10,
-        ) === reversedDate;
+        return (
+          new Date(epochFromDate).toISOString().slice(0, 10) === reversedDate
+        );
       },
       {
         message: "Invalid date of birth",
-      },
-    ).refine(
+      }
+    )
+    .refine(
       (date) => {
         const [day, month, year] = date.split("/").map(Number);
         const epochFromDate = Date.UTC(year, month - 1, day);
@@ -67,7 +67,7 @@ export const CreateCustomerPayloadSchema = z.object({
       },
       {
         message: "Date of birth cannot be in the future",
-      },
+      }
     ),
   countryOfResidence: z.string({
     invalid_type_error: "Country must be specified",

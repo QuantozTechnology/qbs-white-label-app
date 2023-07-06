@@ -102,7 +102,7 @@ describe("ConsumerRegistration", () => {
     server.use(
       rest.post(`${backendApiUrl}/api/accounts`, (_req, rest, ctx) => {
         return rest(ctx.status(400), ctx.json(mockedError));
-      }),
+      })
     );
 
     props = createTestProps({});
@@ -149,7 +149,7 @@ describe("ConsumerRegistration", () => {
     server.use(
       rest.post(`${backendApiUrl}/api/accounts`, (_req, rest, ctx) => {
         return rest(ctx.status(400), ctx.json(mockedError));
-      }),
+      })
     );
 
     props = createTestProps({});
@@ -198,11 +198,11 @@ describe("ConsumerRegistration", () => {
     fireEvent(firstName, "onChangeText", "");
     fireEvent(createAccountButton, "onPress");
     const firstNameErrorEmptyString = await screen.findByLabelText(
-      "first name error",
+      "first name error"
     );
 
     expect(firstNameErrorEmptyString).toHaveTextContent(
-      /^First name must be longer than 1 character$/,
+      /^First name must be longer than 1 character$/
     );
   });
 
@@ -223,11 +223,11 @@ describe("ConsumerRegistration", () => {
     fireEvent(lastName, "onChangeText", "");
     fireEvent(createAccountButton, "onPress");
     const lastNameErrorEmptyString = await screen.findByLabelText(
-      "last name error",
+      "last name error"
     );
 
     expect(lastNameErrorEmptyString).toHaveTextContent(
-      /^Last name must be longer than 1 character$/,
+      /^Last name must be longer than 1 character$/
     );
   });
 
@@ -250,12 +250,10 @@ describe("ConsumerRegistration", () => {
     fireEvent(createAccountButton, "onPress");
 
     const dateOfBirthError = await screen.findByLabelText(
-      "date of birth error",
+      "date of birth error"
     );
 
-    expect(dateOfBirthError).toHaveTextContent(
-      /^Invalid date of birth$/,
-    );
+    expect(dateOfBirthError).toHaveTextContent(/^Invalid date of birth$/);
   });
 
   it("should return error if the birth date is in the future", async () => {
@@ -277,11 +275,11 @@ describe("ConsumerRegistration", () => {
     fireEvent(createAccountButton, "onPress");
 
     const dateOfBirthError = await screen.findByLabelText(
-      "date of birth error",
+      "date of birth error"
     );
 
     expect(dateOfBirthError).toHaveTextContent(
-      /^Date of birth cannot be in the future$/,
+      /^Date of birth cannot be in the future$/
     );
   });
 

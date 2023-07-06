@@ -113,7 +113,7 @@ export default function PortfolioStackNavigator() {
       <PortfolioStack.Screen
         name="TokenDetails"
         component={TokenDetails}
-        options={({route}) => ({
+        options={({ route }) => ({
           title: route.params.tokenCode,
           header: (props) => <CustomNavigationHeader {...props} />,
         })}

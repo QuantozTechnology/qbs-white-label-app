@@ -104,8 +104,8 @@ describe("BusinessRegistration", () => {
         `${backendApiUrl}/api/customers/merchant`,
         (_req, rest, ctx) => {
           return rest(ctx.status(400), ctx.json(mockedError));
-        },
-      ),
+        }
+      )
     );
 
     props = createTestProps({});
@@ -164,7 +164,7 @@ describe("BusinessRegistration", () => {
     server.use(
       rest.post(`${backendApiUrl}/api/accounts`, (_req, rest, ctx) => {
         return rest(ctx.status(400), ctx.json(mockedError));
-      }),
+      })
     );
 
     props = createTestProps({});
@@ -212,7 +212,7 @@ describe("BusinessRegistration", () => {
     server.use(
       rest.post(`${backendApiUrl}/api/accounts`, (_req, rest, ctx) => {
         return rest(ctx.status(400), ctx.json(mockedError));
-      }),
+      })
     );
 
     props = createTestProps({});
@@ -258,16 +258,16 @@ describe("BusinessRegistration", () => {
     const companyNameError = await screen.findByLabelText("company name error");
 
     const contactPersonError = screen.getByLabelText(
-      "contact person full name error",
+      "contact person full name error"
     );
     const businessEmailError = await screen.findByLabelText(
-      "business email error",
+      "business email error"
     );
     const countryError = screen.getByLabelText("country error");
 
     expect(companyNameError).toHaveTextContent("Company name is required");
     expect(contactPersonError).toHaveTextContent(
-      "Contact person full name is required",
+      "Contact person full name is required"
     );
     expect(businessEmailError).toHaveTextContent("Business email is required");
     expect(countryError).toHaveTextContent("Country is required");
