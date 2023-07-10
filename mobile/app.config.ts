@@ -17,16 +17,16 @@ const AppConfig = {
   name: isDevEnv
     ? "Quantoz Blockchain Solutions (Dev)"
     : isPreviewEnv
-    ? "Quantoz Blockchain Solutions (Test)"
-    : "Quantoz Blockchain Solutions",
+      ? "Quantoz Blockchain Solutions (Test)"
+      : "Quantoz Blockchain Solutions",
   icon: "./assets/icon-qbs.png",
   image: "./assets/splash-qbs.png",
   ios: {
     bundleIdentifier: isDevEnv
       ? "com.quantoz.qbs.dev"
       : isPreviewEnv
-      ? "com.quantoz.qbs.preview"
-      : "com.quantoz.qbs",
+        ? "com.quantoz.qbs.preview"
+        : "com.quantoz.qbs",
   },
   android: {
     adaptiveIcon: {
@@ -35,13 +35,13 @@ const AppConfig = {
     package: isDevEnv
       ? "com.quantoz.qbs.dev"
       : isPreviewEnv
-      ? "com.quantoz.qbs.preview"
-      : "com.quantoz.qbs",
+        ? "com.quantoz.qbs.preview"
+        : "com.quantoz.qbs",
   },
   // This logic sets the correct env variables to use throughout the app
   // They can be read through the `expo-constants` package (https://docs.expo.dev/guides/environment-variables/#reading-environment-variables)
   extra: {
-    POSTMAN_MOCK_API_KEY: process.env.POSTMAN_MOCK_API_KEY,  
+    POSTMAN_MOCK_API_KEY: process.env.POSTMAN_MOCK_API_KEY,
     API_URL: isDevEnv ? process.env.DEV_API_URL : process.env.PROD_API_URL,
     AUTH_AZURE_B2C_LOGIN_ISSUER: isDevEnv
       ? process.env.DEV_AUTH_AZURE_B2C_LOGIN_ISSUER
@@ -62,6 +62,10 @@ const AppConfig = {
       ? process.env.DEV_AUTH_AZURE_B2C_PASSWORD_ISSUER
       : process.env.PROD_AUTH_AZURE_B2C_PASSWORD_ISSUER,
     APP_ENV: process.env.APP_ENV || null,
+    SENTRY_ORG: process.env.SENTRY_ORG,
+    SENTRY_PROJECT: process.env.SENTRY_PROJECT,
+    SENTRY_DSN: process.env.SENTRY_DSN,
+    SENTRY_AUTH_TOKEN: process.env.SENTRY_AUTH_TOKEN,
   },
 };
 
@@ -112,6 +116,7 @@ export default () => ({
       ...AppConfig.extra,
     },
     plugins: [
+      "sentry-expo",
       [
         "expo-image-picker",
         {
@@ -124,11 +129,22 @@ export default () => ({
     scheme: isDevEnv
       ? "quantoz.qbs.dev"
       : isPreviewEnv
-      ? "quantoz.qbs.preview"
-      : "quantoz.qbs",
+        ? "quantoz.qbs.preview"
+        : "quantoz.qbs",
     platforms: ["ios", "android"],
     runtimeVersion: {
       policy: "sdkVersion",
+    },
+    hooks: {
+      postPublish: [
+        {
+          file: "sentry-expo/upload-sourcemaps",
+          config: {
+            organization: process.env.SENTRY_ORG,
+            project: process.env.SENTRY_PROJECT,
+          },
+        },
+      ],
     },
   },
 });
