@@ -6,10 +6,10 @@ import { z } from "zod";
 
 const TokenDetailsSchema = z.object({
   tokenCode: z.string(),
-  validator: z.string().url(),
-  owner: z.string().url(),
-  asset: z.string().url(),
-  schema: z.string().url(),
+  validatorUrl: z.string().url(),
+  issuerUrl: z.string().url(),
+  assetUrl: z.string().url(),
+  schemaUrl: z.string().url(),
 });
 
 export type TokenDetails = z.infer<typeof TokenDetailsSchema>;

@@ -10,10 +10,10 @@ import { TokenDetails } from "./tokens.interface";
 export const tokenDetailsDefaultMock: GenericApiResponse<TokenDetails> = {
   value: {
     tokenCode: "SCEUR",
-    asset: "https://www.example.com",
-    owner: "https://www.example.com",
-    validator: "https://www.example.com",
-    schema: "https://www.example.com",
+    assetUrl: "https://www.example.com",
+    issuerUrl: "https://www.example.com",
+    validatorUrl: "https://www.example.com",
+    schemaUrl: "https://www.example.com",
   },
 };
 

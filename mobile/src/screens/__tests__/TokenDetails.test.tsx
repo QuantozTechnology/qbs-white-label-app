@@ -30,7 +30,7 @@ describe("TokenDetails", () => {
     const validator = await screen.findByLabelText("validator");
     const schema = await screen.findByLabelText("schema");
 
-    expect(within(assetInfo).getByLabelText("value")).toHaveTextContent(
+    expect(await within(assetInfo).findByLabelText("value")).toHaveTextContent(
       "https://www.example.com"
     );
     expect(within(issuer).getByLabelText("value")).toHaveTextContent(

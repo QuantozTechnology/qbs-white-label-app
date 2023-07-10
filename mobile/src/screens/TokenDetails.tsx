@@ -30,7 +30,7 @@ function TokenDetails({ route }: Props) {
     );
   }
 
-  const { asset, validator, owner, schema } = data.value;
+  const { assetUrl, validatorUrl, issuerUrl, schemaUrl } = data.value;
 
   function handleUrlPress(url: string) {
     Linking.openURL(url);
@@ -41,11 +41,11 @@ function TokenDetails({ route }: Props) {
       <DataDisplayField
         accessibilityLabel="asset info"
         label="Asset info"
-        value={asset}
+        value={assetUrl}
         action={
           <Pressable
             accessibilityLabel="go to asset info page"
-            onPress={() => handleUrlPress(asset)}
+            onPress={() => handleUrlPress(assetUrl)}
             mr={4}
           >
             <Icon
@@ -60,11 +60,11 @@ function TokenDetails({ route }: Props) {
       <DataDisplayField
         accessibilityLabel="issuer"
         label="Issuer"
-        value={owner}
+        value={issuerUrl}
         action={
           <Pressable
             accessibilityLabel="go to issuer page"
-            onPress={() => handleUrlPress(asset)}
+            onPress={() => handleUrlPress(issuerUrl)}
             mr={4}
           >
             <Icon
@@ -79,11 +79,11 @@ function TokenDetails({ route }: Props) {
       <DataDisplayField
         accessibilityLabel="validator"
         label="Validator"
-        value={validator}
+        value={validatorUrl}
         action={
           <Pressable
             accessibilityLabel="go to validator page"
-            onPress={() => handleUrlPress(asset)}
+            onPress={() => handleUrlPress(validatorUrl)}
             mr={4}
           >
             <Icon
@@ -98,11 +98,11 @@ function TokenDetails({ route }: Props) {
       <DataDisplayField
         accessibilityLabel="schema"
         label="Schema"
-        value={schema}
+        value={schemaUrl}
         action={
           <Pressable
             accessibilityLabel="go to schema page"
-            onPress={() => handleUrlPress(asset)}
+            onPress={() => handleUrlPress(schemaUrl)}
             mr={4}
           >
             <Icon
