@@ -3,6 +3,7 @@
 // of this distribution or at http://www.apache.org/licenses/LICENSE-2.0
 
 using Core.Application.Abstractions;
+using Core.Domain.Entities.TransactionAggregate;
 using Core.Domain.Repositories;
 using MediatR;
 
@@ -60,17 +61,21 @@ namespace Core.Application.Commands
             {
                 var transactionCode = await _transactionRepository.CreatePaymentsAsync(payments, request.IP, cancellationToken);
 
-                // If the transaction is successfully processed we set the transaction and update the payment request status to Paid
-                payment.SetTransactionCode(transactionCode);
-                paymentRequest.Paid(payment);
+                // If the transaction is successfully processed we set the transaction and update the offer status to Paid
+                payments.ToList()
+                    .ForEach(payment => payment.SetTransactionCode(transactionCode));
 
-                _paymentRepository.Add(payment);
+                // for case 1 and 2, we close the offer
+                offer.Closed();
+                //paymentRequest.Paid(payment);
+
+                _paymentRepository.AddRange(payments);
                 await _unitOfWork.SaveChangesAsync(cancellationToken);
             }
             catch (Exception)
             {
                 // If the transaction fails we reset the payment request
-                paymentRequest.ProcessingFailed();
+                offer.ProcessingFailed();
                 await _unitOfWork.SaveChangesAsync(cancellationToken);
                 throw;
             }

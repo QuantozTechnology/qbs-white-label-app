@@ -49,7 +49,7 @@ namespace Core.Infrastructure.Nexus.Repositories
             return _tokenSettings.Blockchain switch
             {
                 Blockchain.STELLAR => await CreateStellarPayments(payments, ip),
-                Blockchain.ALGORAND => await CreateAlgorandPayment(payment, ip),
+                //Blockchain.ALGORAND => await CreateAlgorandPayment(payments, ip),
                 _ => throw new CustomErrorsException("NexusSDKError", _tokenSettings.Blockchain.ToString(), "Blockchain not supported"),
             };
         }
@@ -208,7 +208,30 @@ namespace Core.Infrastructure.Nexus.Repositories
 
             var signableResponse = await _tokenServer.Operations.CreatePaymentsAsync(paymentDefinitions);
 
+            ////sign all the token operations inside signableresponse using signing service all together
+            //var signedResponses = payments.Select(async x =>
+            //{
+            //    return await _signingService.SignStellarTransactionEnvelopeAsync(x.SenderPublicKey, signableResponse);
+            //})
+            //    .ToList();
 
+            var keys = payments.Select(x => x.SenderPublicKey).ToList();
+            var signedResponses = await _signingService.SignStellarTransactionEnvelopeAsync(keys, signableResponse);
+
+            await _tokenServer.Submit.OnStellarAsync(signedResponses);
+
+            if (signableResponse.TokenOperationResponse?.FirstOrDefault() == null)
+            {
+                throw new CustomErrorsException(NexusErrorCodes.TransactionNotFoundError.ToString(), null!, "Transaction not found for the offer request");
+            }
+
+            // set transactionCode in payments
+            string transactionCode = signableResponse.TokenOperationResponse!.FirstOrDefault()!.Code;
+
+            foreach (var payment in payments)
+            {
+                payment.TransactionCode = transactionCode;
+            }
 
             return signableResponse.TokenOperationResponse!.FirstOrDefault()!.Code;
         }

@@ -15,5 +15,7 @@ namespace Core.Domain.Repositories
         public Task<T> FindAsync(int id, CancellationToken cancellationToken = default);
 
         Task<List<T>> ListAsync(ISpecification<T> specification, CancellationToken cancellationToken = default);
+
+        public void AddRange(IEnumerable<T> entities);
     }
 }

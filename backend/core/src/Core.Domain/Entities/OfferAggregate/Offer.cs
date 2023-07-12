@@ -4,6 +4,7 @@
 
 using Core.Domain.Entities.CallbackAggregate;
 using Core.Domain.Entities.TransactionAggregate;
+using Core.Domain.Events;
 using Core.Domain.Primitives;
 using Core.Domain.Primitives.Offer;
 
@@ -97,6 +98,30 @@ namespace Core.Domain.Entities.OfferAggregate
             var isOneOffAndProcessing = Options.IsOneOffPayment && Status == OfferStatus.Processing;
             var isNotOneOffAndOpen = !Options.IsOneOffPayment && Status == OfferStatus.Open;
             return isOneOffAndProcessing || isNotOneOffAndOpen;
+        }
+
+        public void Closed()
+        {
+            UpdatedOn = DateTimeProvider.UtcNow;
+
+            if (Options.IsOneOffPayment)
+            {
+                Status = OfferStatus.Closed;
+            }
+
+            //Payments.Add(payment);
+
+            //RaiseDomainEvent(new PaymentRequestPaidEvent(this, payment));
+        }
+
+        public void ProcessingFailed()
+        {
+            // we only set it to open if the offer was processed sequentially
+            if (Options.IsOneOffPayment)
+            {
+                UpdatedOn = DateTimeProvider.UtcNow;
+                Status = OfferStatus.Open;
+            }
         }
 
         // Required for EF Core

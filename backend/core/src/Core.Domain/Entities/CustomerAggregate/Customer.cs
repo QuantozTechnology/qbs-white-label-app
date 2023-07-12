@@ -213,7 +213,6 @@ namespace Core.Domain.Entities.CustomerAggregate
                 Amount = amount,
                 Memo = memo
             };
-
         }
 
         public Payment[] NewPaymentsToOffer(Account senderAccount, Offer offer, decimal amount)
@@ -235,27 +234,39 @@ namespace Core.Domain.Entities.CustomerAggregate
 
             // Case 1: offer.Options.PayerCanChangeRequestedAmount = true and offer.Options.IsOneOffPayment = true, only once a payment can be made for upto the destinationAmount, then the offer is closed.
 
-            if (offer.Options.PayerCanChangeRequestedAmount && offer.Options.IsOneOffPayment)
+            PaymentProperties[] properties;
+
+            switch ((offer.Options.PayerCanChangeRequestedAmount, offer.Options.IsOneOffPayment))
             {
-                if (amount > offer.DestinationTokenAmount)
-                {
-                    throw new CustomErrorsException(DomainErrorCode.InvalidPropertyError.ToString(), amount.ToString()!, "The provided amount is greater than the requested amount of the offer.");
-                }
+                case (true, true):
+                    if (amount > offer.DestinationTokenAmount)
+                    {
+                        throw new CustomErrorsException(DomainErrorCode.InvalidPropertyError.ToString(), amount.ToString()!, "The provided amount is greater than the requested amount of the offer.");
+                    }
+
+                    properties = ConvertIntoPaymentProperties(senderAccount, offer, amount);
+                    break;
+
+                case (false, true):
+                    if (amount != offer.DestinationTokenAmount)
+                    {
+                        throw new CustomErrorsException(DomainErrorCode.InvalidPropertyError.ToString(), amount.ToString()!, "The provided amount does not match the requested amount of the offer.");
+                    }
+
+                    properties = ConvertIntoPaymentProperties(senderAccount, offer, amount);
+                    break;
+
+                default:
+                    throw new Exception("Invalid case encountered."); // Handle default case appropriately based on your logic
             }
 
-            // Case 2: offer.Options.PayerCanChangeRequestedAmount = false and offer.Options.IsOneOffPayment = true, only once a payment can be made for exactly the destinationAmount, then the offer is closed.
-            else if (!offer.Options.PayerCanChangeRequestedAmount && offer.Options.IsOneOffPayment)
-            {
-                if (amount != offer.DestinationTokenAmount)
-                {
-                    throw new CustomErrorsException(DomainErrorCode.InvalidPropertyError.ToString(), amount.ToString()!, "The provided amount does not match the requested amount of the offer.");
-                }
-            }
+            return Payment.NewToOffer(properties);
+        }
 
-            // In both Case 1 and Case 2, the offer is closed after the payment is made.
-            // 2 payments need to be made, one from the sender to the receiver and one from the receiver to the sender.
+        private static PaymentProperties[] ConvertIntoPaymentProperties(Account senderAccount, Offer offer, decimal amount)
+        {
             var properties = new[]
-            {
+                        {
                 new PaymentProperties
                 {
                     SenderPublicKey = senderAccount.PublicKey,
@@ -279,8 +290,7 @@ namespace Core.Domain.Entities.CustomerAggregate
                     SenderAccountCode = offer.PublicKey // TODO: This is a hack, we need to fix this
                 }
             };
-
-            return Payment.NewToOffer(properties);
+            return properties;
         }
     }
 }

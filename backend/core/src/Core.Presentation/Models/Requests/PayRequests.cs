@@ -73,7 +73,7 @@ namespace Core.Presentation.Models.Requests
             return new ConfirmOfferPaymentCommand
             {
                 CustomerCode = customerCode,
-                PaymentRequestCode = PaymentRequestCode,
+                OfferCode = OfferCode,
                 Amount = Amount,
                 IP = ip
             };
