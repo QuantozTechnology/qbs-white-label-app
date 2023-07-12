@@ -2,6 +2,8 @@
 // under the Apache License, Version 2.0. See the NOTICE file at the root
 // of this distribution or at http://www.apache.org/licenses/LICENSE-2.0
 
+using Core.Application.Queries.OfferQueries;
+using Core.Application.Queries.PaymentRequestQueries;
 using Core.Presentation.Models;
 using Core.Presentation.Models.Requests.OfferRequests;
 using Core.Presentation.Models.Responses.OfferResponses;
@@ -34,11 +36,16 @@ namespace Core.Presentation.Controllers
         }
 
         [HttpGet(Name = "GetOffersOfCustomer")]
-        public Task<IActionResult?> GetOffersAsync([FromQuery] string? status, [FromQuery] int page = 1,
-            [FromQuery] int pageSize = 10)
+        [ProducesResponseType(typeof(CustomResponse<OfferResponse>), 200)]
+        [ProducesResponseType(typeof(CustomErrorsResponse), 404)]
+        [ProducesResponseType(typeof(CustomErrorsResponse), 500)]
+        [RequiredScope("PaymentRequest.Read")]
+        public async Task<IActionResult> GetOffersAsync([FromQuery] string? status, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
         {
-            // Not implemented yet
-            return Task.FromResult<IActionResult>(null);
+            var query = new GetPagedOffersForCustomerQuery(GetUserId(), status, page, pageSize);
+            var offers = await _sender.Send(query);
+            var response = ConstructCustomResponse(offers, OfferResponse.FromOffer);
+            return Ok(response);
         }
     }
 }
