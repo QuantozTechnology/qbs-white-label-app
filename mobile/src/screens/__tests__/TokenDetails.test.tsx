@@ -4,11 +4,11 @@
 
 import { rest } from "msw";
 import { genericApiError } from "../../api/generic/error.interface";
-import { linkingOpenUrlMock } from "../../jest/jest.setup";
 import { fireEvent, render, screen, within } from "../../jest/test-utils";
 import { server } from "../../mocks/server";
 import { mockApiUrl } from "../../utils/axios";
 import TokenDetails from "../TokenDetails";
+import * as Linking from "expo-linking";
 
 describe("TokenDetails", () => {
   const createTestProps = (props: Record<string, unknown>) => ({
@@ -67,6 +67,6 @@ describe("TokenDetails", () => {
     );
     fireEvent(assetEntryLink, "onPress");
 
-    expect(linkingOpenUrlMock).toHaveBeenCalledWith("https://www.example.com");
+    expect(Linking.openURL).toHaveBeenCalledWith("https://www.example.com");
   });
 });

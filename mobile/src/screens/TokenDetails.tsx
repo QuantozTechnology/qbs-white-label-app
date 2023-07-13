@@ -1,7 +1,7 @@
 import { Feather } from "@expo/vector-icons";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { Icon, Pressable } from "native-base";
-import { Linking } from "react-native";
+import * as Linking from "expo-linking";
 import { useToken } from "../api/tokens/tokens";
 import DataDisplayField from "../components/DataDisplayField";
 import DataDisplayFieldSkeleton from "../components/DataDisplayFieldSkeleton";
