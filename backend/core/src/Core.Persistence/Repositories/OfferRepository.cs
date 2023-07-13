@@ -15,11 +15,19 @@ namespace Core.Persistence.Repositories
         {
         }
 
-        public async Task<Offer> GetByOfferCodeAsync(string offerCode, CancellationToken cancellationToken = default)
-            {
-                var offer = await Query().FirstOrDefaultAsync(pr => pr.OfferCode == offerCode, cancellationToken);
+        public async Task<Offer> GetByOfferCodeAsync(string code, CancellationToken cancellationToken = default)
+        {
+            var offer = await Query()
+                .Include(pr => pr.Payments)
+                .FirstOrDefaultAsync(pr => pr.OfferCode == code, cancellationToken);
 
-                return offer;
+            if (offer == null)
+            {
+                throw new CustomErrorsException(PersistenceErrorCode.NotFoundError.ToString(), code,
+                    "An offer was not found matching the provided code.");
             }
+
+            return offer;
+        }
     }
 }

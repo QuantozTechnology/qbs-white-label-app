@@ -21,12 +21,12 @@ namespace Core.Presentation.Controllers
         {
         }
 
-        [HttpPost(Name = "PostOfferRequest")]
+        [HttpPost(Name = "PostOffer")]
         [ProducesResponseType(typeof(CustomResponse<OfferResponse>), 201)]
         [ProducesResponseType(typeof(CustomErrorsResponse), 400)]
         [ProducesResponseType(typeof(CustomErrorsResponse), 404)]
         [ProducesResponseType(typeof(CustomErrorsResponse), 500)]
-        [RequiredScope("OfferRequest.Create")]
+        [RequiredScope("Offer.Create")]
         public async Task<IActionResult> CreateOffersAsync([FromBody] CreateOfferRequest request)
         {
             var command = request.ToCommand(GetUserId());
@@ -39,12 +39,25 @@ namespace Core.Presentation.Controllers
         [ProducesResponseType(typeof(CustomResponse<OfferResponse>), 200)]
         [ProducesResponseType(typeof(CustomErrorsResponse), 404)]
         [ProducesResponseType(typeof(CustomErrorsResponse), 500)]
-        [RequiredScope("PaymentRequest.Read")]
+        [RequiredScope("Offer.Read")]
         public async Task<IActionResult> GetOffersAsync([FromQuery] string? status, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
         {
             var query = new GetPagedOffersForCustomerQuery(GetUserId(), status, page, pageSize);
             var offers = await _sender.Send(query);
             var response = ConstructCustomResponse(offers, OfferResponse.FromOffer);
+            return Ok(response);
+        }
+
+        [HttpGet("{code}", Name = "GetOffer")]
+        [ProducesResponseType(typeof(CustomResponse<OfferResponse>), 200)]
+        [ProducesResponseType(typeof(CustomErrorsResponse), 404)]
+        [ProducesResponseType(typeof(CustomErrorsResponse), 500)]
+        [RequiredScope("Offer.Read")]
+        public async Task<IActionResult> GetOfferAsync([FromRoute] string code)
+        {
+            var query = new GetOfferQuery(code);
+            var offer = await _sender.Send(query);
+            var response = ConstructCustomResponse(offer, OfferResponse.FromOffer);
             return Ok(response);
         }
     }
