@@ -30,6 +30,7 @@ import { validationCheck } from "../utils/validation/errors";
 import * as Linking from "expo-linking";
 import { useCustomerState } from "../context/CustomerContext";
 import CustomCountrySelect from "../components/CustomSelect";
+import { defaultConfig } from "../config/config";
 
 function ConsumerRegistration() {
   const auth = useAuth();
@@ -225,7 +226,7 @@ function ConsumerRegistration() {
   );
 
   function handleTermsPress() {
-    Linking.openURL("https://quantozpay.com/terms");
+    Linking.openURL(defaultConfig.termsUrl);
   }
 
   function handleCheckboxTermsPress() {

@@ -34,6 +34,7 @@ import ScreenWrapper from "../components/ScreenWrapper";
 import * as Linking from "expo-linking";
 import { useCustomerState } from "../context/CustomerContext";
 import CustomCountrySelect from "../components/CustomSelect";
+import { defaultConfig } from "../config/config";
 
 type Props = NativeStackScreenProps<RegistrationStackParamList, "Business">;
 
@@ -284,7 +285,7 @@ function BusinessRegistration({ navigation }: Props) {
   );
 
   function handleTermsPress() {
-    Linking.openURL("https://quantozpay.com/terms");
+    Linking.openURL(defaultConfig.termsUrl);
   }
 
   // It accepts an input such as {companyName: aString} to allow checking the value on text change

@@ -11,6 +11,7 @@ type AppDefaultConfig = {
     websiteLink: string;
   };
   supportEmail: string;
+  termsUrl: string;
   feeSettings: {
     minimumFee: number;
   };
@@ -31,6 +32,7 @@ export const defaultConfig: AppDefaultConfig = {
     websiteLink: "https://www.quantoz.com",
   },
   supportEmail: "support@quantozpayments.com",
+  termsUrl: "https://www.quantozpay.com/terms",
   feeSettings: {
     minimumFee: 2,
   },

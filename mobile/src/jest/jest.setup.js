@@ -10,7 +10,6 @@ import { paymentsApi } from "../utils/axios";
 import * as CustomerContext from "../context/CustomerContext";
 import * as Clipboard from "expo-clipboard";
 import { biometricValidation } from "../utils/biometric";
-import { Linking } from "react-native";
 
 export const mockRefresh = jest.fn();
 export let mockClipboardCopy: jest.SpyInstance;
@@ -23,7 +22,6 @@ global.setImmediate =
   function (fn) {
     return setTimeout(fn, 0);
   };
-
 // Needed after update to Jest 29
 global.clearImmediate =
   global.clearImmediate ||
@@ -35,6 +33,10 @@ jest.mock("expo-font");
 jest.mock("expo-asset");
 jest.mock("../utils/biometric", () => ({
   biometricValidation: jest.fn().mockResolvedValue({ result: "success" }),
+}));
+jest.mock("expo-linking", () => ({
+  canOpenURL: jest.fn(() => Promise.resolve(true)),
+  openURL: jest.fn(() => Promise.resolve()),
 }));
 
 // create a mock for the whole react navigation prop object
@@ -69,9 +71,6 @@ jest.mock("@react-navigation/native", () => {
     }),
   };
 });
-
-export const linkingOpenUrlMock = jest.fn();
-Linking.openURL = linkingOpenUrlMock;
 
 beforeEach(() => {
   // mocking NOTICE to clipboard

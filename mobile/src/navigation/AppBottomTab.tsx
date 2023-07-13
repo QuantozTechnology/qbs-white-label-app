@@ -4,30 +4,25 @@
 
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { getFocusedRouteNameFromRoute, Route } from "@react-navigation/native";
-import { useCustomer } from "../api/customer/customer";
-import { defaultConfig } from "../config/config";
-import Support from "../screens/Support";
-import { composeEmail } from "../utils/email";
 import PortfolioStackNavigator from "./PortfolioStack";
 import CustomNavigationHeader from "../components/CustomNavigationHeader";
 import CustomTabBarLabel from "../components/CustomTabBarLabel";
 import CustomTabBarIcon from "../components/CustomTabBarIcon";
 import UserProfileStack from "./UserProfileStack";
-import { TouchableOpacity } from "react-native";
 import PaymentRequestsNativeStackNavigator from "./PaymentRequestsStack";
+import Settings from "../screens/Settings";
 
 export type AppBottomTabParamList = {
   PortfolioOverview: undefined;
   PaymentRequests: undefined;
   UserProfileStack: undefined;
+  Settings: undefined;
   Support: undefined;
 };
 
 const AppBottomTab = createBottomTabNavigator<AppBottomTabParamList>();
 
 export default function AppBottomTabNavigator() {
-  const { data } = useCustomer();
-
   const getTabBarVisibility = (route: Partial<Route<string>>) => {
     const routeName = getFocusedRouteNameFromRoute(route);
     // list of screens on which we do not show the bottom tab
@@ -51,21 +46,6 @@ export default function AppBottomTabNavigator() {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     return hideOnScreens.indexOf(routeName!) <= -1;
   };
-
-  async function handleSupportPress() {
-    const emailRecipient = defaultConfig.supportEmail;
-    const emailSubject = "Support request - Quantoz Blockchain Solutions";
-    const emailBody = `Please provide a detailed description of the issue you are experiencing. Be sure to leave the information below as it is.
-    
-    ---------------------
-    My account email: ${data?.data.value.email ?? "not available"}`;
-
-    await composeEmail({
-      recipients: [emailRecipient],
-      subject: emailSubject,
-      body: emailBody,
-    });
-  }
 
   return (
     <AppBottomTab.Navigator
@@ -127,24 +107,23 @@ export default function AppBottomTabNavigator() {
         })}
       />
       <AppBottomTab.Screen
-        name="Support"
-        component={Support}
-        options={{
-          title: "Support",
-          headerShown: true,
-          tabBarButton: (props) => (
-            <TouchableOpacity {...props} onPress={handleSupportPress} />
-          ),
+        name="Settings"
+        component={Settings}
+        options={({ route }) => ({
+          title: "Settings",
           tabBarLabel({ focused }) {
-            return <CustomTabBarLabel focused={focused} label="Support" />;
+            return <CustomTabBarLabel focused={focused} label="Settings" />;
+          },
+          tabBarStyle: {
+            display: getTabBarVisibility(route) ? "flex" : "none",
           },
           tabBarIcon: ({ focused }) => {
-            return (
-              <CustomTabBarIcon focused={focused} iconName="question-circle" />
-            );
+            return <CustomTabBarIcon focused={focused} iconName="cog" />;
           },
-        }}
-      ></AppBottomTab.Screen>
+          headerShown: true,
+          header: (props) => <CustomNavigationHeader {...props} />,
+        })}
+      />
     </AppBottomTab.Navigator>
   );
 }
