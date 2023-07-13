@@ -96,16 +96,6 @@ namespace Core.Application.Commands.OfferCommands
                 properties.DestinationTokenRemainingAmount = null;
             }
 
-            // in case of existing offer
-            if (!string.IsNullOrWhiteSpace(request.OfferCode))
-            {
-                var existingOffer = await _offerRepository.GetByOfferCodeAsync(request.OfferCode, cancellationToken);
-                if (existingOffer != null)
-                {
-                    properties.OfferCode = existingOffer.OfferCode;
-                }
-            }
-
             if (request.ExpiresOn.HasValue)
             {
                 properties.Options.ExpiresOn = DateTimeProvider.FromUnixTimeInMilliseconds(request.ExpiresOn.Value);
