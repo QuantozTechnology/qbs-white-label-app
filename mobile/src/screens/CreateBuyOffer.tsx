@@ -368,11 +368,11 @@ function CreateBuyOffer({ navigation, route }: Props) {
           action: "Buy",
           sourceToken: {
             tokenCode: defaultConfig.defaultStableCoin.code,
-            totalAmount: (parseFloat(amount) * parseFloat(price)).toString(),
+            amount: (parseFloat(amount) * parseFloat(price)).toString(),
           },
           destinationToken: {
             tokenCode: selectedToken?.code,
-            totalAmount: amount,
+            amount: amount,
           },
           pricePerUnit: parseFloat(price),
           options: {

@@ -37,7 +37,7 @@ export function useOffer({ offerCode }: GetOfferProps) {
 
 // GET offers
 export async function getOffers({ type, pageParam = 1 }: useOffersProps) {
-  const { data, headers } = await mockPaymentsApi.get<Offers>(
+  const { data, headers } = await paymentsApi.get<Offers>(
     `/api/offers?offerStatus=${type}&page=${pageParam}&pageSize=10`
   );
 

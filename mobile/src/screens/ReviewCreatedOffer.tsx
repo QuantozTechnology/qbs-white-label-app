@@ -85,8 +85,6 @@ function ReviewCreatedOffer({ navigation, route }: ReviewCreatedOfferProps) {
   const isBuyOffer = action === "Buy";
   const fee = isBuyOffer ? "0.80" : "-0.80";
 
-  console.log("params: ", JSON.stringify(route.params.offer));
-
   return (
     <ScreenWrapper flex={1}>
       <VStack flex={1} space={4}>
@@ -95,14 +93,13 @@ function ReviewCreatedOffer({ navigation, route }: ReviewCreatedOfferProps) {
           accessibilityLabel="price"
           leftContent="Price"
           rightContent={`${displayFiatAmount(
-            parseFloat(sourceToken.totalAmount) /
-              parseFloat(destinationToken.totalAmount)
+            parseFloat(sourceToken.amount) / parseFloat(destinationToken.amount)
           )} ${sourceToken.tokenCode}/${destinationToken.tokenCode}`}
         />
         <GenericListItem
           accessibilityLabel="gross total"
           leftContent={isBuyOffer ? "Purchase" : "Selling"}
-          rightContent={displayFiatAmount(sourceToken.totalAmount, {
+          rightContent={displayFiatAmount(sourceToken.amount, {
             currency: sourceToken.tokenCode,
           })}
         />
@@ -119,7 +116,7 @@ function ReviewCreatedOffer({ navigation, route }: ReviewCreatedOfferProps) {
           accessibilityLabel="net total"
           leftContent="Total"
           rightContent={displayFiatAmount(
-            parseFloat(sourceToken.totalAmount) + parseFloat(fee),
+            parseFloat(sourceToken.amount) + parseFloat(fee),
             {
               currency: sourceToken.tokenCode,
             }

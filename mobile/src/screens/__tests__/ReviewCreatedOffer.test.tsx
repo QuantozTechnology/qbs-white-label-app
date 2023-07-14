@@ -17,7 +17,7 @@ describe("ReviewCreatedOffer", () => {
     action: "Buy",
     destinationToken: {
       tokenCode: "GOLD",
-      totalAmount: "10.00",
+      amount: "10.00",
     },
     options: {
       params: null,
@@ -31,7 +31,7 @@ describe("ReviewCreatedOffer", () => {
     offerCode: null,
     sourceToken: {
       tokenCode: "SCEUR",
-      totalAmount: "10.00",
+      amount: "10.00",
     },
   };
 

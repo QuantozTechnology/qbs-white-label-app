@@ -23,6 +23,13 @@ function ReviewOfferAmount({
 }: ReviewOfferAmountProps) {
   const { action, destinationToken, sourceToken, options } = offer;
   const isBuyOffer = action === "Buy";
+  const isCreatedOffer = "amount" in destinationToken;
+
+  // needed for Typescript safety
+  const amount =
+    "amount" in destinationToken
+      ? destinationToken.amount
+      : destinationToken.totalAmount;
 
   return (
     <VStack
@@ -37,12 +44,12 @@ function ReviewOfferAmount({
         {action}{" "}
         {isBuyOffer ? destinationToken.tokenCode : sourceToken.tokenCode}
       </Heading>
-      {options?.payerCanChangeRequestedAmount ? (
+      {!isCreatedOffer && options?.payerCanChangeRequestedAmount ? (
         <Input
           variant="unstyled"
           fontSize="5xl"
           textAlign="center"
-          defaultValue={destinationToken.totalAmount}
+          defaultValue={amount}
           value={customAmount}
           onChangeText={setCustomAmount}
           autoFocus
@@ -53,7 +60,7 @@ function ReviewOfferAmount({
           accessibilityLabel="review offer amount"
           letterSpacing="sm"
         >
-          {displayFiatAmount(destinationToken.totalAmount)}
+          {displayFiatAmount(amount)}
         </Heading>
       )}
       {options?.payerCanChangeRequestedAmount && maxAmount == null && (

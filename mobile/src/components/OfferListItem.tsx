@@ -18,7 +18,6 @@ function OfferListItem({ offer, offerStatus }: OfferProps) {
   const { action, status, sourceToken, destinationToken } = offer;
   const navigation = useNavigation<NavigationProp<OffersStackParamList>>();
 
-  // TODO add Partial status
   return (
     <Pressable
       onPress={() =>
