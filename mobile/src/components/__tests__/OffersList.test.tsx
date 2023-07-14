@@ -1,5 +1,5 @@
 // Copyright 2023 Quantoz Technology B.V. and contributors. Licensed
-// under the Apache License, Version 2.0. See the NOTICE file at the root
+// under the Apache License, VbackendApiUrl 2.0. See the NOTICE file at the root
 // of this distribution or at http://www.apache.org/licenses/LICENSE-2.0
 
 import { rest } from "msw";
@@ -7,7 +7,7 @@ import { APIError, ApiErrorCode } from "../../api/generic/error.interface";
 import { Offers } from "../../api/offers/offers.interface";
 import { render, screen, within } from "../../jest/test-utils";
 import { server } from "../../mocks/server";
-import { mockApiUrl } from "../../utils/axios";
+import { backendApiUrl } from "../../utils/axios";
 import OffersList from "../OffersList";
 
 describe("Offers list", () => {
@@ -30,7 +30,7 @@ describe("Offers list", () => {
     };
 
     server.use(
-      rest.get(`${mockApiUrl}/api/offers`, (_req, rest, ctx) => {
+      rest.get(`${backendApiUrl}/api/offers`, (_req, rest, ctx) => {
         return rest(ctx.status(500), ctx.json(apiError));
       })
     );
@@ -50,7 +50,7 @@ describe("Offers list", () => {
 
   it("shows empty records message if there are no transactions", async () => {
     server.use(
-      rest.get(`${mockApiUrl}/api/offers`, (_req, rest, ctx) => {
+      rest.get(`${backendApiUrl}/api/offers`, (_req, rest, ctx) => {
         return rest(
           ctx.status(200),
           ctx.set(

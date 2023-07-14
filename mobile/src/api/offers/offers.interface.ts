@@ -21,7 +21,7 @@ const CreateOfferOptionsSchema = z.object({
 
 const CreateOfferTokenSchema = z.object({
   tokenCode: z.string(),
-  totalAmount: z.string(),
+  amount: z.string(),
 });
 
 const CreateOfferPayloadSchema = z.object({
@@ -67,8 +67,8 @@ const OfferSchema = z.object({
       returnUrl: z.string().url(),
     })
     .nullable(),
-  createdOn: z.string(),
-  updatedOn: z.string(),
+  createdOn: z.number(),
+  updatedOn: z.number(),
   callbacks: z.object({
     code: z.string(),
     status: z.string(),

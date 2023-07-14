@@ -3,7 +3,7 @@
 // of this distribution or at http://www.apache.org/licenses/LICENSE-2.0
 
 import { rest } from "msw";
-import { backendApiUrl, mockApiUrl } from "../../utils/axios";
+import { backendApiUrl } from "../../utils/axios";
 import { Offers } from "./offers.interface";
 
 export const mockOffers: Offers = {
@@ -37,8 +37,8 @@ export const mockOffers: Offers = {
         callbackUrl: "https://example.com/api/callback",
         returnUrl: "https://example.com/checkout/success",
       },
-      createdOn: "2023-05-09T10:30:00.000Z",
-      updatedOn: "2023-05-09T10:30:00.000Z",
+      createdOn: 1683590400,
+      updatedOn: 1683590400,
       callbacks: {
         code: "whatever",
         status: "Created",
@@ -61,7 +61,7 @@ export const offersMocks = [
   rest.post(`${backendApiUrl}/api/offers`, (_req, rest, ctx) => {
     return rest(ctx.status(201), ctx.json({}));
   }),
-  rest.get(`${mockApiUrl}/api/offers`, (_req, rest, ctx) => {
+  rest.get(`${backendApiUrl}/api/offers`, (_req, rest, ctx) => {
     return rest(
       ctx.status(200),
       ctx.set(
