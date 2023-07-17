@@ -28,6 +28,7 @@ jobs:
         with:
           node-version: 18.x
           cache: npm
+          cache-dependency-path: mobile/package-lock.json
 
       - name: Setup Expo and EAS
         uses: expo/expo-github-action@v8
