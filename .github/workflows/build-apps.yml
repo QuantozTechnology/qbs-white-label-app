@@ -2,7 +2,7 @@
 name: Build and submit apps through Expo EAS 
 
 on:
-  pull_request:
+  push:
     branches:
       - main
 
