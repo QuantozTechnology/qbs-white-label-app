@@ -1,5 +1,5 @@
 
-name: Build and submit iOS and Android apps on Expo EAS 
+name: Build and submit apps through Expo EAS 
 
 on:
   push:

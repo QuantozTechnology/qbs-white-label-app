@@ -22,14 +22,6 @@ jobs:
     - name: Build
       run: dotnet build
 
-    - name: Upload build artifacts
-      uses: actions/upload-artifact@v3
-      with:
-        name: build-output
-        path: |
-          **/bin
-          **/obj
-
   backend_test:
     needs: build
     runs-on: ubuntu-latest
@@ -39,12 +31,6 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v3
-
-    - name: Download build artifacts
-      uses: actions/download-artifact@v3
-      with:
-        name: build-output
-        path: .
 
     - name: Backend tests
       run: dotnet test
@@ -68,9 +54,3 @@ jobs:
         cd mobile
         npm run ci-test
 
-    - name: Upload test results
-      if: always()
-      uses: actions/upload-artifact@v3
-      with:
-        name: test-results
-        path: mobile/junit.xml
