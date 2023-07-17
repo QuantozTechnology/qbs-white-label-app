@@ -2,7 +2,7 @@
 name: Build and submit apps through Expo EAS 
 
 on:
-  push:
+  pull_request:
     branches:
       - main
 
@@ -19,7 +19,15 @@ jobs:
             echo "You must provide an EXPO_TOKEN secret linked to this project's Expo account in this repo's secrets. Learn more: https://docs.expo.dev/eas-update/github-actions"
             exit 1
           fi      
-
+      - name: Check for GOOGLE_SERVICES_JSON
+        run: |
+          if [ -z "${GOOGLE_SERVICES_JSON}" ]; then
+            echo "You must provide a GOOGLE_SERVICES_JSON environment variable for this job. This should be a secret linked to this project's Google service account in this repo's secrets."
+            exit 1
+          fi
+        env:
+          GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
+      
       - name: Checkout code
         uses: actions/checkout@v3
 
