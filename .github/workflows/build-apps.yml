@@ -28,12 +28,12 @@ jobs:
         env:
           GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
       
+      - name: Checkout code
+        uses: actions/checkout@v3
+
       - name: Setup Google Service Account
         run: |
           echo '${{ secrets.GOOGLE_SERVICES_JSON }}' > ./mobile/google-service-account.json
-
-      - name: Checkout code
-        uses: actions/checkout@v3
 
       - name: Set up Node.js
         uses: actions/setup-node@v3
