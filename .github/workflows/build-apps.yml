@@ -56,4 +56,4 @@ jobs:
       - name: Run script
         run: |
           cd mobile
-          eas build --profile preview-store --platform all --non-interactive --auto-submit
+          npm run create-stores-build
