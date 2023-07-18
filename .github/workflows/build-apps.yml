@@ -10,7 +10,7 @@ jobs:
   run-script:
     runs-on: ubuntu-latest
     permissions:
-      pull-requests: write
+      push: write
 
     steps:
       - name: Check for EXPO_TOKEN
