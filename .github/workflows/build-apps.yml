@@ -1,5 +1,5 @@
 
-name: Build and submit apps through Expo EAS 
+name: Build apps through Expo EAS 
 
 on:
   pull_request:
