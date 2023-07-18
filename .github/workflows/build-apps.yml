@@ -33,7 +33,7 @@ jobs:
 
       - name: Setup Google Service Account
         run: |
-          echo '${{ secrets.GOOGLE_SERVICES_JSON }}' > ./mobile/google-service-account.json
+          echo '${{ secrets.GOOGLE_SERVICES_JSON }}' | base64 --decode > ./mobile/google-service-account.json
 
       - name: Set up Node.js
         uses: actions/setup-node@v3
