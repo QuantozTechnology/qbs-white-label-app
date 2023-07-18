@@ -2,7 +2,7 @@
 name: Build and submit apps through Expo EAS 
 
 on:
-  push:
+  pull_request:
     branches:
       - main
 
@@ -10,7 +10,7 @@ jobs:
   run-script:
     runs-on: ubuntu-latest
     permissions:
-      push: write
+      pull-requests: write
 
     steps:
       - name: Check for EXPO_TOKEN
