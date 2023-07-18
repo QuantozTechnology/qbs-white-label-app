@@ -10,7 +10,7 @@
     "test": "TZ=UTC npx jest --forceExit",
     "lint": "eslint",
     "prepare": "cd .. && husky install",
-    "eas-build-pre-install": "npm config set legacy-peer-deps true",
+    "eas-build-pre-install": "npm config set legacy-peer-deps true && echo $GOOGLE_SERVICES_JSON | base64 --decode > ./google-service-account.json",
     "create-stores-build": "eas build --profile preview-store --platform all --non-interactive",
     "update-stores-build": "eas update --branch preview-store"
   },
