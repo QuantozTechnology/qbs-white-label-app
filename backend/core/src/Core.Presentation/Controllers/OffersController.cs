@@ -2,6 +2,7 @@
 // under the Apache License, Version 2.0. See the NOTICE file at the root
 // of this distribution or at http://www.apache.org/licenses/LICENSE-2.0
 
+using Core.Application.Commands.OfferCommands;
 using Core.Application.Queries.OfferQueries;
 using Core.Application.Queries.PaymentRequestQueries;
 using Core.Presentation.Models;
@@ -59,6 +60,19 @@ namespace Core.Presentation.Controllers
             var offer = await _sender.Send(query);
             var response = ConstructCustomResponse(offer, OfferResponse.FromOffer);
             return Ok(response);
+        }
+
+        [HttpPut("{code}/cancel", Name = "CancelOffer")]
+        [ProducesResponseType(typeof(CustomResponse<EmptyCustomResponse>), 200)]
+        [ProducesResponseType(typeof(CustomErrorsResponse), 400)]
+        [ProducesResponseType(typeof(CustomErrorsResponse), 404)]
+        [ProducesResponseType(typeof(CustomErrorsResponse), 500)]
+        [RequiredScope("Offer.Create")]
+        public async Task<IActionResult> CancelOfferAsync([FromRoute] string code)
+        {
+            var command = new CancelOfferCommand(GetUserId(), code);
+            await _sender.Send(command);
+            return Ok(new EmptyCustomResponse());
         }
     }
 }
