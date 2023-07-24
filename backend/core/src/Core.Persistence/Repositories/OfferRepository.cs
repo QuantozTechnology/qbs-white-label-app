@@ -29,5 +29,20 @@ namespace Core.Persistence.Repositories
 
             return offer;
         }
+
+        public async Task<Offer> GetByCodeForCustomerAsync(string customerCode, string code, CancellationToken cancellationToken = default)
+        {
+            var offer = await Query()
+                .Include(pr => pr.Payments)
+                .FirstOrDefaultAsync(pr => pr.OfferCode == code && pr.CustomerCode == customerCode, cancellationToken);
+
+            if (offer == null)
+            {
+                throw new CustomErrorsException(PersistenceErrorCode.NotFoundError.ToString(), code,
+                    "An offer for the customer was not found matching the provided code.");
+            }
+
+            return offer;
+        }
     }
 }

@@ -9,5 +9,7 @@ namespace Core.Domain.Repositories
     public interface IOfferRepository : IRepository<Offer>
     {
         Task<Offer> GetByOfferCodeAsync(string offerCode, CancellationToken cancellationToken = default);
+
+        Task<Offer> GetByCodeForCustomerAsync(string customerCode, string code, CancellationToken cancellationToken = default);
     }
 }
