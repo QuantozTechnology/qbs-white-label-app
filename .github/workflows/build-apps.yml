@@ -4,7 +4,7 @@ name: Build and submit apps through Expo EAS
 on:
   push:
     branches:
-      - main
+      - '**'
 
 jobs:
   run-script:
