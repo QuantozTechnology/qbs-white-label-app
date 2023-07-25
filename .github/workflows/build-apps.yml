@@ -48,15 +48,17 @@ jobs:
           cd mobile
           npm install --legacy-peer-deps
 
-      - name: Write Google service account file and check if it has contents
-        run: echo '${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}' > ./mobile/google-service-account.json
-              if [ ! -f "./mobile/google-service-account.json" ]; then
-                echo "Failed to create the google-service-account.json file"
-                exit 1
-              elif [ ! -s "./mobile/google-service-account.json" ]; then
-                echo "The google-service-account.json file is empty"
-                exit 1
-              fi
+      - name: Write Google service account file and check
+        run: |
+          echo "${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}" > ./mobile/google-service-account.json
+          if [ ! -f "./mobile/google-service-account.json" ]; then
+            echo "Failed to create the google-service-account.json file"
+            exit 1
+          fi
+          if [ ! -s "./mobile/google-service-account.json" ]; then 
+            echo "The google-service-account.json file is empty"
+            exit 1
+          fi
 
       - name: Run script
         run: |
