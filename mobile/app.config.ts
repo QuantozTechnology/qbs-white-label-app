@@ -98,7 +98,6 @@ export default () => ({
       },
     },
     android: {
-      googleServicesFile: process.env.GOOGLE_SERVICES_JSON,
       adaptiveIcon: {
         foregroundImage: AppConfig.android.adaptiveIcon.foregroundImage,
         backgroundColor: "#FFFFFF",
