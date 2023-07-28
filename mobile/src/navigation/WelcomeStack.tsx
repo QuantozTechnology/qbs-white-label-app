@@ -17,6 +17,7 @@ import CreateAccount from "../screens/CreateAccount";
 import { biometricValidation } from "../utils/biometric";
 import FullScreenMessage from "../components/FullScreenMessage";
 import { useCustomer } from "../api/customer/customer";
+import * as LocalAuthentication from "expo-local-authentication";
 
 export type WelcomeStackParamList = {
   Home: undefined;
@@ -58,6 +59,7 @@ export default function WelcomeStackNavigator() {
     boolean | undefined
   >();
   const [retryBiometric, setRetryBiometric] = useState<boolean | undefined>();
+  const [has2faMechanism, setHas2faMechanism] = useState<boolean>();
 
   const { data: customer } = useCustomer({
     enabled: auth?.userSession !== null,
@@ -66,6 +68,19 @@ export default function WelcomeStackNavigator() {
   useEffect(() => {
     WebBrowser.warmUpAsync();
 
+    const checkDeviceSecurityLevel = async () => {
+      const result = await LocalAuthentication.getEnrolledLevelAsync();
+      setHas2faMechanism(result !== LocalAuthentication.SecurityLevel.NONE);
+    };
+
+    checkDeviceSecurityLevel();
+
+    return () => {
+      WebBrowser.coolDownAsync();
+    };
+  }, []);
+
+  useEffect(() => {
     // check biometric
     async function checkBiometric() {
       setIsBiometricCheckPassed(undefined);
@@ -84,11 +99,10 @@ export default function WelcomeStackNavigator() {
     ) {
       checkBiometric();
     }
-
-    return () => {
-      WebBrowser.coolDownAsync();
-    };
   }, [auth?.userSession, retryBiometric]);
+
+  console.log("auth.isLoading: ", auth?.isLoading);
+  console.log("auth.userSession: ", auth?.userSession);
 
   if (auth?.isLoading) {
     return <FullScreenLoadingSpinner />;
@@ -106,7 +120,8 @@ export default function WelcomeStackNavigator() {
 
   if (
     customerContext?.isLoading ||
-    typeof isBiometricCheckPassed === "undefined"
+    typeof isBiometricCheckPassed === "undefined" ||
+    typeof has2faMechanism === "undefined"
   ) {
     return <FullScreenLoadingSpinner />;
   }
@@ -133,6 +148,23 @@ export default function WelcomeStackNavigator() {
   );
 
   function renderCorrectStack() {
+    if (!has2faMechanism) {
+      return (
+        <>
+          <WelcomeStack.Screen
+            name="Feedback"
+            component={Feedback}
+            initialParams={{
+              title: "Security issue",
+              description:
+                "Your device has no security measures set up (pin, passcode or fingerprint/faceID). Please enable one of these to be able to use the app.",
+              illustration: ImageIdentifier.Find,
+            }}
+          />
+        </>
+      );
+    }
+
     if (customerContext?.requiresCustomer) {
       return (
         <>
