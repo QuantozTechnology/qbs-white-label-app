@@ -2,16 +2,17 @@
 name: Build and submit apps through Expo EAS 
 
 on:
-  push:
-    paths:
-      - 'mobile/**'
-
   pull_request:
+    types:
+      - closed
     paths:
       - 'mobile/**'
+    branches:
+      - main
 
 jobs:
   run-script:
+    if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
@@ -27,7 +28,7 @@ jobs:
       - name: Check for GOOGLE_SERVICE_ACCOUNT_JSON
         run: |
           if [ -z "${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}" ]; then
-            echo "You must provide a GOOGLE_SERVICE_ACCOUNT_JSON secret in this repo's secrets."
+            echo "You must provide a GOOGLE_SERVICE_ACCOUNT_JSON secret in this repo's secrets. It must be stored as a Base64 encoded string."
             exit 1
           fi
 
