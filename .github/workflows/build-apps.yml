@@ -3,8 +3,12 @@ name: Build and submit apps through Expo EAS
 
 on:
   push:
-    branches:
-      - '**'
+    paths:
+      - 'mobile/**'
+
+  pull_request:
+    paths:
+      - 'mobile/**'
 
 jobs:
   run-script:
