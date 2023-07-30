@@ -70,6 +70,7 @@ export default function WelcomeStackNavigator() {
 
     const checkDeviceSecurityLevel = async () => {
       const result = await LocalAuthentication.getEnrolledLevelAsync();
+
       setHas2faMechanism(result !== LocalAuthentication.SecurityLevel.NONE);
     };
 
@@ -101,13 +102,32 @@ export default function WelcomeStackNavigator() {
     }
   }, [auth?.userSession, retryBiometric]);
 
-  console.log("auth.isLoading: ", auth?.isLoading);
-  console.log("auth.userSession: ", auth?.userSession);
+  if (typeof has2faMechanism === "undefined") {
+    return <FullScreenLoadingSpinner />;
+  }
+
+  if (!has2faMechanism) {
+    return (
+      <WelcomeStack.Navigator
+        screenOptions={{ headerShown: false, gestureEnabled: false }}
+      >
+        <WelcomeStack.Screen
+          name="Feedback"
+          component={Feedback}
+          initialParams={{
+            title: "Security issue",
+            description: `Your device has no security measures set up (pin, passcode or fingerprint/faceID).
+Please enable one of these to be able to use the app.`,
+            illustration: ImageIdentifier.Find,
+          }}
+        />
+      </WelcomeStack.Navigator>
+    );
+  }
 
   if (auth?.isLoading) {
     return <FullScreenLoadingSpinner />;
   }
-
   if (auth?.userSession === null && !auth.isLoading) {
     return (
       <WelcomeStack.Navigator
@@ -120,8 +140,7 @@ export default function WelcomeStackNavigator() {
 
   if (
     customerContext?.isLoading ||
-    typeof isBiometricCheckPassed === "undefined" ||
-    typeof has2faMechanism === "undefined"
+    typeof isBiometricCheckPassed === "undefined"
   ) {
     return <FullScreenLoadingSpinner />;
   }
@@ -148,23 +167,6 @@ export default function WelcomeStackNavigator() {
   );
 
   function renderCorrectStack() {
-    if (!has2faMechanism) {
-      return (
-        <>
-          <WelcomeStack.Screen
-            name="Feedback"
-            component={Feedback}
-            initialParams={{
-              title: "Security issue",
-              description:
-                "Your device has no security measures set up (pin, passcode or fingerprint/faceID). Please enable one of these to be able to use the app.",
-              illustration: ImageIdentifier.Find,
-            }}
-          />
-        </>
-      );
-    }
-
     if (customerContext?.requiresCustomer) {
       return (
         <>
