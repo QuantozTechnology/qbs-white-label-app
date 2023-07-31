@@ -11,6 +11,30 @@ import * as CustomerContext from "../context/CustomerContext";
 import * as Clipboard from "expo-clipboard";
 import { biometricValidation } from "../utils/biometric";
 
+// Needed because it accesses the value of code in the Expo Constants, but mocking Constants breaks sentry-expo library, and mocking that one breaks other stuff
+jest.mock("../config/config", () => ({
+  ...jest.requireActual("../config/config"),
+  defaultConfig: {
+    ...jest.requireActual("../config/config").defaultConfig,
+    defaultStableCoin: {
+      ...jest.requireActual("../config/config").defaultConfig.defaultStableCoin,
+      code: "SCEUR",
+    },
+  },
+}));
+
+jest.mock("expo-local-authentication", () => ({
+  hasHardwareAsync: jest.fn().mockResolvedValue(true),
+  isEnrolledAsync: jest.fn().mockResolvedValue(true),
+  authenticateAsync: jest.fn().mockResolvedValue({ success: true }),
+  SecurityLevel: {
+    NONE: 0,
+    SECRET: 1,
+    BIOMETRIC: 2,
+  },
+  getEnrolledLevelAsync: jest.fn().mockResolvedValue(2),
+}));
+
 export const mockRefresh = jest.fn();
 export let mockClipboardCopy: jest.SpyInstance;
 export let authMock: jest.SpyInstance;

@@ -3,6 +3,7 @@
 // of this distribution or at http://www.apache.org/licenses/LICENSE-2.0
 
 import { backendApiUrl } from "../utils/axios";
+import Constants from "expo-constants";
 
 type AppDefaultConfig = {
   defaultFiatCurrency: string;
@@ -28,7 +29,7 @@ type AppDefaultConfig = {
 export const defaultConfig: AppDefaultConfig = {
   defaultFiatCurrency: "EUR",
   defaultStableCoin: {
-    code: "SCEUR",
+    code: Constants.expoConfig?.extra?.DEFAULT_STABLECOIN,
     websiteLink: "https://www.quantoz.com",
   },
   supportEmail: "support@quantozpayments.com",

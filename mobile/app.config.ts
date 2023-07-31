@@ -66,6 +66,7 @@ const AppConfig = {
     SENTRY_PROJECT: process.env.SENTRY_PROJECT,
     SENTRY_DSN: process.env.SENTRY_DSN,
     SENTRY_AUTH_TOKEN: process.env.SENTRY_AUTH_TOKEN,
+    DEFAULT_STABLECOIN: process.env.DEFAULT_STABLECOIN,
   },
 };
 
@@ -98,7 +99,6 @@ export default () => ({
       },
     },
     android: {
-      googleServicesFile: process.env.GOOGLE_SERVICES_JSON,
       adaptiveIcon: {
         foregroundImage: AppConfig.android.adaptiveIcon.foregroundImage,
         backgroundColor: "#FFFFFF",
