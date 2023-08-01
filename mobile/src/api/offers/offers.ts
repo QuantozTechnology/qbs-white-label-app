@@ -21,7 +21,7 @@ type GetOfferProps = {
 };
 
 async function getOffer({ offerCode }: GetOfferProps) {
-  const { data } = await mockPaymentsApi.get<GenericApiResponse<Offer>>(
+  const { data } = await paymentsApi.get<GenericApiResponse<Offer>>(
     `/api/offers/${offerCode}`
   );
 

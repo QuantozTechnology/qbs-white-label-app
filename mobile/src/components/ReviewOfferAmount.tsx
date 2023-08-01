@@ -46,6 +46,7 @@ function ReviewOfferAmount({
       </Heading>
       {!isCreatedOffer && options?.payerCanChangeRequestedAmount ? (
         <Input
+          accessibilityLabel="changeable amount"
           variant="unstyled"
           fontSize="5xl"
           textAlign="center"
@@ -88,7 +89,9 @@ function ReviewOfferAmount({
               ? "medium"
               : "normal"
           }
-          accessibilityLabel="payer can change amount"
+          accessibilityLabel={`payer can change amount ${
+            parseFloat(customAmount) > parseFloat(maxAmount) ? "error" : ""
+          }`}
         >
           Max: {displayFiatAmount(maxAmount)}
         </Text>
