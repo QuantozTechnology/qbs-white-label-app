@@ -11,5 +11,7 @@ namespace Core.Domain.Repositories
         Task<Offer> GetByOfferCodeAsync(string offerCode, CancellationToken cancellationToken = default);
 
         Task<Offer> GetByCodeForCustomerAsync(string customerCode, string code, CancellationToken cancellationToken = default);
+
+        Task<IEnumerable<Offer>> GetOpenOffersToExpireAsync(CancellationToken cancellationToken = default);
     }
 }

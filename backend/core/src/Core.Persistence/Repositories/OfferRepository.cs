@@ -2,7 +2,9 @@
 // under the Apache License, Version 2.0. See the NOTICE file at the root
 // of this distribution or at http://www.apache.org/licenses/LICENSE-2.0
 
+using Core.Domain;
 using Core.Domain.Entities.OfferAggregate;
+using Core.Domain.Entities.PaymentRequestAggregate;
 using Core.Domain.Exceptions;
 using Core.Domain.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -43,6 +45,15 @@ namespace Core.Persistence.Repositories
             }
 
             return offer;
+        }
+
+        public async Task<IEnumerable<Offer>> GetOpenOffersToExpireAsync(CancellationToken cancellationToken = default)
+        {
+            return await Query()
+                .Where(pr => pr.Options.ExpiresOn.HasValue && DateTimeProvider.UtcNow > pr.Options.ExpiresOn.Value
+                    && pr.Status == OfferStatus.Open)
+                .Take(20)
+                .ToListAsync(cancellationToken);
         }
     }
 }
