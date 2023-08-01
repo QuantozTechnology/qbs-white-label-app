@@ -1,3 +1,7 @@
+// Copyright 2023 Quantoz Technology B.V. and contributors. Licensed
+// under the Apache License, Version 2.0. See the NOTICE file at the root
+// of this distribution or at http://www.apache.org/licenses/LICENSE-2.0
+
 import { NavigationProp, useNavigation } from "@react-navigation/native";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
@@ -60,7 +64,6 @@ function CancelOfferDialog({
   const onClose = () => setIsOpen(false);
 
   const handleCancelOffer = () => {
-    // TODO mock code to delete the offer
     mutate();
   };
 
@@ -69,6 +72,7 @@ function CancelOfferDialog({
       leastDestructiveRef={cancelRef}
       isOpen={isOpen}
       onClose={onClose}
+      accessibilityLabel="cancel offer dialog"
     >
       <AlertDialog.Content>
         <AlertDialog.CloseButton />
@@ -83,6 +87,7 @@ function CancelOfferDialog({
               colorScheme="coolGray"
               onPress={onClose}
               ref={cancelRef}
+              accessibilityLabel="close cancel offer dialog"
             >
               Close
             </Button>
@@ -91,6 +96,7 @@ function CancelOfferDialog({
               onPress={handleCancelOffer}
               isLoading={isLoading}
               isLoadingText="Canceling..."
+              accessibilityLabel="confirm cancel offer"
             >
               Cancel offer
             </Button>

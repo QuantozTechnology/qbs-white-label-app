@@ -97,4 +97,10 @@ export const offersMocks = [
   rest.post(`${mockApiUrl}/api/offers/confirm`, (_req, rest, ctx) => {
     return rest(ctx.status(201), ctx.json({}));
   }),
+  rest.put(
+    `${backendApiUrl}/api/offers/:offerCode/cancel`,
+    (_req, rest, ctx) => {
+      return rest(ctx.status(200), ctx.json({}));
+    }
+  ),
 ];

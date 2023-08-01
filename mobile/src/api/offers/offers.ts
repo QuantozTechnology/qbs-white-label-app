@@ -62,11 +62,7 @@ export function useOffers({ type }: useOffersProps) {
 
 // Cancel an offer
 export function cancelOffer(offerCode: string): Promise<AxiosResponse> {
-  return mockPaymentsApi.put(`/api/offers/${offerCode}/cancel`, null, {
-    headers: {
-      "x-mock-response-code": 201,
-    },
-  });
+  return paymentsApi.put(`/api/offers/${offerCode}/cancel`, null, {});
 }
 
 // POST confirm offer

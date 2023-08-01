@@ -56,6 +56,7 @@ export const mockNavigation = {
 
 export const mockUseNavigationNavigate = jest.fn();
 export const mockUseNavigationDispatch = jest.fn();
+export const mockUseNavigationGoBack = jest.fn();
 jest.mock("@react-navigation/native", () => {
   const actualNav = jest.requireActual("@react-navigation/native");
   return {
@@ -66,6 +67,7 @@ jest.mock("@react-navigation/native", () => {
       })),
       dispatch: mockUseNavigationDispatch,
       navigate: mockUseNavigationNavigate,
+      goBack: mockUseNavigationGoBack,
     }),
   };
 });
