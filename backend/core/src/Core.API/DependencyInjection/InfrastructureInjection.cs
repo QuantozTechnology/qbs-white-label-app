@@ -50,6 +50,7 @@ namespace Core.API.DependencyInjection
             services.AddScoped<IAccountRepository, NexusAccountRepository>();
             services.AddScoped<ITransactionRepository, NexusTransactionRepository>();
             services.AddScoped<ISettingsRepository, NexusSettingsRepository>();
+            services.AddScoped<ITokenRepository, NexusTokenRepository>();
 
             return services;
         }

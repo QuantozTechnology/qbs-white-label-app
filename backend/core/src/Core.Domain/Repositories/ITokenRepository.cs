@@ -9,6 +9,6 @@ namespace Core.Domain.Repositories
 {
     public interface ITokenRepository
     {
-        public Task<Paged<Token>> GetAsync(string publicKey, int page, int pageSize, CancellationToken cancellationToken = default);
+        public Task<Paged<Token>> GetAsync(string publicKey, TokenAvailability? availability, int page, int pageSize, CancellationToken cancellationToken = default);
     }
 }
