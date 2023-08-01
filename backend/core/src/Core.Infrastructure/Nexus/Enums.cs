@@ -24,6 +24,7 @@ namespace Core.Infrastructure.Nexus
         TrustlevelNotFoundError = 4,
         InvalidStatus = 4,
         InvalidProperty = 5,
-        TransactionNotFoundError = 6
+        TransactionNotFoundError = 6,
+        TokenNotFoundError = 7
     }
 }

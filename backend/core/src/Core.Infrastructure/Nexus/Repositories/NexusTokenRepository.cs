@@ -4,6 +4,7 @@
 
 using Core.Domain;
 using Core.Domain.Entities.TokenAggregate;
+using Core.Domain.Exceptions;
 using Core.Domain.Primitives;
 using Core.Domain.Repositories;
 using Nexus.Token.SDK;
@@ -75,6 +76,15 @@ namespace Core.Infrastructure.Nexus.Repositories
             var pagedRecords = paginationHelper.GetPagedList(records, page, pageSize);
 
             return pagedRecords;
+        }
+
+        public async Task<Token> GetTokenDetailsAsync(string code, CancellationToken cancellationToken = default)
+        {
+            var token = await _tokenServer.Tokens.Get(code);
+
+            return token == null
+                ? throw new CustomErrorsException(NexusErrorCodes.TokenNotFoundError.ToString(), code, "A token with the provided code was not found")
+                : ConvertToToken(token);
         }
 
         private static Token ConvertToToken(TokenResponse token)
