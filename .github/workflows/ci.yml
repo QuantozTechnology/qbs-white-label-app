@@ -4,10 +4,12 @@ name: CI
 on:
   push:
     branches:
-      - [main, feature-asset-tokenization]
+      - main
+      - feature-asset-tokenization
   pull_request:
     branches:
-      - [main, feature-asset-tokenization]
+      - main
+      - feature-asset-tokenization
 
 jobs:
   build:
