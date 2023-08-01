@@ -61,4 +61,10 @@ namespace Core.Domain
         Cancelled,
         Expired
     }
+
+    public enum TokenAvailability
+    {
+        Available,
+        Owned,
+    }
 }
