@@ -40,7 +40,17 @@ function ReviewScannedOffer({ navigation, route }: Props) {
         render: () => (
           <Notification
             title="Offer confirmed"
-            message="Bought this much"
+            message={`${data?.value.action} value: ${displayFiatAmount(
+              customAmount ?? destinationToken.totalAmount,
+              {
+                currency: isBuyOffer
+                  ? sourceToken.tokenCode
+                  : destinationToken.tokenCode,
+                decimals: isBuyOffer
+                  ? getDecimalCount(sourceToken.totalAmount)
+                  : getDecimalCount(destinationToken.totalAmount),
+              }
+            )}`}
             variant="success"
             isToastNotification
           />
@@ -76,7 +86,6 @@ function ReviewScannedOffer({ navigation, route }: Props) {
   }
 
   if (status === "loading" || customAmount == null) {
-    // return <FullScreenLoadingSpinner />;
     return <ReviewScannedOfferSkeleton />;
   }
 
@@ -103,12 +112,14 @@ function ReviewScannedOffer({ navigation, route }: Props) {
         <GenericListItem
           leftContent={isBuyOffer ? "Seller" : "Buyer"}
           rightContent={customerCode}
+          accessibilityLabel="initiator"
         />
         <GenericListItem
           leftContent="Price"
           rightContent={`${price} ${
             isBuyOffer ? sourceToken.tokenCode : destinationToken.tokenCode
           }/${isBuyOffer ? destinationToken.tokenCode : sourceToken.tokenCode}`}
+          accessibilityLabel="price"
         />
         <GenericListItem
           leftContent={isBuyOffer ? "Purchase value" : "Sell value"}
@@ -125,6 +136,7 @@ function ReviewScannedOffer({ navigation, route }: Props) {
                 : getDecimalCount(destinationToken.totalAmount),
             }
           )}
+          accessibilityLabel="offer value"
         />
         <GenericListItem
           leftContent="Fee"
@@ -133,6 +145,7 @@ function ReviewScannedOffer({ navigation, route }: Props) {
               ? sourceToken.tokenCode
               : destinationToken.tokenCode,
           })}
+          accessibilityLabel="fee"
         />
         <GenericListItem
           accessibilityLabel="total"
@@ -156,6 +169,7 @@ function ReviewScannedOffer({ navigation, route }: Props) {
         />
       </VStack>
       <Button
+        accessibilityLabel="confirm offer"
         onPress={handleConfirmOffer}
         isDisabled={!customAmountIsValid || isLoading}
         isLoading={isLoading}

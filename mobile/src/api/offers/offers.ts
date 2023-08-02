@@ -21,7 +21,7 @@ type GetOfferProps = {
 };
 
 async function getOffer({ offerCode }: GetOfferProps) {
-  const { data } = await mockPaymentsApi.get<GenericApiResponse<Offer>>(
+  const { data } = await paymentsApi.get<GenericApiResponse<Offer>>(
     `/api/offers/${offerCode}`
   );
 
@@ -37,7 +37,7 @@ export function useOffer({ offerCode }: GetOfferProps) {
 
 // GET offers
 export async function getOffers({ type, pageParam = 1 }: useOffersProps) {
-  const { data, headers } = await mockPaymentsApi.get<Offers>(
+  const { data, headers } = await paymentsApi.get<Offers>(
     `/api/offers?offerStatus=${type}&page=${pageParam}&pageSize=10`
   );
 
@@ -62,11 +62,7 @@ export function useOffers({ type }: useOffersProps) {
 
 // Cancel an offer
 export function cancelOffer(offerCode: string): Promise<AxiosResponse> {
-  return mockPaymentsApi.put(`/api/offers/${offerCode}/cancel`, null, {
-    headers: {
-      "x-mock-response-code": 201,
-    },
-  });
+  return paymentsApi.put(`/api/offers/${offerCode}/cancel`, null, {});
 }
 
 // POST confirm offer

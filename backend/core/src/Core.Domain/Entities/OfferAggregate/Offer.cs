@@ -124,6 +124,15 @@ namespace Core.Domain.Entities.OfferAggregate
             }
         }
 
+        public void Cancel()
+        {
+            if (Status == OfferStatus.Open)
+            {
+                UpdatedOn = DateTimeProvider.UtcNow;
+                Status = OfferStatus.Cancelled;
+            }
+        }
+
         // Required for EF Core
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
         public Offer() { }
