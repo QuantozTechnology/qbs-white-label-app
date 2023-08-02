@@ -23,7 +23,7 @@ import {
   VStack,
 } from "native-base";
 import { useEffect, useState } from "react";
-import { getAvailableTokens, getOwnedTokens } from "../api/tokens/tokens";
+import { getTokens } from "../api/tokens/tokens";
 import { Tokens } from "../api/tokens/tokens.interface";
 import ScreenWrapper from "../components/ScreenWrapper";
 import { validationCheck } from "../utils/validation/errors";
@@ -64,15 +64,15 @@ function CreateSellOffer({ navigation, route }: Props) {
     // Prefetch the owned tokens which the user can select, since it's most likely to happen every time
     async function prefetchOwnedTokens() {
       await queryClient.prefetchInfiniteQuery({
-        queryKey: ["owned_tokens"],
-        queryFn: getOwnedTokens,
+        queryKey: ["tokens", "owned"],
+        queryFn: () => getTokens({ type: "owned" }),
       });
     }
 
     async function prefetchAvailableTokens() {
       await queryClient.prefetchInfiniteQuery({
-        queryKey: ["available_tokens"],
-        queryFn: getAvailableTokens,
+        queryKey: ["tokens", "available"],
+        queryFn: () => getTokens({ type: "available" }),
       });
     }
 

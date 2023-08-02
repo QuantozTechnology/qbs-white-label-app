@@ -4,7 +4,7 @@
 
 import { Button, Heading, VStack } from "native-base";
 import { Fragment } from "react";
-import { useAvailableTokens } from "../api/tokens/tokens";
+import { useTokens } from "../api/tokens/tokens";
 import TokensListSkeleton from "../screens/skeletons/TokensListSkeleton";
 import { ImageIdentifier } from "../utils/images";
 import TokenListItem from "./TokenListItem";
@@ -14,7 +14,7 @@ import ScreenWrapper from "./ScreenWrapper";
 
 function AvailableTokensList() {
   const { data, status, hasNextPage, isFetchingNextPage, fetchNextPage } =
-    useAvailableTokens();
+    useTokens({ type: "available" });
 
   if (status === "error") {
     return (

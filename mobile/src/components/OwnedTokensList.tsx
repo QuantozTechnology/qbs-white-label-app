@@ -4,7 +4,7 @@
 
 import { Button, Heading, VStack } from "native-base";
 import { Fragment } from "react";
-import { useOwnedTokens } from "../api/tokens/tokens";
+import { useTokens } from "../api/tokens/tokens";
 import TokensListSkeleton from "../screens/skeletons/TokensListSkeleton";
 import { ImageIdentifier } from "../utils/images";
 import TokenListItem from "./TokenListItem";
@@ -14,7 +14,7 @@ import ScreenWrapper from "./ScreenWrapper";
 
 function OwnedTokensList() {
   const { data, status, hasNextPage, isFetchingNextPage, fetchNextPage } =
-    useOwnedTokens();
+    useTokens({ type: "owned" });
 
   if (status === "error") {
     return (

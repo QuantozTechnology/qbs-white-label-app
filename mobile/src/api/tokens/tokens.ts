@@ -2,28 +2,40 @@
 // under the Apache License, Version 2.0. See the NOTICE file at the root
 // of this distribution or at http://www.apache.org/licenses/LICENSE-2.0
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
-import { mockPaymentsApi } from "../../utils/axios";
+import { mockPaymentsApi, paymentsApi } from "../../utils/axios";
 import { TokenDetails, Tokens } from "./tokens.interface";
-import { GenericApiResponse } from "../utils/api.interface";
+import { GenericApiResponse, PaginatedResponse } from "../utils/api.interface";
+import { constructUrlWithParams } from "../../utils/api";
 
-type GetTokenProps = {
+type GetTokenDetailsProps = {
   tokenCode: string;
 };
 
-// GET available tokens
+type GetTokensProps = {
+  pageParam: number;
+  type?: "available" | "owned";
+};
 
-export async function getAvailableTokens({ pageParam = 1 }) {
-  const { data, headers } = await mockPaymentsApi.get<
-    GenericApiResponse<Tokens[]>
-  >(`/api/tokens/available?page=${pageParam}&pageSize=10`);
+export async function getTokens({
+  pageParam = 1,
+  type,
+}: Partial<GetTokensProps>): Promise<PaginatedResponse<Tokens[]>> {
+  const url = constructUrlWithParams("api/tokens", {
+    availability: type,
+    page: pageParam,
+    pageSize: 5,
+  });
 
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  const nextPage = JSON.parse(headers["x-pagination"]!).NextPage;
+  const { data, headers } = await paymentsApi.get<GenericApiResponse<Tokens[]>>(
+    url
+  );
+  const nextPage: string | null = JSON.parse(headers["x-pagination"]).NextPage;
+
   return { ...data, nextPage };
 }
 
-export function useAvailableTokens() {
-  return useInfiniteQuery(["available_tokens"], getAvailableTokens, {
+export function useTokens({ type }: Partial<GetTokensProps>) {
+  return useInfiniteQuery(["tokens", type], () => getTokens({ type }), {
     getNextPageParam: (lastPage) => {
       return lastPage.nextPage ?? undefined;
     },
@@ -31,29 +43,9 @@ export function useAvailableTokens() {
   });
 }
 
-// GET owned tokens
-
-export async function getOwnedTokens({ pageParam = 1 }) {
-  const { data, headers } = await mockPaymentsApi.get<
-    GenericApiResponse<Tokens[]>
-  >(`/api/tokens/owned?page=${pageParam}&pageSize=1`);
-
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  const nextPage = JSON.parse(headers["x-pagination"]!).NextPage;
-  return { ...data, nextPage };
-}
-
-export function useOwnedTokens() {
-  return useInfiniteQuery(["owned_tokens"], getOwnedTokens, {
-    getNextPageParam: (lastPage) => {
-      return lastPage.nextPage ?? undefined;
-    },
-  });
-}
-
 // GET a single token details
 
-async function getTokenDetails({ tokenCode }: GetTokenProps) {
+async function getTokenDetails({ tokenCode }: GetTokenDetailsProps) {
   const { data } = await mockPaymentsApi.get<GenericApiResponse<TokenDetails>>(
     `/api/tokens/${tokenCode}`
   );
@@ -61,7 +53,7 @@ async function getTokenDetails({ tokenCode }: GetTokenProps) {
   return data;
 }
 
-export function useTokenDetails({ tokenCode }: GetTokenProps) {
+export function useTokenDetails({ tokenCode }: GetTokenDetailsProps) {
   return useQuery({
     queryKey: ["token"],
     queryFn: () => getTokenDetails({ tokenCode }),
