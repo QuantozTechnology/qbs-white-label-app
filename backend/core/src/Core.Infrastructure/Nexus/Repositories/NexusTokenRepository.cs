@@ -42,24 +42,59 @@ namespace Core.Infrastructure.Nexus.Repositories
 
             var nexusAssets = await _tokenServer.Tokens.Get(query);
 
-            IEnumerable<Token> records;
-            var tokens = new List<TokenResponse>();
+            Token[] records;
 
             if (availability.HasValue)
             {
                 if (availability == TokenAvailability.Available)
                 {
                     var availableTokens = nexusAssets!.Records.Where(a => !userTokens!.Contains(a.Code))?.ToList();
-                    records = availableTokens!.Select(ConvertToToken);
+
+                    records = new Token[availableTokens!.Count];
+
+                    var tasks = availableTokens.Select((at, index) =>
+                    {
+                        return Task.Run(() =>
+                        {
+                            records[index] = ConvertToToken(at);
+                        });
+                    });
+
+                    await Task.WhenAll(tasks);
                 }
                 else if (availability == TokenAvailability.Owned)
                 {
+                    var tokens = new List<TokenResponse>();
+
                     foreach (var balance in response.Balances)
                     {
                         var token = await _tokenServer.Tokens.Get(balance.TokenCode);
                         tokens.Add(token);
                     }
-                    records = tokens!.Select(ConvertToToken);
+
+                    records = new Token[tokens!.Count];
+
+                    var tasks = tokens
+                        .Join(response.Balances,
+                        token => token.Code,
+                        balance => balance.TokenCode,
+                        (token, balance) =>
+                        {
+                            return new
+                            {
+                                Token = token,
+                                Balance = balance.Amount,
+                            };
+                        })
+                        .Select((token, index) =>
+                        {
+                            return Task.Run(() =>
+                            {
+                                records[index] = ConvertToToken(token.Token, token.Balance);
+                            });
+                        });
+
+                    await Task.WhenAll(tasks);
                 }
                 else
                 {
@@ -68,8 +103,17 @@ namespace Core.Infrastructure.Nexus.Repositories
             }
             else
             {
-                // If availability is not specified, return all tokens
-                records = nexusAssets.Records.Select(ConvertToToken);
+                // If availability is not specified, return nexusAssets converted into Token
+                records = new Token[nexusAssets!.Records!.Count()];
+                var tasks = nexusAssets.Records.Select((asset, index) =>
+                {
+                    return Task.Run(() =>
+                    {
+                        records[index] = ConvertToToken(asset);
+                    });
+                });
+
+                await Task.WhenAll(tasks);
             }
 
             var paginationHelper = new PaginationHelper<Token>();
@@ -87,13 +131,14 @@ namespace Core.Infrastructure.Nexus.Repositories
                 : ConvertToToken(token);
         }
 
-        private static Token ConvertToToken(TokenResponse token)
+        private static Token ConvertToToken(TokenResponse token, decimal? balance = null)
         {
             return new Token
             {
                 TokenCode = token.Code,
                 Name = token.Name,
                 IssuerAddress = token.IssuerAddress,
+                Balance = balance?.ToString() ?? null,
                 Status = token.Status,
                 Created = DateTimeOffset.Parse(token.Created)
             };
