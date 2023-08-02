@@ -12,6 +12,8 @@ namespace Core.Domain.Entities.TokenAggregate
 
         public required string IssuerAddress { get; set; }
 
+        public string? Balance { get; set; }
+
         public required string Status { get; set; }
 
         public required DateTimeOffset Created { get; set; }
