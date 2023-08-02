@@ -16,7 +16,7 @@ type TokensOverviewProps = NativeStackScreenProps<
 function TokensOverview({ route }: TokensOverviewProps) {
   const { sourceScreen } = route.params;
   return (
-    <ScreenWrapper flex={1}>
+    <ScreenWrapper flex={1} space={8}>
       <OwnedTokensList />
       {sourceScreen === "CreateBuyOffer" && <AvailableTokensList />}
     </ScreenWrapper>

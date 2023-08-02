@@ -23,24 +23,27 @@ export async function getTokens({
   const url = constructUrlWithParams("api/tokens", {
     availability: type,
     page: pageParam,
-    pageSize: 5,
+    pageSize: 10,
   });
 
   const { data, headers } = await paymentsApi.get<GenericApiResponse<Tokens[]>>(
     url
   );
-  const nextPage: string | null = JSON.parse(headers["x-pagination"]).NextPage;
-
-  return { ...data, nextPage };
+  const pagination = JSON.parse(headers["x-pagination"]);
+  return { ...data, nextPage: pagination.NextPage };
 }
 
 export function useTokens({ type }: Partial<GetTokensProps>) {
-  return useInfiniteQuery(["tokens", type], () => getTokens({ type }), {
-    getNextPageParam: (lastPage) => {
-      return lastPage.nextPage ?? undefined;
-    },
-    refetchInterval: 5000,
-  });
+  return useInfiniteQuery(
+    ["tokens", type],
+    ({ pageParam }) => getTokens({ type, pageParam }),
+    {
+      getNextPageParam: (lastPage) => {
+        return lastPage.nextPage ?? undefined;
+      },
+      refetchInterval: 10000,
+    }
+  );
 }
 
 // GET a single token details
