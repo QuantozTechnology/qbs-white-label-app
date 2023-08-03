@@ -2,16 +2,20 @@ export function constructUrlWithParams(
   base: string,
   queryParams?: Record<string, string | number | boolean | null | undefined>
 ): string {
-  const url = new URL(base);
+  if (!queryParams) return base;
 
-  if (queryParams) {
-    Object.keys(queryParams).forEach((key) => {
+  const params = Object.keys(queryParams)
+    .map((key) => {
       const value = queryParams[key];
       if (value !== null && value !== undefined) {
-        url.searchParams.append(key, value.toString());
+        return `${encodeURIComponent(key)}=${encodeURIComponent(
+          value.toString()
+        )}`;
       }
-    });
-  }
+      return null;
+    })
+    .filter((param) => param !== null)
+    .join("&");
 
-  return url.toString();
+  return params ? `${base}?${params}` : base;
 }

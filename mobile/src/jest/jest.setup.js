@@ -69,6 +69,9 @@ jest.mock("@react-navigation/native", () => {
       navigate: mockUseNavigationNavigate,
       goBack: mockUseNavigationGoBack,
     }),
+    useRoute: () => ({
+      params: { sourceScreen: "CreateBuyOffer" },
+    }),
   };
 });
 

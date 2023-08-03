@@ -26,7 +26,10 @@ function TokenListItem({ token }: TokenListItemProps) {
   const { code, name, balance } = token;
 
   return (
-    <Pressable onPress={handleTokenListItemPress}>
+    <Pressable
+      onPress={handleTokenListItemPress}
+      accessibilityLabel="token list item"
+    >
       <HStack
         alignItems="center"
         justifyContent="space-between"

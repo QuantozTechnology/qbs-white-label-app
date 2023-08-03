@@ -3,7 +3,7 @@
 // of this distribution or at http://www.apache.org/licenses/LICENSE-2.0
 
 import { rest } from "msw";
-import { mockApiUrl } from "../../utils/axios";
+import { backendApiUrl, mockApiUrl } from "../../utils/axios";
 import { GenericApiResponse, PaginatedResponse } from "../utils/api.interface";
 import { TokenDetails, Tokens } from "./tokens.interface";
 
@@ -49,9 +49,13 @@ export const tokensMock: PaginatedResponse<Tokens[]> = {
 };
 
 export const tokenMocks = [
-  rest.get(`${mockApiUrl}/api/tokens`, (_req, rest, ctx) => {
+  rest.get(`${backendApiUrl}/api/tokens`, (_req, rest, ctx) => {
     return rest(
       ctx.status(200),
+      ctx.set(
+        "x-pagination",
+        '{"TotalCount":5,"PageSize":10,"CurrentPage":1,"PreviousPage":null,"NextPage":null,"TotalPages":1}'
+      ),
       ctx.json<PaginatedResponse<Tokens[]>>(tokensMock)
     );
   }),

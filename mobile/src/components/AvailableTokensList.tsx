@@ -52,8 +52,12 @@ function AvailableTokensList() {
   const items = data.pages.map((page) => page.value).flat();
 
   return (
-    <VStack space={2} flex={1}>
-      <Heading size="xs" textTransform="uppercase">
+    <VStack space={2} flex={1} accessibilityLabel="available tokens section">
+      <Heading
+        size="xs"
+        textTransform="uppercase"
+        accessibilityLabel="available tokens heading"
+      >
         Available assets
       </Heading>
       <FlatList

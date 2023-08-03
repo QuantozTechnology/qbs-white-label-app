@@ -29,6 +29,7 @@ export async function getTokens({
   const { data, headers } = await paymentsApi.get<GenericApiResponse<Tokens[]>>(
     url
   );
+
   const pagination = JSON.parse(headers["x-pagination"]);
   return { ...data, nextPage: pagination.NextPage };
 }
