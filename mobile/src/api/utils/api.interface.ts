@@ -5,3 +5,7 @@
 export interface GenericApiResponse<T> {
   value: T;
 }
+
+export type PaginatedResponse<T> = {
+  nextPage: string | null;
+} & GenericApiResponse<T>;
