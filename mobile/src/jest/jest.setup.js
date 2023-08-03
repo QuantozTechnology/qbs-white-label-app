@@ -57,6 +57,8 @@ export const mockNavigation = {
 export const mockUseNavigationNavigate = jest.fn();
 export const mockUseNavigationDispatch = jest.fn();
 export const mockUseNavigationGoBack = jest.fn();
+export const mockUseRoute = jest.fn();
+
 jest.mock("@react-navigation/native", () => {
   const actualNav = jest.requireActual("@react-navigation/native");
   return {
@@ -69,9 +71,7 @@ jest.mock("@react-navigation/native", () => {
       navigate: mockUseNavigationNavigate,
       goBack: mockUseNavigationGoBack,
     }),
-    useRoute: () => ({
-      params: { sourceScreen: "CreateBuyOffer" },
-    }),
+    useRoute: mockUseRoute,
   };
 });
 

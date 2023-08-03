@@ -44,13 +44,16 @@ function TokenListItem({ token }: TokenListItemProps) {
               <Icon as={Ionicons} name="information-circle-outline" size="md" />
             }
             onPress={handleTokenDetailsPress}
+            accessibilityLabel="see token details"
           />
-          <Text>
+          <Text accessibilityLabel="token name and code">
             {name} ({code})
           </Text>
         </HStack>
         {balance !== null && (
-          <Text>{displayFiatAmount(parseFloat(balance))}</Text>
+          <Text accessibilityLabel="token balance">
+            {displayFiatAmount(parseFloat(balance))}
+          </Text>
         )}
       </HStack>
     </Pressable>
