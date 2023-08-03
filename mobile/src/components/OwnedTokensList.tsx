@@ -26,7 +26,7 @@ function OwnedTokensList() {
   if (status === "error") {
     return (
       <FullScreenMessage
-        message="Error loading assets"
+        message="Error loading owned assets"
         icon={null}
         illustration={ImageIdentifier.Find}
       />
@@ -52,9 +52,13 @@ function OwnedTokensList() {
   const items = data.pages.map((page) => page.value).flat();
 
   return (
-    <VStack space={2}>
-      <Heading size="xs" textTransform="uppercase">
-        Available assets
+    <VStack space={2} accessibilityLabel="owned tokens section">
+      <Heading
+        size="xs"
+        textTransform="uppercase"
+        accessibilityLabel="owned tokens heading"
+      >
+        Owned assets
       </Heading>
       <FlatList
         data={items}
