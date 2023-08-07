@@ -5,7 +5,7 @@
 import { Feather } from "@expo/vector-icons";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { Icon, IconButton } from "native-base";
-import { Linking } from "react-native";
+import * as Linking from "expo-linking";
 import { useTokenDetails } from "../api/tokens/tokens";
 import DataDisplayFieldSkeleton from "../components/DataDisplayFieldSkeleton";
 import FullScreenMessage from "../components/FullScreenMessage";

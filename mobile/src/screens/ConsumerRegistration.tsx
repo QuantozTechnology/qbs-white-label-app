@@ -84,12 +84,6 @@ function ConsumerRegistration() {
         firstName: firstName,
         lastName: lastName,
         dateOfBirth,
-        dateOfBirth:
-          dateOfBirth &&
-          dateOfBirth.split("/").length === 3 &&
-          dateOfBirth.split("/")[2].length === 4
-            ? new Date(dateOfBirth.split("/").reverse().join("-")).toISOString()
-            : undefined,
         countryOfResidence: country,
         email: userSession.email,
         phone: userSession.phone,
@@ -108,9 +102,7 @@ function ConsumerRegistration() {
             reference: userSession.objectId,
             firstName: firstName,
             lastName: lastName,
-            dateOfBirth: new Date(
-              dateOfBirth.split("/").reverse().join("-")
-            ).toISOString(),
+            dateOfBirth,
             countryOfResidence: country,
             email: userSession.email,
             phone: userSession.phone,

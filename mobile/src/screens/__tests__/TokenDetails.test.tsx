@@ -5,7 +5,6 @@
 import { fireEvent, render, screen } from "../../jest/test-utils";
 import { server } from "../../mocks/server";
 import { rest } from "msw";
-import TokenDetails from "../TokenDetails";
 import { mockApiUrl } from "../../utils/axios";
 import { genericApiError } from "../../api/generic/error.interface";
 import TokenDetails from "../TokenDetails";

@@ -62,9 +62,7 @@ export const CreateCustomerPayloadSchema = z.object({
         const reversedDate = date.split("/").reverse().join("-");
 
         // checks if input date is the same as the one created from its parts
-        return (
-          new Date(epochFromDate).toISOString().slice(0, 10) === reversedDate
-        );
+        return new Date(epochFromDate).toISOString().startsWith(reversedDate);
       },
       {
         message: "Invalid date of birth",
