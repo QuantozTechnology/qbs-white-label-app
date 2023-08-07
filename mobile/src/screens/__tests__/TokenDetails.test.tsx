@@ -2,7 +2,7 @@ import { fireEvent, render, screen } from "../../jest/test-utils";
 import { server } from "../../mocks/server";
 import { rest } from "msw";
 import TokenDetails from "../TokenDetails";
-import { mockApiUrl } from "../../utils/axios";
+import { backendApiUrl } from "../../utils/axios";
 import { genericApiError } from "../../api/generic/error.interface";
 import { linkingOpenUrlMock } from "../../jest/jest.setup";
 
@@ -34,7 +34,7 @@ describe("TokenDetails", () => {
 
   it("shows error message if it cannot retrieve details from the API", async () => {
     server.use(
-      rest.get(`${mockApiUrl}/api/tokens/:tokenCode`, (_req, rest, ctx) => {
+      rest.get(`${backendApiUrl}/api/tokens/:tokenCode`, (_req, rest, ctx) => {
         return rest(ctx.status(500), ctx.json(genericApiError));
       })
     );

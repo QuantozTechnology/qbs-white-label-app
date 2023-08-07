@@ -1,9 +1,9 @@
-// Copyright 2023 Quantoz Technology B.V. and contributors. Licensed
+// Copyright 2023 Quantoz backendApiUrl B.V. and contributors. Licensed
 // under the Apache License, Version 2.0. See the NOTICE file at the root
 // of this distribution or at http://www.apache.org/licenses/LICENSE-2.0
 
 import { rest } from "msw";
-import { backendApiUrl, mockApiUrl } from "../../utils/axios";
+import { backendApiUrl } from "../../utils/axios";
 import { GenericApiResponse, PaginatedResponse } from "../utils/api.interface";
 import { TokenDetails, Tokens } from "./tokens.interface";
 
@@ -18,7 +18,7 @@ export const tokenDetailsDefaultMock: GenericApiResponse<TokenDetails> = {
 };
 
 export const tokenDetailsMocks = [
-  rest.get(`${mockApiUrl}/api/tokens/:tokenCode`, (_req, rest, ctx) => {
+  rest.get(`${backendApiUrl}/api/tokens/:tokenCode`, (_req, rest, ctx) => {
     return rest(
       ctx.status(200),
       ctx.json<GenericApiResponse<TokenDetails>>(tokenDetailsDefaultMock)

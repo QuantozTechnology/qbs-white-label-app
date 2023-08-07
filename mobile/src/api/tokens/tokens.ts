@@ -2,7 +2,7 @@
 // under the Apache License, Version 2.0. See the NOTICE file at the root
 // of this distribution or at http://www.apache.org/licenses/LICENSE-2.0
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
-import { mockPaymentsApi, paymentsApi } from "../../utils/axios";
+import { paymentsApi } from "../../utils/axios";
 import { TokenDetails, Tokens } from "./tokens.interface";
 import { GenericApiResponse, PaginatedResponse } from "../utils/api.interface";
 import { constructUrlWithParams } from "../../utils/api";
@@ -50,7 +50,7 @@ export function useTokens({ type }: Partial<GetTokensProps>) {
 // GET a single token details
 
 async function getTokenDetails({ tokenCode }: GetTokenDetailsProps) {
-  const { data } = await mockPaymentsApi.get<GenericApiResponse<TokenDetails>>(
+  const { data } = await paymentsApi.get<GenericApiResponse<TokenDetails>>(
     `/api/tokens/${tokenCode}`
   );
 
@@ -59,7 +59,7 @@ async function getTokenDetails({ tokenCode }: GetTokenDetailsProps) {
 
 export function useTokenDetails({ tokenCode }: GetTokenDetailsProps) {
   return useQuery({
-    queryKey: ["token"],
+    queryKey: ["token", "details"],
     queryFn: () => getTokenDetails({ tokenCode }),
   });
 }
