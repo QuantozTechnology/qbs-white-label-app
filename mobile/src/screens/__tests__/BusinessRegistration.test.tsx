@@ -33,16 +33,14 @@ describe("BusinessRegistration", () => {
     const companyName = screen.getByLabelText("company name");
     const contactPerson = screen.getByLabelText("contact person full name");
     const businessEmail = screen.getByLabelText("business email");
-    const countryOfRegistration = screen.getByLabelText(
-      "country of registration"
-    );
+    const country = screen.getByTestId("country dropdown");
     const terms = screen.getByLabelText("terms checkbox");
     const createAccountButton = screen.getByLabelText("create account");
 
     expect(companyName.props.value).toBeUndefined();
     expect(contactPerson.props.value).toBeUndefined();
     expect(businessEmail.props.value).toBeUndefined();
-    expect(countryOfRegistration.props.value).toBeUndefined();
+    expect(country.props.value).toBeUndefined();
     expect(terms.props.checked).toBeFalsy();
     expect(createAccountButton).toBeTruthy();
   });
@@ -54,9 +52,7 @@ describe("BusinessRegistration", () => {
     const companyName = screen.getByLabelText("company name");
     const contactPerson = screen.getByLabelText("contact person full name");
     const businessEmail = screen.getByLabelText("business email");
-    const countryOfRegistration = screen.getByLabelText(
-      "country of registration"
-    );
+    const country = screen.getByTestId("country dropdown");
     const terms = screen.getByLabelText("terms checkbox");
     const createAccountButton = screen.getByLabelText("create account");
 
@@ -69,11 +65,10 @@ describe("BusinessRegistration", () => {
     fireEvent(businessEmail, "onChangeText", "test@test.test");
     expect(businessEmail.props.value).toBe("test@test.test");
 
-    expect(countryOfRegistration.props.value).toBeUndefined();
-    fireEvent(countryOfRegistration, "onValueChange", "Austria");
-
-    const updatedCountry = await screen.findByPlaceholderText("Select country");
-    expect(updatedCountry.props.value).toBe("Austria");
+    fireEvent(country, "onPress");
+    const firstEntry = await screen.findByTestId("Albania");
+    fireEvent(firstEntry, "onPress");
+    expect(await screen.findByText("Albania")).toBeOnTheScreen();
 
     fireEvent(terms, "onChange", true);
 
@@ -119,9 +114,7 @@ describe("BusinessRegistration", () => {
     const companyName = screen.getByLabelText("company name");
     const contactPerson = screen.getByLabelText("contact person full name");
     const businessEmail = screen.getByLabelText("business email");
-    const countryOfRegistration = screen.getByLabelText(
-      "country of registration"
-    );
+    const country = screen.getByTestId("country dropdown");
     const terms = screen.getByLabelText("terms checkbox");
     const createAccountButton = screen.getByLabelText("create account");
 
@@ -134,11 +127,10 @@ describe("BusinessRegistration", () => {
     fireEvent(businessEmail, "onChangeText", "test@test.test");
     expect(businessEmail.props.value).toBe("test@test.test");
 
-    expect(countryOfRegistration.props.value).toBeUndefined();
-    fireEvent(countryOfRegistration, "onValueChange", "Austria");
-
-    const updatedCountry = await screen.findByPlaceholderText("Select country");
-    expect(updatedCountry.props.value).toBe("Austria");
+    fireEvent(country, "onPress");
+    const firstEntry = await screen.findByTestId("Albania");
+    fireEvent(firstEntry, "onPress");
+    expect(await screen.findByText("Albania")).toBeOnTheScreen();
 
     fireEvent(terms, "onChange", true);
 
@@ -181,9 +173,7 @@ describe("BusinessRegistration", () => {
     const companyName = screen.getByLabelText("company name");
     const contactPerson = screen.getByLabelText("contact person full name");
     const businessEmail = screen.getByLabelText("business email");
-    const countryOfRegistration = screen.getByLabelText(
-      "country of registration"
-    );
+    const country = screen.getByTestId("country dropdown");
     const terms = screen.getByLabelText("terms checkbox");
     const createAccountButton = screen.getByLabelText("create account");
 
@@ -196,11 +186,10 @@ describe("BusinessRegistration", () => {
     fireEvent(businessEmail, "onChangeText", "test@test.test");
     expect(businessEmail.props.value).toBe("test@test.test");
 
-    expect(countryOfRegistration.props.value).toBeUndefined();
-    fireEvent(countryOfRegistration, "onValueChange", "Austria");
-
-    const updatedCountry = await screen.findByPlaceholderText("Select country");
-    expect(updatedCountry.props.value).toBe("Austria");
+    fireEvent(country, "onPress");
+    const firstEntry = await screen.findByTestId("Albania");
+    fireEvent(firstEntry, "onPress");
+    expect(await screen.findByText("Albania")).toBeOnTheScreen();
 
     fireEvent(terms, "onChange", true);
 
@@ -232,9 +221,7 @@ describe("BusinessRegistration", () => {
     const companyName = screen.getByLabelText("company name");
     const contactPerson = screen.getByLabelText("contact person full name");
     const businessEmail = screen.getByLabelText("business email");
-    const countryOfRegistration = screen.getByLabelText(
-      "country of registration"
-    );
+    const country = screen.getByTestId("country dropdown");
     const terms = screen.getByLabelText("terms checkbox");
     const createAccountButton = screen.getByLabelText("create account");
 
@@ -247,11 +234,10 @@ describe("BusinessRegistration", () => {
     fireEvent(businessEmail, "onChangeText", "test@test.test");
     expect(businessEmail.props.value).toBe("test@test.test");
 
-    expect(countryOfRegistration.props.value).toBeUndefined();
-    fireEvent(countryOfRegistration, "onValueChange", "Austria");
-
-    const updatedCountry = await screen.findByPlaceholderText("Select country");
-    expect(updatedCountry.props.value).toBe("Austria");
+    fireEvent(country, "onPress");
+    const firstEntry = await screen.findByTestId("Albania");
+    fireEvent(firstEntry, "onPress");
+    expect(await screen.findByText("Albania")).toBeOnTheScreen();
 
     fireEvent(terms, "onChange", true);
 
@@ -277,7 +263,7 @@ describe("BusinessRegistration", () => {
     const businessEmailError = await screen.findByLabelText(
       "business email error"
     );
-    const countryError = screen.getByLabelText("country of registration error");
+    const countryError = screen.getByLabelText("country error");
 
     expect(companyNameError).toHaveTextContent("Company name is required");
     expect(contactPersonError).toHaveTextContent(

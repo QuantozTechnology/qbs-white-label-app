@@ -3,15 +3,15 @@
 // of this distribution or at http://www.apache.org/licenses/LICENSE-2.0
 
 import {
-  IAsyncAuthProvider,
+  AuthError,
   AuthorizeResponse,
-  ExchangeRequest,
   EndSessionRequest,
   EndSessionResponse,
+  ExchangeRequest,
+  IAsyncAuthProvider,
+  IdToken,
   RefreshRequest,
   TokenResponse,
-  AuthError,
-  IdToken,
 } from "./types";
 import * as AuthSession from "expo-auth-session";
 import axios from "axios";
@@ -62,7 +62,9 @@ export const azureAuthProvider = (): IAsyncAuthProvider => {
       };
 
       const request = await AuthSession.loadAsync(config, discovery);
-      const result = await request.promptAsync(discovery);
+      const result = await request.promptAsync(discovery, {
+        createTask: false,
+      });
 
       if (!result) {
         return error(AuthErrorEnum.AUTH_INVALID_RESPONSE);
@@ -145,7 +147,9 @@ export const azureAuthProvider = (): IAsyncAuthProvider => {
       };
 
       const request = await AuthSession.loadAsync(config, discovery);
-      const result = await request.promptAsync(discovery);
+      const result = await request.promptAsync(discovery, {
+        createTask: false,
+      });
 
       if (!result) {
         return error(AuthErrorEnum.AUTH_INVALID_RESPONSE);

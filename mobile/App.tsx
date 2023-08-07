@@ -21,9 +21,18 @@ import { appNavigationState } from "./src/config/config";
 import FullScreenLoadingSpinner from "./src/components/FullScreenLoadingSpinner";
 import { CustomerProvider } from "./src/context/CustomerContext";
 import { Feather } from "@expo/vector-icons";
+import * as Sentry from "sentry-expo";
+import Constants from "expo-constants";
 
 const prefix = Linking.createURL("/");
 const queryClient = new QueryClient();
+
+Sentry.init({
+  dsn: Constants.expoConfig?.extra?.SENTRY_DSN,
+  enableInExpoDevelopment:
+    Constants.expoConfig?.extra?.APP_ENV !== "development",
+  debug: Constants.expoConfig?.extra?.APP_ENV !== "development",
+});
 
 export default function App() {
   const [appReady, setAppReady] = useState(false);

@@ -30,6 +30,7 @@ function DataDisplayField({
       shadow="0"
       mb={0.3}
       bg={bg}
+      minH={20}
     >
       <VStack space={0} p={4} {...other}>
         {label && (
