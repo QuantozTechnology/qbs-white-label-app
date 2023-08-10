@@ -5,6 +5,7 @@
 using Core.Application.Queries.TokenQueries;
 using Core.Presentation.Models;
 using Core.Presentation.Models.Responses;
+using Core.Presentation.Models.Responses.TokenResponses;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Identity.Web.Resource;
@@ -31,7 +32,7 @@ namespace Core.Presentation.Controllers
         }
 
         [HttpGet("{code}", Name = "GetTokenDetails")]
-        [ProducesResponseType(typeof(CustomResponse<TokenResponse>), 200)]
+        [ProducesResponseType(typeof(CustomResponse<TokenDataResponse>), 200)]
         [ProducesResponseType(typeof(CustomErrorsResponse), 404)]
         [ProducesResponseType(typeof(CustomErrorsResponse), 500)]
         [RequiredScope("Token.Read")]
@@ -39,7 +40,7 @@ namespace Core.Presentation.Controllers
         {
             var query = new GetTokenQuery(code);
             var token = await _sender.Send(query);
-            var response = ConstructCustomResponse(token, TokenResponse.FromToken);
+            var response = ConstructCustomResponse(token, TokenDataResponse.FromToken);
             return Ok(response);
         }
     }

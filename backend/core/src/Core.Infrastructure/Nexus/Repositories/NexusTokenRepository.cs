@@ -56,7 +56,7 @@ namespace Core.Infrastructure.Nexus.Repositories
                     {
                         return Task.Run(() =>
                         {
-                            records[index] = ConvertToToken(at);
+                            records[index] = ConvertTokenResponseToToken(at);
                         });
                     });
 
@@ -90,7 +90,7 @@ namespace Core.Infrastructure.Nexus.Repositories
                         {
                             return Task.Run(() =>
                             {
-                                records[index] = ConvertToToken(token.Token, token.Balance);
+                                records[index] = ConvertTokenResponseToToken(token.Token, token.Balance);
                             });
                         });
 
@@ -109,7 +109,7 @@ namespace Core.Infrastructure.Nexus.Repositories
                 {
                     return Task.Run(() =>
                     {
-                        records[index] = ConvertToToken(asset);
+                        records[index] = ConvertTokenResponseToToken(asset);
                     });
                 });
 
@@ -122,16 +122,16 @@ namespace Core.Infrastructure.Nexus.Repositories
             return pagedRecords;
         }
 
-        public async Task<Token> GetTokenDetailsAsync(string code, CancellationToken cancellationToken = default)
+        public async Task<TokenTaxonomy> GetTokenDetailsAsync(string code, CancellationToken cancellationToken = default)
         {
             var token = await _tokenServer.Tokens.Get(code);
 
             return token == null
                 ? throw new CustomErrorsException(NexusErrorCodes.TokenNotFoundError.ToString(), code, "A token with the provided code was not found")
-                : ConvertToToken(token);
+                : ConvertTokenDetailsResponseToToken(token);
         }
 
-        private static Token ConvertToToken(TokenResponse token, decimal? balance = null)
+        private static Token ConvertTokenResponseToToken(TokenResponse token, decimal? balance = null)
         {
             return new Token
             {
@@ -141,6 +141,28 @@ namespace Core.Infrastructure.Nexus.Repositories
                 Balance = balance?.ToString() ?? null,
                 Status = token.Status,
                 Created = DateTimeOffset.Parse(token.Created)
+            };
+        }
+
+        private static TokenTaxonomy ConvertTokenDetailsResponseToToken(TokenDetailsResponse token, decimal? balance = null)
+        {
+            return new TokenTaxonomy
+            {
+                TokenCode = token.Code,
+                Name = token.Name,
+                IssuerAddress = token.IssuerAddress,
+                Balance = balance?.ToString() ?? null,
+                Status = token.Status,
+                Created = DateTimeOffset.Parse(token.Created),
+                BlockchainId = token?.BlockchainId,
+                Data = token?.Data,
+                Taxonomy = new GetTaxonomyResponse
+                {
+                    TaxonomySchemaCode = token?.Taxonomy?.TaxonomySchemaCode,
+                    AssetUrl = token?.Taxonomy?.AssetUrl,
+                    Hash = token?.Taxonomy?.Hash,
+                    TaxonomyProperties = token?.Taxonomy?.TaxonomyProperties
+                }
             };
         }
     }
