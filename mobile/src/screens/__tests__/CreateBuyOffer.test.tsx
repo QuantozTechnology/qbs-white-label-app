@@ -19,6 +19,7 @@ describe("CreateBuyOffer screen", () => {
     code: "GOLD",
     name: "Gold",
     issuerAddress: "test-address",
+    status: "Active",
   };
   const createTestProps = (props: Record<string, unknown>) => ({
     navigation: {
@@ -97,6 +98,7 @@ describe("CreateBuyOffer screen", () => {
       code: "GOLD",
       name: "Gold",
       issuerAddress: "test-address",
+      status: "Active",
     };
     props = createTestProps({ route: { params: { token: mockToken } } });
     render(<CreateBuyOffer {...props} />);

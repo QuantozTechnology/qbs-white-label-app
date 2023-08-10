@@ -1,18 +1,17 @@
 {
   "name": "mobile",
   "version": "1.0.0",
-  "main": "node_modules/expo/AppEntry.js",
   "scripts": {
     "start": "npx expo start --dev-client",
-    "android": "npx expo start --android",
-    "ios": "npx expo start --ios",
+    "android": "expo run:android",
+    "ios": "expo run:ios",
     "web": "npx expo start --web",
     "ci-test": "TZ=UTC jest --ci --maxWorkers=2 --forceExit --reporters=\"jest-junit\" --reporters=\"default\" --silent",
     "test": "TZ=UTC npx jest --forceExit",
     "lint": "eslint",
     "prepare": "cd .. && husky install",
     "eas-build-pre-install": "npm config set legacy-peer-deps true",
-    "create-stores-build": "eas build --profile preview-store  --auto-submit",
+    "create-stores-build": "eas build --profile preview-store --platform all --non-interactive --auto-submit",
     "update-stores-build": "eas update --branch preview-store"
   },
   "dependencies": {
@@ -29,7 +28,7 @@
     "@types/jest": "^29.5.0",
     "@types/react": "^18.0.34",
     "axios": "^1.1.3",
-    "expo": "^48.0.10",
+    "expo": "~48.0.18",
     "expo-auth-session": "~4.0.3",
     "expo-barcode-scanner": "~12.3.2",
     "expo-camera": "~13.2.1",
@@ -56,8 +55,9 @@
     "prop-types": "^15.8.1",
     "react": "18.2.0",
     "react-dom": "18.2.0",
-    "react-native": "0.71.7",
+    "react-native": "0.71.8",
     "react-native-dotenv": "^3.3.1",
+    "react-native-dropdown-picker": "^5.4.6",
     "react-native-gesture-handler": "~2.9.0",
     "react-native-mask-input": "^1.2.2",
     "react-native-pager-view": "6.1.2",
@@ -69,7 +69,12 @@
     "react-native-svg": "13.4.0",
     "react-native-tab-view": "^3.3.4",
     "typescript": "^4.9.4",
-    "zod": "^3.20.2"
+    "zod": "^3.20.2",
+    "sentry-expo": "~6.2.0",
+    "expo-application": "~5.1.1",
+    "expo-device": "~5.2.1",
+    "@sentry/react-native": "4.15.2",
+    "expo-splash-screen": "~0.18.2"
   },
   "devDependencies": {
     "@babel/core": "^7.19.3",

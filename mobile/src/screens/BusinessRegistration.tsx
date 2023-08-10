@@ -10,7 +10,6 @@ import {
   Input,
   KeyboardAvoidingView,
   ScrollView,
-  Select,
   Text,
   Toast,
   VStack,
@@ -25,7 +24,6 @@ import { RegistrationStackParamList } from "../navigation/RegistrationTopTabsSta
 import { AxiosError } from "axios";
 import { APIError, ApiErrorCode } from "../api/generic/error.interface";
 import Notification from "../components/Notification";
-import countries from "../utils/world.json";
 import { createAccount } from "../api/account/account";
 import {
   BusinessRegistrationSchema,
@@ -35,12 +33,15 @@ import { formatError } from "../utils/errors";
 import ScreenWrapper from "../components/ScreenWrapper";
 import * as Linking from "expo-linking";
 import { useCustomerState } from "../context/CustomerContext";
+import CustomCountrySelect from "../components/CustomSelect";
+import { defaultConfig } from "../config/config";
 
 type Props = NativeStackScreenProps<RegistrationStackParamList, "Business">;
 
 function BusinessRegistration({ navigation }: Props) {
   const customerContext = useCustomerState();
 
+  const [open, setOpen] = useState(false);
   const [companyName, setCompanyName] = useState<string | undefined>();
   const [contactPersonFullName, setContactPersonFullName] = useState<
     string | undefined
@@ -149,11 +150,6 @@ function BusinessRegistration({ navigation }: Props) {
     }
   }
 
-  // simplify countries object
-  const minimalCountriesList = countries
-    .map(({ name }) => ({ name }))
-    .sort((a, b) => (a.name > b.name ? 1 : -1));
-
   return (
     <KeyboardAvoidingView
       behavior={getPlatformOS() === "ios" ? "padding" : undefined}
@@ -238,25 +234,18 @@ function BusinessRegistration({ navigation }: Props) {
               isRequired
               isInvalid={"countryOfRegistration" in errors}
             >
-              <VStack>
-                <FormControl.Label>Country of registration</FormControl.Label>
-                <Select
-                  accessibilityLabel="country of registration"
-                  placeholder="Select country"
-                  onValueChange={(value) => {
-                    setCountryOfRegistration(value);
-                    validateInput("countryOfRegistration", value);
-                  }}
-                  selectedValue={countryOfRegistration}
-                >
-                  {minimalCountriesList.map(({ name }) => (
-                    <Select.Item key={name} label={name} value={name} />
-                  ))}
-                </Select>
-                <FormControl.ErrorMessage accessibilityLabel="country of registration error">
-                  {errors["countryOfRegistration"]}
-                </FormControl.ErrorMessage>
-              </VStack>
+              <FormControl.Label>Country of registration</FormControl.Label>
+              <CustomCountrySelect
+                country={countryOfRegistration}
+                setCountry={setCountryOfRegistration}
+                open={open}
+                setOpen={setOpen}
+                hasValidationError={"countryOfRegistration" in errors}
+                accessibilityLabel="country of registration"
+              />
+              <FormControl.ErrorMessage accessibilityLabel="country error">
+                {errors["countryOfRegistration"]}
+              </FormControl.ErrorMessage>
             </FormControl>
           </VStack>
         </ScrollView>
@@ -296,7 +285,7 @@ function BusinessRegistration({ navigation }: Props) {
   );
 
   function handleTermsPress() {
-    Linking.openURL("https://quantozpay.com/terms");
+    Linking.openURL(defaultConfig.termsUrl);
   }
 
   // It accepts an input such as {companyName: aString} to allow checking the value on text change

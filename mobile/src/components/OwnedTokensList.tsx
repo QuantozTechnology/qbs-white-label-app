@@ -2,24 +2,31 @@
 // under the Apache License, Version 2.0. See the NOTICE file at the root
 // of this distribution or at http://www.apache.org/licenses/LICENSE-2.0
 
-import { Button, Heading, VStack } from "native-base";
-import { Fragment } from "react";
-import { useOwnedTokens } from "../api/tokens/tokens";
+import { Heading, PresenceTransition, View, VStack } from "native-base";
+import { useTokens } from "../api/tokens/tokens";
 import TokensListSkeleton from "../screens/skeletons/TokensListSkeleton";
 import { ImageIdentifier } from "../utils/images";
 import TokenListItem from "./TokenListItem";
 import FullScreenMessage from "./FullScreenMessage";
 import NoMoreButton from "./NoMoreButton";
 import ScreenWrapper from "./ScreenWrapper";
+import { FlatList } from "react-native";
+import LoadingMessage from "./LoadingMessage";
 
 function OwnedTokensList() {
-  const { data, status, hasNextPage, isFetchingNextPage, fetchNextPage } =
-    useOwnedTokens();
+  const {
+    data,
+    status,
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
+    isFetching,
+  } = useTokens({ type: "owned" });
 
   if (status === "error") {
     return (
       <FullScreenMessage
-        message="Error loading assets"
+        message="Error loading owned assets"
         icon={null}
         illustration={ImageIdentifier.Find}
       />
@@ -42,28 +49,38 @@ function OwnedTokensList() {
     );
   }
 
+  const items = data.pages.map((page) => page.value).flat();
+
   return (
-    <VStack space={2} marginBottom={8}>
-      <Heading size="xs" textTransform="uppercase">
+    <VStack space={2} accessibilityLabel="owned tokens section">
+      <Heading
+        size="xs"
+        textTransform="uppercase"
+        accessibilityLabel="owned tokens heading"
+      >
         Owned assets
       </Heading>
-      {data.pages.map((page, i) => (
-        <Fragment key={i}>
-          {page.value.map((token) => (
-            <TokenListItem key={token.code} token={token} />
-          ))}
-        </Fragment>
-      ))}
-      {!hasNextPage ? (
-        <NoMoreButton entityName="assets" />
-      ) : (
-        <Button
-          size="sm"
-          isDisabled={isFetchingNextPage}
-          onPress={() => fetchNextPage()}
+      <FlatList
+        data={items}
+        renderItem={({ item }) => <TokenListItem token={item} />}
+        ItemSeparatorComponent={() => <View my={1} />}
+        ListFooterComponent={
+          !hasNextPage ? <NoMoreButton entityName="assets" /> : null
+        }
+        onEndReached={() => {
+          if (hasNextPage) {
+            fetchNextPage();
+          }
+        }}
+      />
+      {isFetching && isFetchingNextPage && (
+        <PresenceTransition
+          visible={isFetching && isFetchingNextPage}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
         >
-          {isFetchingNextPage ? "Loading more..." : "Load more"}
-        </Button>
+          <LoadingMessage />
+        </PresenceTransition>
       )}
     </VStack>
   );

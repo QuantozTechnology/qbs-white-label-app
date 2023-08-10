@@ -115,7 +115,7 @@ export function CustomerProvider({
       dispatch({
         type: CustomerStateActionType.ERROR,
         errorMessage:
-          error instanceof AxiosError && axiosError.response
+          error instanceof AxiosError && axiosError.response?.data.Errors[0]
             ? axiosError.response.data.Errors[0].Message
             : (error as Error).message,
       });

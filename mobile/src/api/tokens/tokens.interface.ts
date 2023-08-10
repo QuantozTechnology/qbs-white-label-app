@@ -10,6 +10,7 @@ const TokensSchema = z.object({
   name: z.string(),
   issuerAddress: z.string(),
   balance: z.string().nullable(),
+  status: z.enum(["Created", "Active", "Disabled"]),
 });
 
 export type Tokens = z.infer<typeof TokensSchema>;
