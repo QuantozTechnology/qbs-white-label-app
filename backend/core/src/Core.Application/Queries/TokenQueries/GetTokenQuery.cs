@@ -8,7 +8,7 @@ using MediatR;
 
 namespace Core.Application.Queries.TokenQueries
 {
-    public class GetTokenQuery : IRequest<Token>
+    public class GetTokenQuery : IRequest<TokenTaxonomy>
     {
         public string TokenCode { get; set; }
 
@@ -18,7 +18,7 @@ namespace Core.Application.Queries.TokenQueries
         }
     }
 
-    public class GetTokenQueryHandler : IRequestHandler<GetTokenQuery, Token>
+    public class GetTokenQueryHandler : IRequestHandler<GetTokenQuery, TokenTaxonomy>
     {
         private readonly ITokenRepository _tokenRepository;
 
@@ -27,7 +27,7 @@ namespace Core.Application.Queries.TokenQueries
             _tokenRepository = tokenRepository;
         }
 
-        public Task<Token> Handle(GetTokenQuery request, CancellationToken cancellationToken)
+        public Task<TokenTaxonomy> Handle(GetTokenQuery request, CancellationToken cancellationToken)
         {
             return _tokenRepository.GetTokenDetailsAsync(request.TokenCode, cancellationToken);
         }
