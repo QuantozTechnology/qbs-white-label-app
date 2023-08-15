@@ -240,6 +240,11 @@ mobile/.expo
 mobile/junit.xml
 .expo
 mobile/.envrc
-mobile/google-service-account.json
 AzureB2C/custom-policies/output
 /backend/core/src/Core.API/appsettings.Development.json
+android/app/build
+android/.gradle
+android/build
+android/app/.gradle
+android/*/build
+android/*/release

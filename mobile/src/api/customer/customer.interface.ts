@@ -55,16 +55,34 @@ export const CreateCustomerPayloadSchema = z.object({
     .min(1, { message: "Last name must be longer than 1 character" }),
   dateOfBirth: z
     .string({ required_error: "A valid date of birth must be specified" })
-    .datetime()
     .refine(
       (date) => {
-        return new Date(date).getTime() <= new Date().getTime();
+        const [day, month, year] = date.split("/").map(Number);
+        const epochFromDate = Date.UTC(year, month - 1, day);
+        const reversedDate = date.split("/").reverse().join("-");
+
+        // checks if input date is the same as the one created from its parts
+        return new Date(epochFromDate).toISOString().startsWith(reversedDate);
+      },
+      {
+        message: "Invalid date of birth",
+      }
+    )
+    .refine(
+      (date) => {
+        const [day, month, year] = date.split("/").map(Number);
+        const epochFromDate = Date.UTC(year, month - 1, day);
+
+        return epochFromDate <= new Date().getTime();
       },
       {
         message: "Date of birth cannot be in the future",
       }
     ),
-  countryOfResidence: z.string({ required_error: "Country must be specified" }),
+  countryOfResidence: z.string({
+    invalid_type_error: "Country must be specified",
+    required_error: "Country must be specified",
+  }),
   email: z.string().email(),
   phone: z.string(),
 });

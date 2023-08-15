@@ -20,7 +20,7 @@ namespace Web.SDK.Services
 
         public async Task<Result<AccountResponse>> GetAccountAsync()
         {
-            var request = new RequestBuilder(_client).SetSegments("accounts");
+            var request = new RequestBuilder(_client).SetSegments("api", "accounts");
             return await request.ExecuteGet<AccountResponse>();
         }
 

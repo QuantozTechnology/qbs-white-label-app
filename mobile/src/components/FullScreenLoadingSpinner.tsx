@@ -2,42 +2,50 @@
 // under the Apache License, Version 2.0. See the NOTICE file at the root
 // of this distribution or at http://www.apache.org/licenses/LICENSE-2.0
 
+import { LinearGradient } from "expo-linear-gradient";
 import { Box, Heading, Image, Link, Spinner, Text, VStack } from "native-base";
+import { useWindowDimensions } from "react-native";
 import { useAuth } from "../auth/AuthContext";
-import { ImageIdentifier, imagesCollection } from "../utils/images";
 
 function FullScreenLoadingSpinner() {
   const auth = useAuth();
+  const { height } = useWindowDimensions();
   return (
     <VStack
-      justifyContent={"center"}
+      justifyContent="space-evenly"
       alignItems={"center"}
-      space={16}
       flex={1}
       accessibilityLabel="full screen loading"
-      bg="#324658"
     >
+      <LinearGradient
+        colors={["#324658", "#030C0C"]}
+        style={{
+          position: "absolute",
+          left: 0,
+          top: 0,
+          right: 0,
+          height: height * 1.5,
+        }}
+      />
+      <Image
+        // any needed to cast from string of enum to type requested from source
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        source={require("../../assets/qbs_logo_light.png")}
+        size="lg"
+        resizeMode="contain"
+        alt="logo"
+      />
       <VStack
         justifyContent="center"
         alignItems="center"
         space={4}
-        paddingX={8}
+        paddingX={20}
       >
         <Spinner size={"lg"} color="white" />
-        <Heading size="xl" color="white">
-          Loading...
-        </Heading>
-        <Heading size="sm" color="white">
+        <Heading size="md" color="white" textAlign="center">
           Hang tight, we are getting things ready for you
         </Heading>
       </VStack>
-      <Image
-        // any needed to cast from string of enum to type requested from source
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        source={imagesCollection[ImageIdentifier.Loading] as any}
-        resizeMode="contain"
-        alt="illustration"
-      />
       <Box alignItems="center">
         <Text color="white">Taking too long?</Text>
         <Link

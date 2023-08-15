@@ -16,6 +16,7 @@ import { formatError } from "../utils/errors";
 import { StatusBar } from "expo-status-bar";
 import { useIsFocused } from "@react-navigation/native";
 import ErrorBoundary from "../components/ErrorBoundary";
+import FullScreenMessage from "../components/FullScreenMessage";
 
 function PortfolioOverview() {
   const isFocused = useIsFocused();
@@ -53,7 +54,15 @@ function PortfolioOverview() {
         selectedToken={selectedToken}
         setSelectedToken={setSelectedToken}
       />
-      <ErrorBoundary>
+      <ErrorBoundary
+        render={
+          <FullScreenMessage
+            title="Oops"
+            message="Cannot load transactions, try again later"
+            noFullScreen
+          />
+        }
+      >
         <TransactionsList selectedToken={selectedToken?.tokenCode} />
       </ErrorBoundary>
       {isFocused ? <StatusBar style="light" /> : null}

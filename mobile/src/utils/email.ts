@@ -4,9 +4,10 @@
 
 import * as MailComposer from "expo-mail-composer";
 import { MailComposerOptions } from "expo-mail-composer";
-import { Linking } from "react-native";
+import * as Linking from "expo-linking";
 import { defaultConfig } from "../config/config";
 import { z } from "zod";
+import { Toast } from "native-base";
 
 const ZSendEmail = z.object({
   recipients: z.string().array().default([defaultConfig.supportEmail]),
@@ -23,11 +24,20 @@ export async function composeEmail({
   body,
   onEmailSendError,
 }: SendEmailPayload) {
+  const errorNotification = () =>
+    Toast.show({
+      title: "Cannot open email client",
+      p: "80",
+      description: `Please send an email to ${defaultConfig.supportEmail}`,
+      bg: "red.500",
+      _title: { fontWeight: "semibold", fontSize: "md" },
+    });
+
   if (
     !ZSendEmail.safeParse({ recipients, subject, body, onEmailSendError })
       .success
   ) {
-    console.log("Error");
+    errorNotification();
   }
 
   try {
@@ -61,7 +71,15 @@ export async function composeEmail({
         emailUrl.searchParams.append("body", body);
       }
 
-      Linking.openURL(emailUrl.href);
+      try {
+        if (await Linking.canOpenURL(emailUrl.href)) {
+          Linking.openURL(emailUrl.href);
+        } else {
+          errorNotification();
+        }
+      } catch (error) {
+        errorNotification();
+      }
     }
   } catch (error) {
     onEmailSendError && onEmailSendError();
