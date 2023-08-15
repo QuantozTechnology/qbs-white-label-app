@@ -3,7 +3,6 @@
 // of this distribution or at http://www.apache.org/licenses/LICENSE-2.0
 
 using Core.Application.Abstractions;
-using Core.Domain.Entities.TransactionAggregate;
 using Core.Domain.Repositories;
 using MediatR;
 
