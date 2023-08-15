@@ -9,7 +9,7 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.1" />
     <PackageReference Include="Quartz" Version="3.6.0" />
-    <PackageReference Include="Nexus.Token.SDK" Version="2023.4.5.7" />
+    <PackageReference Include="Nexus.Token.SDK" Version="2023.8.15.12" />
     <PackageReference Include="WindowsAzure.Storage" Version="9.3.3" />
   </ItemGroup>
 

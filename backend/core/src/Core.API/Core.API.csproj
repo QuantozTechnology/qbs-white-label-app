@@ -23,8 +23,8 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.17.0" />
-    <PackageReference Include="Nexus.SDK.Shared" Version="2023.4.5.7" />
-    <PackageReference Include="Nexus.Token.SDK" Version="2023.4.5.7" />
+    <PackageReference Include="Nexus.SDK.Shared" Version="2023.8.15.12" />
+    <PackageReference Include="Nexus.Token.SDK" Version="2023.8.15.12" />
     <PackageReference Include="Quartz.Extensions.DependencyInjection" Version="3.6.0" />
     <PackageReference Include="Quartz.Extensions.Hosting" Version="3.6.0" />
     <PackageReference Include="ReHackt.Extensions.Options.Validation" Version="7.0.0" />

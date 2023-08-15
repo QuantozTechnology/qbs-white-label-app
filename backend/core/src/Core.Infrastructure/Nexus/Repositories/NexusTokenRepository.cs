@@ -9,6 +9,7 @@ using Core.Domain.Primitives;
 using Core.Domain.Repositories;
 using Nexus.Token.SDK;
 using Nexus.Token.SDK.Responses;
+using TaxonomyResponse = Core.Domain.Entities.TokenAggregate.TaxonomyResponse;
 
 namespace Core.Infrastructure.Nexus.Repositories
 {
@@ -68,8 +69,14 @@ namespace Core.Infrastructure.Nexus.Repositories
 
                     foreach (var balance in response.Balances)
                     {
-                        var token = await _tokenServer.Tokens.Get(balance.TokenCode);
-                        tokens.Add(token);
+                        var codeQuery = new Dictionary<string, string>()
+                        {
+                            { "code", balance.TokenCode }
+                        };
+
+                        var token = await _tokenServer.Tokens.Get(codeQuery);
+
+                        tokens.Add(token.Records.FirstOrDefault()!);
                     }
 
                     records = new Token[tokens!.Count];
@@ -156,13 +163,13 @@ namespace Core.Infrastructure.Nexus.Repositories
                 Created = DateTimeOffset.Parse(token.Created),
                 BlockchainId = token?.BlockchainId,
                 Data = token?.Data,
-                Taxonomy = new GetTaxonomyResponse
+                Taxonomy = token?.Taxonomy != null ? new TaxonomyResponse
                 {
                     TaxonomySchemaCode = token?.Taxonomy?.TaxonomySchemaCode,
                     AssetUrl = token?.Taxonomy?.AssetUrl,
                     Hash = token?.Taxonomy?.Hash,
                     TaxonomyProperties = token?.Taxonomy?.TaxonomyProperties
-                }
+                } : null
             };
         }
     }

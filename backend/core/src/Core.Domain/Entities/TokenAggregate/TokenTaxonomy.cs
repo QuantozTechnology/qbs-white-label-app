@@ -20,7 +20,7 @@ namespace Core.Domain.Entities.TokenAggregate
 
         public string? BlockchainId { get; set; }
 
-        public GetTaxonomyResponse? Taxonomy { get; }
+        public TaxonomyResponse? Taxonomy { get; set; }
 
         public IDictionary<string, string>? Data { get; set; }
 
@@ -30,7 +30,7 @@ namespace Core.Domain.Entities.TokenAggregate
         }
     }
 
-    public class GetTaxonomyResponse
+    public class TaxonomyResponse
     {
         public string? TaxonomySchemaCode { get; set; }
 
