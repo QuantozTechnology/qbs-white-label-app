@@ -16,12 +16,24 @@ const TokensSchema = z.object({
 export type Tokens = z.infer<typeof TokensSchema>;
 
 // token details
+
+const TokenDetailsTaxonomySchema = z.object({
+  taxonomySchemaCode: z.string().nullable(),
+  assetUrl: z.string().nullable(),
+  taxonomyProperties: z.string().nullable(), // Assuming this is always a stringified JSON
+  hash: z.string().nullable(),
+});
+
 const TokenDetailsSchema = z.object({
-  tokenCode: z.string(),
-  validatorUrl: z.string().url(),
-  issuerUrl: z.string().url(),
-  assetUrl: z.string().url(),
-  schemaUrl: z.string().url(),
+  code: z.string(),
+  name: z.string(),
+  issuerAddress: z.string(),
+  status: z.string(),
+  balance: z.string().nullable(),
+  // unix epoch, therefore number
+  created: z.number(),
+  taxonomy: TokenDetailsTaxonomySchema.nullable(),
+  data: z.record(z.string()).nullable(),
 });
 
 export type TokenDetails = z.infer<typeof TokenDetailsSchema>;
