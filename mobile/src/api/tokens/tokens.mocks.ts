@@ -9,11 +9,23 @@ import { TokenDetails, Tokens } from "./tokens.interface";
 
 export const tokenDetailsDefaultMock: GenericApiResponse<TokenDetails> = {
   value: {
-    tokenCode: "SCEUR",
-    assetUrl: "https://www.example.com",
-    issuerUrl: "https://www.example.com",
-    validatorUrl: "https://www.example.com",
-    schemaUrl: "https://www.example.com",
+    code: "SILV",
+    balance: "100.00",
+    name: "Silver",
+    status: "Active",
+    created: 1691582675000,
+    issuerAddress: "issuer-address",
+    taxonomy: {
+      taxonomySchemaCode: "47C03F19-F70",
+      assetUrl: "https://test.com",
+      taxonomyProperties: '{"Name":"Silver","Value":500}',
+      hash: "B3A19E05041FB3A0CF36BF0538CE92B5E0120E313D58CD3E724A5FEE509FFE4E",
+    },
+    data: {
+      AssetUrl: "www.test.com",
+      ValidatorUrl: "www.test.com",
+      OwnerUrl: "www.test.com",
+    },
   },
 };
 
