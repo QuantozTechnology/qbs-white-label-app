@@ -60,11 +60,11 @@ function SignIn() {
       <Box accessibilityLabel="sign-in message" flex={1} p={4}>
         <VStack flex={1} space={4} justifyContent="center" alignItems="center">
           <Image
-            source={require("../../assets/adaptive-icon-qbs.png")}
+            source={require("../../assets/qbs_logo_light.png")}
             alt="qbs logo"
             style={{
-              resizeMode: "center",
-              width: width,
+              resizeMode: "contain",
+              width: width * 0.6,
               height: 200,
             }}
           />

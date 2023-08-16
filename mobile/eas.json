@@ -12,14 +12,16 @@
         "simulator": true
       },
       "env": {
-        "APP_ENV": "development"
+        "APP_ENV": "development",
+        "DEFAULT_STABLECOIN": "SCEUR"
       }
     },
     "preview": {
       "channel": "preview",
       "distribution": "internal",
       "env": {
-        "APP_ENV": "preview"
+        "APP_ENV": "preview",
+        "DEFAULT_STABLECOIN": "TQEU"
       }
     },
     "preview-store": {
@@ -30,7 +32,8 @@
         "image": "macos-monterey-12.6-xcode-14.1"
       },
       "env": {
-        "APP_ENV": "production"
+        "APP_ENV": "production",
+        "DEFAULT_STABLECOIN": "TQEU"
       }
     },
     "production": {
@@ -40,7 +43,8 @@
         "image": "macos-monterey-12.6-xcode-14.1"
       },
       "env": {
-        "APP_ENV": "production"
+        "APP_ENV": "production",
+        "DEFAULT_STABLECOIN": "TQEU"
       }
     }
   },
@@ -49,12 +53,18 @@
       "android": {
         "serviceAccountKeyPath": "./google-service-account.json",
         "track": "internal"
+      },
+      "ios": {
+        "ascAppId": "6446848462"
       }
     },
     "production": {
       "android": {
         "serviceAccountKeyPath": "./google-service-account.json",
         "track": "production"
+      },
+      "ios": {
+        "ascAppId": "6446848462"
       }
     }
   }

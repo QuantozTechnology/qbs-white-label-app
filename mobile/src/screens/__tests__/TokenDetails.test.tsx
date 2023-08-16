@@ -1,23 +1,22 @@
+// Quantoz Technology B.V. and contributors. Licensed
+// under the Apache License, Version 2.0. See the NOTICE file at the root
+// of this distribution or at http://www.apache.org/licenses/LICENSE-2.0
+
 import { fireEvent, render, screen } from "../../jest/test-utils";
 import { server } from "../../mocks/server";
 import { rest } from "msw";
 import TokenDetails from "../TokenDetails";
 import { backendApiUrl } from "../../utils/axios";
 import { genericApiError } from "../../api/generic/error.interface";
-import { linkingOpenUrlMock } from "../../jest/jest.setup";
+import * as Linking from "expo-linking";
 
 describe("TokenDetails", () => {
-  const createTestProps = (props: Record<string, unknown>) => {
-    return {
-      navigation: {},
-      route: {
-        params: {
-          tokenCode: "TEST",
-        },
-      },
-      ...props,
-    };
-  };
+  const createTestProps = (props: Record<string, unknown>) => ({
+    route: {
+      params: { tokenCode: "SCEUR" },
+    },
+    ...props,
+  });
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let props: any;
@@ -55,6 +54,6 @@ describe("TokenDetails", () => {
 
     fireEvent(screen.getByLabelText("go to asset info website"), "onPress");
 
-    expect(linkingOpenUrlMock).toHaveBeenCalledWith("https://www.example.com");
+    expect(Linking.openURL).toHaveBeenCalledWith("https://www.example.com");
   });
 });

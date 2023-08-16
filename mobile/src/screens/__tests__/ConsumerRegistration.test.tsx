@@ -30,7 +30,8 @@ describe("ConsumerRegistration", () => {
     expect(await screen.findByLabelText("first name")).toBeTruthy();
     expect(screen.getByLabelText("last name")).toBeTruthy();
     expect(screen.getByLabelText("date of birth")).toBeTruthy();
-    expect(screen.getByLabelText("country of residence")).toBeTruthy();
+    expect(screen.getByTestId("country dropdown")).toBeTruthy();
+
     expect(screen.getByLabelText("terms checkbox")).toBeTruthy();
   });
 
@@ -41,14 +42,14 @@ describe("ConsumerRegistration", () => {
     const firstName = screen.getByLabelText("first name");
     const lastName = screen.getByLabelText("last name");
     const dateOfBirth = screen.getByLabelText("date of birth");
-    const countryField = screen.getByLabelText("country of residence");
+    const country = screen.getByTestId("country dropdown");
     const terms = screen.getByLabelText("terms checkbox");
     const createAccountButton = screen.getByLabelText("create account");
 
     expect(firstName.props.value).toBeUndefined();
     expect(lastName.props.value).toBeUndefined();
     expect(dateOfBirth.props.value).toBe("");
-    expect(countryField).toHaveTextContent("");
+    expect(country).toHaveTextContent("");
     expect(terms.props.checked).toBeFalsy();
     expect(createAccountButton).toBeTruthy();
   });
@@ -60,7 +61,7 @@ describe("ConsumerRegistration", () => {
     const firstName = screen.getByLabelText("first name");
     const lastName = screen.getByLabelText("last name");
     const dateOfBirth = screen.getByLabelText("date of birth");
-    const country = screen.getByLabelText("country of residence");
+    const country = screen.getByTestId("country dropdown");
     const terms = screen.getByLabelText("terms checkbox");
     const createAccountButton = screen.getByLabelText("create account");
 
@@ -73,13 +74,10 @@ describe("ConsumerRegistration", () => {
     fireEvent(dateOfBirth, "onChangeText", "30012000");
     expect(dateOfBirth.props.value).toBe("30/01/2000");
 
-    expect(country.props.value).toBeUndefined();
-    fireEvent(country, "onValueChange", "Austria");
-
-    const updatedCountry = await screen.findByPlaceholderText(
-      "Select your country"
-    );
-    expect(updatedCountry.props.value).toBe("Austria");
+    fireEvent(country, "onPress");
+    const firstEntry = await screen.findByTestId("Albania");
+    fireEvent(firstEntry, "onPress");
+    expect(await screen.findByText("Albania")).toBeOnTheScreen();
 
     fireEvent(terms, "onChange");
 
@@ -113,7 +111,7 @@ describe("ConsumerRegistration", () => {
     const firstName = screen.getByLabelText("first name");
     const lastName = screen.getByLabelText("last name");
     const dateOfBirth = screen.getByLabelText("date of birth");
-    const country = screen.getByLabelText("country of residence");
+    const country = screen.getByTestId("country dropdown");
     const terms = screen.getByLabelText("terms checkbox");
     const createAccountButton = screen.getByLabelText("create account");
 
@@ -126,16 +124,12 @@ describe("ConsumerRegistration", () => {
     fireEvent(dateOfBirth, "onChangeText", "30012000");
     expect(dateOfBirth.props.value).toBe("30/01/2000");
 
-    expect(country.props.value).toBeUndefined();
-    fireEvent(country, "onValueChange", "Austria");
-
-    const updatedCountry = await screen.findByPlaceholderText(
-      "Select your country"
-    );
-    expect(updatedCountry.props.value).toBe("Austria");
+    fireEvent(country, "onPress");
+    const firstEntry = await screen.findByTestId("Albania");
+    fireEvent(firstEntry, "onPress");
+    expect(await screen.findByText("Albania")).toBeOnTheScreen();
 
     fireEvent(terms, "onChange");
-
     fireEvent(createAccountButton, "onPress");
 
     await waitFor(() => expect(mockRefresh).toHaveBeenCalled());
@@ -164,7 +158,7 @@ describe("ConsumerRegistration", () => {
     const firstName = screen.getByLabelText("first name");
     const lastName = screen.getByLabelText("last name");
     const dateOfBirth = screen.getByLabelText("date of birth");
-    const country = screen.getByLabelText("country of residence");
+    const country = screen.getByTestId("country dropdown");
     const terms = screen.getByLabelText("terms checkbox");
     const createAccountButton = screen.getByLabelText("create account");
 
@@ -177,13 +171,10 @@ describe("ConsumerRegistration", () => {
     fireEvent(dateOfBirth, "onChangeText", "30012000");
     expect(dateOfBirth.props.value).toBe("30/01/2000");
 
-    expect(country.props.value).toBeUndefined();
-    fireEvent(country, "onValueChange", "Austria");
-
-    const updatedCountry = await screen.findByPlaceholderText(
-      "Select your country"
-    );
-    expect(updatedCountry.props.value).toBe("Austria");
+    fireEvent(country, "onPress");
+    const firstEntry = await screen.findByTestId("Albania");
+    fireEvent(firstEntry, "onPress");
+    expect(await screen.findByText("Albania")).toBeOnTheScreen();
 
     fireEvent(terms, "onChange");
 
@@ -262,9 +253,7 @@ describe("ConsumerRegistration", () => {
       "date of birth error"
     );
 
-    expect(dateOfBirthError).toHaveTextContent(
-      /^A valid date of birth must be specified$/
-    );
+    expect(dateOfBirthError).toHaveTextContent(/^Invalid date of birth$/);
   });
 
   it("should return error if the birth date is in the future", async () => {

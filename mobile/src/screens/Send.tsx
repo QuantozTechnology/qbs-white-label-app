@@ -67,7 +67,7 @@ function Send({ navigation, route }: Props) {
         render: () => (
           <Notification
             message={
-              error instanceof AxiosError
+              error instanceof AxiosError && error.response?.data.Errors[0]
                 ? error.response?.data.Errors[0].Message
                 : error
             }
