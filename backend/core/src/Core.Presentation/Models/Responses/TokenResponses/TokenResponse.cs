@@ -4,7 +4,7 @@
 
 using Core.Domain.Entities.TokenAggregate;
 
-namespace Core.Presentation.Models.Responses
+namespace Core.Presentation.Models.Responses.TokenResponses
 {
     public class TokenResponse
     {

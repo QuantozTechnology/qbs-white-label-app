@@ -9,6 +9,7 @@ using Core.Domain.Primitives;
 using Core.Domain.Repositories;
 using Nexus.Token.SDK;
 using Nexus.Token.SDK.Responses;
+using TaxonomyResponse = Core.Domain.Entities.TokenAggregate.TaxonomyResponse;
 
 namespace Core.Infrastructure.Nexus.Repositories
 {
@@ -56,7 +57,7 @@ namespace Core.Infrastructure.Nexus.Repositories
                     {
                         return Task.Run(() =>
                         {
-                            records[index] = ConvertToToken(at);
+                            records[index] = ConvertTokenResponseToToken(at);
                         });
                     });
 
@@ -68,8 +69,14 @@ namespace Core.Infrastructure.Nexus.Repositories
 
                     foreach (var balance in response.Balances)
                     {
-                        var token = await _tokenServer.Tokens.Get(balance.TokenCode);
-                        tokens.Add(token);
+                        var codeQuery = new Dictionary<string, string>()
+                        {
+                            { "code", balance.TokenCode }
+                        };
+
+                        var token = await _tokenServer.Tokens.Get(codeQuery);
+
+                        tokens.Add(token.Records.FirstOrDefault()!);
                     }
 
                     records = new Token[tokens!.Count];
@@ -90,7 +97,7 @@ namespace Core.Infrastructure.Nexus.Repositories
                         {
                             return Task.Run(() =>
                             {
-                                records[index] = ConvertToToken(token.Token, token.Balance);
+                                records[index] = ConvertTokenResponseToToken(token.Token, token.Balance);
                             });
                         });
 
@@ -109,7 +116,7 @@ namespace Core.Infrastructure.Nexus.Repositories
                 {
                     return Task.Run(() =>
                     {
-                        records[index] = ConvertToToken(asset);
+                        records[index] = ConvertTokenResponseToToken(asset);
                     });
                 });
 
@@ -122,16 +129,16 @@ namespace Core.Infrastructure.Nexus.Repositories
             return pagedRecords;
         }
 
-        public async Task<Token> GetTokenDetailsAsync(string code, CancellationToken cancellationToken = default)
+        public async Task<TokenTaxonomy> GetTokenDetailsAsync(string code, CancellationToken cancellationToken = default)
         {
             var token = await _tokenServer.Tokens.Get(code);
 
             return token == null
                 ? throw new CustomErrorsException(NexusErrorCodes.TokenNotFoundError.ToString(), code, "A token with the provided code was not found")
-                : ConvertToToken(token);
+                : ConvertTokenDetailsResponseToToken(token);
         }
 
-        private static Token ConvertToToken(TokenResponse token, decimal? balance = null)
+        private static Token ConvertTokenResponseToToken(TokenResponse token, decimal? balance = null)
         {
             return new Token
             {
@@ -141,6 +148,28 @@ namespace Core.Infrastructure.Nexus.Repositories
                 Balance = balance?.ToString() ?? null,
                 Status = token.Status,
                 Created = DateTimeOffset.Parse(token.Created)
+            };
+        }
+
+        private static TokenTaxonomy ConvertTokenDetailsResponseToToken(TokenDetailsResponse token, decimal? balance = null)
+        {
+            return new TokenTaxonomy
+            {
+                TokenCode = token.Code,
+                Name = token.Name,
+                IssuerAddress = token.IssuerAddress,
+                Balance = balance?.ToString() ?? null,
+                Status = token.Status,
+                Created = DateTimeOffset.Parse(token.Created),
+                BlockchainId = token?.BlockchainId,
+                Data = token?.Data,
+                Taxonomy = token?.Taxonomy != null ? new TaxonomyResponse
+                {
+                    TaxonomySchemaCode = token?.Taxonomy?.TaxonomySchemaCode,
+                    AssetUrl = token?.Taxonomy?.AssetUrl,
+                    Hash = token?.Taxonomy?.Hash,
+                    TaxonomyProperties = token?.Taxonomy?.TaxonomyProperties
+                } : null
             };
         }
     }

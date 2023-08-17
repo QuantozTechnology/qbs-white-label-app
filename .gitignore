@@ -248,3 +248,4 @@ android/build
 android/app/.gradle
 android/*/build
 android/*/release
+mobile/google-service-account.json

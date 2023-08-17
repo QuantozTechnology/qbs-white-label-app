@@ -3,22 +3,34 @@
 // of this distribution or at http://www.apache.org/licenses/LICENSE-2.0
 
 import { rest } from "msw";
-import { backendApiUrl, mockApiUrl } from "../../utils/axios";
+import { backendApiUrl } from "../../utils/axios";
 import { GenericApiResponse, PaginatedResponse } from "../utils/api.interface";
 import { TokenDetails, Tokens } from "./tokens.interface";
 
 export const tokenDetailsDefaultMock: GenericApiResponse<TokenDetails> = {
   value: {
-    tokenCode: "SCEUR",
-    assetUrl: "https://www.example.com",
-    issuerUrl: "https://www.example.com",
-    validatorUrl: "https://www.example.com",
-    schemaUrl: "https://www.example.com",
+    code: "SILV",
+    balance: "100.00",
+    name: "Silver",
+    status: "Active",
+    created: 1691582675000,
+    issuerAddress: "issuer-address",
+    taxonomy: {
+      taxonomySchemaCode: "47C03F19-F70",
+      assetUrl: "https://test.com",
+      taxonomyProperties: '{"Name":"Silver","Value":500}',
+      hash: "B3A19E05041FB3A0CF36BF0538CE92B5E0120E313D58CD3E724A5FEE509FFE4E",
+    },
+    data: {
+      AssetUrl: "www.test.com",
+      ValidatorUrl: "www.test.com",
+      OwnerUrl: "www.test.com",
+    },
   },
 };
 
 export const tokenDetailsMocks = [
-  rest.get(`${mockApiUrl}/api/tokens/:tokenCode`, (_req, rest, ctx) => {
+  rest.get(`${backendApiUrl}/api/tokens/:tokenCode`, (_req, rest, ctx) => {
     return rest(
       ctx.status(200),
       ctx.json<GenericApiResponse<TokenDetails>>(tokenDetailsDefaultMock)
