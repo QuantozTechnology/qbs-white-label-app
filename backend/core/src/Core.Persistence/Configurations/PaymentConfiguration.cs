@@ -62,6 +62,10 @@ namespace Core.Persistence.Configurations
                 .WithMany()
                 .HasForeignKey(po => po.PaymentRequestId);
 
+            builder.HasOne(o => o.Offer)
+                .WithMany()
+                .HasForeignKey(o => o.OfferId);
+
             builder.Property(c => c.CreatedOn)
                 .HasColumnName("CreatedOn")
                 .IsRequired();

@@ -4,7 +4,6 @@
 
 using Core.Domain;
 using Core.Domain.Entities.OfferAggregate;
-using Core.Domain.Entities.PaymentRequestAggregate;
 using Core.Domain.Exceptions;
 using Core.Domain.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -20,7 +19,7 @@ namespace Core.Persistence.Repositories
         public async Task<Offer> GetByOfferCodeAsync(string code, CancellationToken cancellationToken = default)
         {
             var offer = await Query()
-                .Include(pr => pr.Payments)
+                //.Include(pr => pr.Payments)
                 .FirstOrDefaultAsync(pr => pr.OfferCode == code, cancellationToken);
 
             if (offer == null)

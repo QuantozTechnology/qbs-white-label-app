@@ -24,6 +24,11 @@ namespace Core.Persistence.Repositories
             Context.Set<T>().Add(entity);
         }
 
+        public void AddRange(IEnumerable<T> entities)
+        {
+            Context.Set<T>().AddRange(entities);
+        }
+
         public void Update(T entity)
         {
             Context.Set<T>().Update(entity);

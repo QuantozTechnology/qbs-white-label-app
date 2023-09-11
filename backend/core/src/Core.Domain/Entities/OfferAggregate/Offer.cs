@@ -4,6 +4,7 @@
 
 using Core.Domain.Entities.CallbackAggregate;
 using Core.Domain.Entities.TransactionAggregate;
+using Core.Domain.Events;
 using Core.Domain.Primitives;
 using Core.Domain.Primitives.Offer;
 
@@ -29,7 +30,7 @@ namespace Core.Domain.Entities.OfferAggregate
 
         public decimal? DestinationTokenRemainingAmount { get; set; }
 
-        public string OfferAction { get; set; }
+        public OfferAction OfferAction { get; set; }
 
         public decimal PricePerUnit { get; set; }
 
@@ -50,7 +51,7 @@ namespace Core.Domain.Entities.OfferAggregate
         public ICollection<Payment> Payments { get; set; } = new List<Payment>();
 
         public Offer(string? offerCode, string customerCode, string publicKey, string sourceTokenCode, decimal sourceTokenAmount,
-            string destinationTokenCode, decimal destinationTokenAmount, string offerAction, decimal pricePerUnit,
+            string destinationTokenCode, decimal destinationTokenAmount, OfferAction offerAction, decimal pricePerUnit,
             bool isMerchant, decimal? sourceTokenRemainingAmount = null, decimal? destinationTokenRemainingAmount = null)
         {
             OfferCode = offerCode ?? Guid.NewGuid().ToString();
@@ -77,12 +78,89 @@ namespace Core.Domain.Entities.OfferAggregate
             };
         }
 
+        public void Processing()
+        {
+            // we only set it to processing if we need to process this offer sequentially
+            if (Options.IsOneOffPayment)
+            {
+                UpdatedOn = DateTimeProvider.UtcNow;
+                Status = OfferStatus.Processing;
+            }
+        }
+
+        public bool HasExpired()
+        {
+            return Status == OfferStatus.Expired;
+        }
+
+        public bool IsClosed()
+        {
+            return Status == OfferStatus.Closed;
+        }
+
+        public bool IsCancelled()
+        {
+            return Status == OfferStatus.Cancelled;
+        }
+
+        public bool CanBeProcessed()
+        {
+            var isOneOffAndProcessing = Options.IsOneOffPayment && Status == OfferStatus.Processing;
+            var isNotOneOffAndOpen = !Options.IsOneOffPayment && Status == OfferStatus.Open;
+            return isOneOffAndProcessing || isNotOneOffAndOpen;
+        }
+
+        public void Closed(Payment[] payments)
+        {
+            UpdatedOn = DateTimeProvider.UtcNow;
+
+            if (Options.IsOneOffPayment)
+            {
+                Status = OfferStatus.Closed;
+            }
+
+            foreach (var payment in payments)
+            {
+                Payments.Add(payment);
+            }
+
+            RaiseDomainEvent(new OfferClosedEvent(this, payments));
+        }
+
+        public void ProcessingFailed()
+        {
+            // we only set it to open if the offer was processed sequentially
+            if (Options.IsOneOffPayment)
+            {
+                UpdatedOn = DateTimeProvider.UtcNow;
+                Status = OfferStatus.Open;
+            }
+        }
+
         public void Cancel()
         {
             if (Status == OfferStatus.Open)
             {
                 UpdatedOn = DateTimeProvider.UtcNow;
                 Status = OfferStatus.Cancelled;
+            }
+        }
+
+        public void ProcessingRemainingAmountsForPayment(decimal amount)
+        {
+            // Calculate the remainingAmount balance for buy and sell if this payment is processed
+            var remainingAmount = OfferAction == OfferAction.Buy
+                ? DestinationTokenRemainingAmount - amount
+                : SourceTokenRemainingAmount - amount;
+
+            // Update the remaining balance in the offer based on if it is buy or sell
+            if (OfferAction == OfferAction.Buy)
+            {
+                DestinationTokenRemainingAmount = remainingAmount;
+            }
+            else
+            {
+                SourceTokenRemainingAmount = remainingAmount;
             }
         }
 

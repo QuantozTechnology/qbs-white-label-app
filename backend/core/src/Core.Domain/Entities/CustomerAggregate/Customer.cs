@@ -3,6 +3,7 @@
 // of this distribution or at http://www.apache.org/licenses/LICENSE-2.0
 
 using Core.Domain.Entities.AccountAggregate;
+using Core.Domain.Entities.OfferAggregate;
 using Core.Domain.Entities.PaymentRequestAggregate;
 using Core.Domain.Entities.TransactionAggregate;
 using Core.Domain.Exceptions;
@@ -212,7 +213,120 @@ namespace Core.Domain.Entities.CustomerAggregate
                 Amount = amount,
                 Memo = memo
             };
+        }
 
+        public void CheckCustomerOfferValidations(Offer offer)
+        {
+            if (Status.ToString() == CustomerStatus.UNDERREVIEW.ToString())
+            {
+                throw new CustomErrorsException(DomainErrorCode.CustomerUnderReviewError.ToString(), CustomerCode, "Cannot execute any payments because your account is currently placed under review");
+            }
+
+            if (offer.HasExpired())
+            {
+                throw new CustomErrorsException(DomainErrorCode.ExpiredError.ToString(), offer.Options.ExpiresOn.ToString()!, "This offer has expired");
+            }
+
+            if (!offer.CanBeProcessed() || offer.IsClosed() || offer.IsCancelled())
+            {
+                throw new CustomErrorsException(DomainErrorCode.InvalidStatusError.ToString(), offer.Status.ToString(), "This offer is no longer open");
+            }
+        }
+
+        public Payment[] NewPaymentsToOffer(Account senderAccount, Offer offer, decimal amount)
+        {
+            // Case 1: offer.Options.PayerCanChangeRequestedAmount = true and offer.Options.IsOneOffPayment = true, only once a payment can be made for upto the destinationAmount, then the offer is closed.
+
+            PaymentProperties[] properties = null;
+
+            switch ((offer.Options.PayerCanChangeRequestedAmount, offer.Options.IsOneOffPayment))
+            {
+                case (true, true):
+
+                    if (amount > offer.DestinationTokenAmount)
+                    {
+                        throw new CustomErrorsException(DomainErrorCode.InvalidPropertyError.ToString(), amount.ToString()!, "The provided amount is greater than the requested amount of the offer.");
+                    }
+
+                    properties = ConvertIntoPaymentProperties(senderAccount, offer, amount);
+                    break;
+
+                case (false, true):
+
+                    if (amount != offer.DestinationTokenAmount)
+                    {
+                        throw new CustomErrorsException(DomainErrorCode.InvalidPropertyError.ToString(), amount.ToString()!, "The provided amount does not match the requested amount of the offer.");
+                    }
+
+                    properties = ConvertIntoPaymentProperties(senderAccount, offer, amount);
+                    break;
+
+                case (true, false):
+
+                    if (amount > offer.DestinationTokenAmount)
+                    {
+                        throw new CustomErrorsException(DomainErrorCode.InvalidPropertyError.ToString(), amount.ToString()!, "The provided amount is greater than the requested amount of the offer.");
+                    }
+
+                    // Check if the offer has already been fully processed: For buy, check DestinationTokenRemainingAmount. For Sell, check SourceTokenRemainingAmount
+                    if (offer.OfferAction == OfferAction.Buy && offer.DestinationTokenRemainingAmount < amount)
+                    {
+                        throw new CustomErrorsException(DomainErrorCode.InvalidStatusError.ToString(), offer.Status.ToString(), "This offer is no longer open");
+                    }
+
+                    if (offer.OfferAction == OfferAction.Sell && offer.SourceTokenRemainingAmount < amount)
+                    {
+                        throw new CustomErrorsException(DomainErrorCode.InvalidStatusError.ToString(), offer.Status.ToString(), "This offer is no longer open");
+                    }
+
+                    properties = ConvertIntoPaymentProperties(senderAccount, offer, amount);
+                    break;
+
+                case (false, false):
+
+                    if (amount != offer.DestinationTokenAmount)
+                    {
+                        throw new CustomErrorsException(DomainErrorCode.InvalidPropertyError.ToString(), amount.ToString()!, "The provided amount does not match the requested amount of the offer.");
+                    }
+
+                    properties = ConvertIntoPaymentProperties(senderAccount, offer, amount);
+                    break;
+
+                default:
+                    throw new Exception("Invalid case encountered."); // Handle default case appropriately based on your logic
+            }
+
+            return Payment.NewToOffer(properties);
+        }
+
+        private static PaymentProperties[] ConvertIntoPaymentProperties(Account senderAccount, Offer offer, decimal amount)
+        {
+            var properties = new[]
+                        {
+                new PaymentProperties
+                {
+                    SenderPublicKey = senderAccount.PublicKey,
+                    ReceiverPublicKey = offer.PublicKey,
+                    Name = offer.Options.Name,
+                    TokenCode = offer.DestinationTokenCode,
+                    Amount = amount,
+                    Memo = offer.Options.Memo,
+                    OfferId = offer.Id,
+                    SenderAccountCode = senderAccount.AccountCode
+                },
+                new PaymentProperties
+                {
+                    SenderPublicKey = offer.PublicKey,
+                    ReceiverPublicKey = senderAccount.PublicKey,
+                    Name = offer.Options.Name,
+                    TokenCode = offer.SourceTokenCode,
+                    Amount = offer.SourceTokenAmount,
+                    Memo = offer.Options.Memo,
+                    OfferId = offer.Id,
+                    SenderAccountCode = offer.PublicKey // TODO: This is a hack, we need to fix this
+                }
+            };
+            return properties;
         }
     }
 }

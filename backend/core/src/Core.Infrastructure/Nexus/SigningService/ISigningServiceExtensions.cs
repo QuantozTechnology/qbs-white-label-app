@@ -56,5 +56,39 @@ namespace Core.Infrastructure.Nexus.SigningService
 
             return await Task.WhenAll(submitRequests);
         }
+
+        public static async Task<StellarSubmitSignatureRequest[]> SignStellarTransactionEnvelopeAsync(this ISigningService signingService, IEnumerable<string> publicKeys, SignableResponse signableResponse)
+        {
+            if (signableResponse.BlockchainResponse.RequiredSignatures == null)
+            {
+                throw new InvalidOperationException("Invalid blockchain response, are you using the correct key pair?");
+            }
+
+            var unsignedTransactions = signableResponse.BlockchainResponse.RequiredSignatures
+                .Where(r => publicKeys.Contains(r.PublicKey))
+                .ToList();
+
+            var submitRequests = new List<Task<StellarSubmitSignatureRequest>>();
+
+            Parallel.ForEach(unsignedTransactions, async unsignedTransaction =>
+            {
+                var encodedUnsignedTransaction = unsignedTransaction.EncodedTransaction;
+                var hash = unsignedTransaction.Hash;
+
+                var request = new SignRequest(Blockchain.STELLAR, unsignedTransaction.PublicKey, encodedUnsignedTransaction);
+                var encodedSignedTransaction = await signingService.Sign(request);
+
+                var submitRequest = new StellarSubmitSignatureRequest(hash, unsignedTransaction.PublicKey, encodedSignedTransaction);
+
+                lock (submitRequests)
+                {
+                    submitRequests.Add(Task.FromResult(submitRequest));
+                }
+            });
+
+            await Task.WhenAll(submitRequests);
+
+            return submitRequests.Select(t => t.Result).ToArray();
+        }
     }
 }

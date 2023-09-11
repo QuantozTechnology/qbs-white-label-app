@@ -10,10 +10,4 @@ namespace Core.Application
         InvalidPropertyError,
         ExistingPropertyError
     }
-
-    public enum OfferAction
-    {
-        Buy,
-        Sell
-    }
 }

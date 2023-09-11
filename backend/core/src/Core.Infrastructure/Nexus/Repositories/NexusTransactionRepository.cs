@@ -8,7 +8,9 @@ using Core.Domain.Primitives;
 using Core.Domain.Repositories;
 using Core.Infrastructure.Nexus.SigningService;
 using Nexus.Token.SDK;
+using Nexus.Token.SDK.Requests;
 using Nexus.Token.SDK.Responses;
+using Transaction = Core.Domain.Entities.TransactionAggregate.Transaction;
 
 namespace Core.Infrastructure.Nexus.Repositories
 {
@@ -37,6 +39,16 @@ namespace Core.Infrastructure.Nexus.Repositories
             {
                 Blockchain.STELLAR => await CreateStellarPayment(payment, ip),
                 Blockchain.ALGORAND => await CreateAlgorandPayment(payment, ip),
+                _ => throw new CustomErrorsException("NexusSDKError", _tokenSettings.Blockchain.ToString(), "Blockchain not supported"),
+            };
+        }
+
+        public async Task<string> CreatePaymentsAsync(Payment[] payments, string? ip = null, CancellationToken cancellationToken = default)
+        {
+            return _tokenSettings.Blockchain switch
+            {
+                Blockchain.STELLAR => await CreateStellarPayments(payments, ip),
+                //Blockchain.ALGORAND => await CreateAlgorandPayment(payments, ip),
                 _ => throw new CustomErrorsException("NexusSDKError", _tokenSettings.Blockchain.ToString(), "Blockchain not supported"),
             };
         }
@@ -181,6 +193,72 @@ namespace Core.Infrastructure.Nexus.Repositories
 
                 return signableResponse.TokenOperationResponse!.FirstOrDefault()!.Code;
             }
+        }
+
+        private async Task<string> CreateStellarPayments(Payment[] payments, string? ip = null)
+        {
+            for (int i = 0; i < payments.Count(); i++)
+            {
+                var paymentToCreate = payments.ElementAt(i);
+                var rAccountCode = Helpers.ToNexusAccountCode(Blockchain.STELLAR, paymentToCreate.ReceiverPublicKey);
+                var rBalance = await _tokenServer.Accounts.GetBalances(rAccountCode);
+
+                if (!rBalance.IsConnectedToToken(paymentToCreate.TokenCode))
+                {
+                    var signResponse = await _tokenServer.Accounts.ConnectToTokenAsync(rAccountCode, paymentToCreate.TokenCode);
+                    var submitRequest = await _signingService.SignStellarTransactionEnvelopeAsync(paymentToCreate.ReceiverPublicKey, signResponse);
+
+                    await _tokenServer.Submit.OnStellarAsync(submitRequest);
+                }
+            }
+
+            var paymentDefinitions = payments.Select(payment => new PaymentDefinition
+            (
+                payment.SenderPublicKey,
+                payment.ReceiverPublicKey,
+                payment.TokenCode,
+                payment.Amount))
+                .ToArray();
+
+            var signableResponse = await _tokenServer.Operations.CreatePaymentsAsync(paymentDefinitions);
+
+            //var signedResponses = payments.SelectMany(x =>
+            //{
+            //    var kp = StellarKeyPair.FromPrivateKey(x.SenderPrivateKey, _decrypter);
+
+            //    return kp.Sign(signableResponse, _network);
+            //})
+            //    .ToList();
+            
+            foreach (var payment in payments)
+            {
+                if (payment.SenderPublicKey != null)
+                {
+                    var signed1Responses = await _signingService.SignStellarTransactionEnvelopeAsync(payment.SenderPublicKey, signableResponse);
+
+                    await _tokenServer.Submit.OnStellarAsync(signed1Responses);
+                }
+            }
+
+            //var keys = payments.Select(x => x.SenderPublicKey).ToList();
+            //var signedResponses = await _signingService.SignStellarTransactionEnvelopeAsync(keys, signableResponse);
+
+            //await _tokenServer.Submit.OnStellarAsync(signedResponses);
+
+            if (signableResponse.TokenOperationResponse?.FirstOrDefault() == null)
+            {
+                throw new CustomErrorsException(NexusErrorCodes.TransactionNotFoundError.ToString(), null!, "Transaction not found for the offer request");
+            }
+
+            //// set transactionCode in payments
+            //string transactionCode = signableResponse.TokenOperationResponse!.FirstOrDefault()!.Code;
+
+            //foreach (var payment in payments)
+            //{
+            //    payment.TransactionCode = transactionCode;
+            //}
+
+            return signableResponse.TokenOperationResponse!.FirstOrDefault()!.Code;
         }
 
         private async Task CreateStellarWithdraw(Withdraw withdraw, string? ip = null)

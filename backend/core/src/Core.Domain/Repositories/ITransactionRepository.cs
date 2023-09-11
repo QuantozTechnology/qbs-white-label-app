@@ -11,6 +11,8 @@ namespace Core.Domain.Repositories
     {
         public Task<string> CreatePaymentAsync(Payment payment, string? ip = null, CancellationToken cancellationToken = default);
 
+        public Task<string> CreatePaymentsAsync(Payment[] payments, string? ip = null, CancellationToken cancellationToken = default);
+
         public Task CreateWithdrawAsync(Withdraw withdraw, string? ip = null, CancellationToken cancellationToken = default);
 
         public Task<Paged<Transaction>> GetAsync(string publicKey, int page, int pageSize, CancellationToken cancellationToken = default);

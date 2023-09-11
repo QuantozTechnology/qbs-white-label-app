@@ -3,12 +3,13 @@
 // of this distribution or at http://www.apache.org/licenses/LICENSE-2.0
 
 using Core.Application.Commands.OfferCommands;
+using Core.Domain;
 
 namespace Core.Presentation.Models.Requests.OfferRequests
 {
     public class CreateOfferRequest
     {
-        public required string Action { get; set; }
+        public required OfferAction Action { get; set; }
 
         public required OfferRequestToken SourceToken { get; set; }
 
