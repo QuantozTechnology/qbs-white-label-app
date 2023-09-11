@@ -12,7 +12,7 @@ namespace Core.Application.Commands.OfferCommands
 {
     public class BaseCreateOfferRequestCommand : IRequest<Offer>
     {
-        public required string OfferAction { get; set; }
+        public required OfferAction OfferAction { get; set; }
 
         public required string SourceTokenCode { get; set; }
 
@@ -84,13 +84,13 @@ namespace Core.Application.Commands.OfferCommands
             };
 
             // buy offer, set destinationTokenRemainingAmount to destinationTokenAmount, sourceTokenRemainingAmount = null
-            if (request.OfferAction == OfferAction.Buy.ToString())
+            if (request.OfferAction == OfferAction.Buy)
             {
                 properties.DestinationTokenRemainingAmount = request.DestinationTokenAmount;
                 properties.SourceTokenRemainingAmount = null;
             }
             // sell offer, set sourceTokenRemainingAmount to sourceTokenAmount, destinationTokenRemainingAmount = null
-            else if (request.OfferAction == OfferAction.Sell.ToString())
+            else if (request.OfferAction == OfferAction.Sell)
             {
                 properties.SourceTokenRemainingAmount = request.SourceTokenAmount;
                 properties.DestinationTokenRemainingAmount = null;

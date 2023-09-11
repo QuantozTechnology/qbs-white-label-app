@@ -22,7 +22,7 @@ namespace Core.Domain.Primitives.Offer
 
         public decimal? DestinationTokenRemainingAmount { get; set; }
 
-        public required string OfferAction { get; set; }
+        public required OfferAction OfferAction { get; set; }
 
         public string? OfferCode { get; set; }
 

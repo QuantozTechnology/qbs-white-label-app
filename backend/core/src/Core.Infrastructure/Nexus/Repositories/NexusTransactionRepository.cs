@@ -230,11 +230,11 @@ namespace Core.Infrastructure.Nexus.Repositories
             //})
             //    .ToList();
             
-            foreach (var x in payments)
+            foreach (var payment in payments)
             {
-                if (x.SenderPublicKey != null)
+                if (payment.SenderPublicKey != null)
                 {
-                    var signed1Responses = await _signingService.SignStellarTransactionEnvelopeAsync(x.SenderPublicKey, signableResponse);
+                    var signed1Responses = await _signingService.SignStellarTransactionEnvelopeAsync(payment.SenderPublicKey, signableResponse);
 
                     await _tokenServer.Submit.OnStellarAsync(signed1Responses);
                 }

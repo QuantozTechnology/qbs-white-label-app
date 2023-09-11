@@ -3,6 +3,7 @@
 // of this distribution or at http://www.apache.org/licenses/LICENSE-2.0
 
 using Core.Application.Abstractions;
+using Core.Domain;
 using Core.Domain.Repositories;
 using MediatR;
 
@@ -49,31 +50,56 @@ namespace Core.Application.Commands
             // Get offer details
             var offer = await _offerRepository.GetByOfferCodeAsync(request.OfferCode, cancellationToken);
 
+            // Validates the customer's eligibility to process payments for the offer.
+            customer.CheckCustomerOfferValidations(offer);
+
+            var payments = customer.NewPaymentsToOffer(account, offer, request.Amount);
+
             // Start processing the payment request
             offer.Processing();
 
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-            var payments = customer.NewPaymentsToOffer(account, offer, request.Amount);
-
             try
             {
+                // Create the transactions only if payments are valid
                 var transactionCode = await _transactionRepository.CreatePaymentsAsync(payments, request.IP, cancellationToken);
 
-                // If the transaction is successfully processed we set the transaction and update the offer status to Paid
+                // If the transaction is successfully processed we set the transaction and update the offer status to Closed
                 payments.ToList()
                     .ForEach(payment => payment.SetTransactionCode(transactionCode));
 
-                // for case 1 and 2, we close the offer
-                offer.Closed();
-                //paymentRequest.Paid(payment);
+                // Checks the remaining amounts and closes the offer if necessary
+                if (offer.Options.PayerCanChangeRequestedAmount && !offer.Options.IsOneOffPayment)
+                {
+                    foreach (var payment in payments)
+                    {
+                        offer.ProcessingRemainingAmountsForPayment(payment.Amount);
+                    }
+                }
 
+                if (offer.Options.PayerCanChangeRequestedAmount && !offer.Options.IsOneOffPayment) 
+                {
+                    if ((offer.OfferAction == OfferAction.Buy && offer.DestinationTokenRemainingAmount == 0) ||
+                        (offer.OfferAction == OfferAction.Sell && offer.SourceTokenRemainingAmount == 0))
+                    {
+                        offer.Closed(payments);
+                    }
+                }
+                // for Case 1 and 2, we always close the offer
+                else
+                {
+                    offer.Closed(payments);
+                }
+
+                _offerRepository.Update(offer);
                 _paymentRepository.AddRange(payments);
+
                 await _unitOfWork.SaveChangesAsync(cancellationToken);
             }
             catch (Exception)
             {
-                // If the transaction fails we reset the payment request
+                // If the transaction fails we reset the payment request  
                 offer.ProcessingFailed();
                 await _unitOfWork.SaveChangesAsync(cancellationToken);
                 throw;

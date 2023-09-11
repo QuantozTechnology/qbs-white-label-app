@@ -30,7 +30,7 @@ namespace Core.Domain.Entities.OfferAggregate
 
         public decimal? DestinationTokenRemainingAmount { get; set; }
 
-        public string OfferAction { get; set; }
+        public OfferAction OfferAction { get; set; }
 
         public decimal PricePerUnit { get; set; }
 
@@ -51,7 +51,7 @@ namespace Core.Domain.Entities.OfferAggregate
         public ICollection<Payment> Payments { get; set; } = new List<Payment>();
 
         public Offer(string? offerCode, string customerCode, string publicKey, string sourceTokenCode, decimal sourceTokenAmount,
-            string destinationTokenCode, decimal destinationTokenAmount, string offerAction, decimal pricePerUnit,
+            string destinationTokenCode, decimal destinationTokenAmount, OfferAction offerAction, decimal pricePerUnit,
             bool isMerchant, decimal? sourceTokenRemainingAmount = null, decimal? destinationTokenRemainingAmount = null)
         {
             OfferCode = offerCode ?? Guid.NewGuid().ToString();
@@ -93,6 +93,16 @@ namespace Core.Domain.Entities.OfferAggregate
             return Status == OfferStatus.Expired;
         }
 
+        public bool IsClosed()
+        {
+            return Status == OfferStatus.Closed;
+        }
+
+        public bool IsCancelled()
+        {
+            return Status == OfferStatus.Cancelled;
+        }
+
         public bool CanBeProcessed()
         {
             var isOneOffAndProcessing = Options.IsOneOffPayment && Status == OfferStatus.Processing;
@@ -100,7 +110,7 @@ namespace Core.Domain.Entities.OfferAggregate
             return isOneOffAndProcessing || isNotOneOffAndOpen;
         }
 
-        public void Closed()
+        public void Closed(Payment[] payments)
         {
             UpdatedOn = DateTimeProvider.UtcNow;
 
@@ -109,9 +119,12 @@ namespace Core.Domain.Entities.OfferAggregate
                 Status = OfferStatus.Closed;
             }
 
-            //Payments.Add(payment);
+            foreach (var payment in payments)
+            {
+                Payments.Add(payment);
+            }
 
-            //RaiseDomainEvent(new PaymentRequestPaidEvent(this, payment));
+            RaiseDomainEvent(new OfferClosedEvent(this, payments));
         }
 
         public void ProcessingFailed()
@@ -130,6 +143,24 @@ namespace Core.Domain.Entities.OfferAggregate
             {
                 UpdatedOn = DateTimeProvider.UtcNow;
                 Status = OfferStatus.Cancelled;
+            }
+        }
+
+        public void ProcessingRemainingAmountsForPayment(decimal amount)
+        {
+            // Calculate the remainingAmount balance for buy and sell if this payment is processed
+            var remainingAmount = OfferAction == OfferAction.Buy
+                ? DestinationTokenRemainingAmount - amount
+                : SourceTokenRemainingAmount - amount;
+
+            // Update the remaining balance in the offer based on if it is buy or sell
+            if (OfferAction == OfferAction.Buy)
+            {
+                DestinationTokenRemainingAmount = remainingAmount;
+            }
+            else
+            {
+                SourceTokenRemainingAmount = remainingAmount;
             }
         }
 

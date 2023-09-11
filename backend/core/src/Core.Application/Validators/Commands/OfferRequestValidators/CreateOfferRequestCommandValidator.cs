@@ -13,10 +13,9 @@ namespace Core.Application.Validators.Commands.OfferRequestValidators
         public CreateOfferRequestCommandValidator()
         {
             RuleFor(c => c.OfferAction)
-                .NotNull()
-                .NotEmpty()
-                .Must(action => Enum.TryParse(typeof(OfferAction), action, out _))
-                .WithErrorCode(ApplicationErrorCode.InvalidStatusError.ToString());
+                .IsInEnum()
+                .WithMessage("Invalid value for OfferAction.")
+                .WithErrorCode(ApplicationErrorCode.InvalidPropertyError.ToString());
 
             RuleFor(c => c.CustomerCode)
                 .NotNull()

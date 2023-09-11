@@ -62,6 +62,12 @@ namespace Core.Domain
         Expired
     }
 
+    public enum OfferAction
+    {
+        Buy,
+        Sell
+    }
+
     public enum TokenAvailability
     {
         Available,
