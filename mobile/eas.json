@@ -28,9 +28,6 @@
       "autoIncrement": true,
       "channel": "preview-store",
       "distribution": "store",
-      "ios": {
-        "image": "macos-monterey-12.6-xcode-14.1"
-      },
       "env": {
         "APP_ENV": "production",
         "DEFAULT_STABLECOIN": "TQEU"
@@ -39,9 +36,6 @@
     "production": {
       "autoIncrement": true,
       "channel": "production",
-      "ios": {
-        "image": "macos-monterey-12.6-xcode-14.1"
-      },
       "env": {
         "APP_ENV": "production",
         "DEFAULT_STABLECOIN": "TQEU"

@@ -5,9 +5,8 @@
 import { FontAwesome5, Ionicons } from "@expo/vector-icons";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { CameraType } from "expo-camera";
-import { Button, Heading, Icon, Text, VStack } from "native-base";
+import { Button, Heading, Icon, ScrollView, Text, VStack } from "native-base";
 import { useState } from "react";
-import { ScrollView } from "react-native-gesture-handler";
 import { useCustomer } from "../api/customer/customer";
 import { useTrustLevels } from "../api/labelpartner/trustlevels";
 import CustomerLimitsProgress from "../components/CustomerLimitsProgress";
