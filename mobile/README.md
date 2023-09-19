@@ -71,11 +71,43 @@ If you wish to change/add authentication providers, refer to the [documentation 
 
 First of all, check the following settings are correct:
 
-- `APP_ENV` in the `.envrc` file is correct (e.g. you are running it locally, it should be `development`)
-- execute the `direnv allow` in the terminal to make sure the correct env variables are loaded
-- Set the right value for the `defaultStablecoin` property in `mobile/src/config/config.ts`. For example, we have two different tokens for development and production purposes, and this needs to be changed depending on which build you want to run/deploy.
+- You need to have 3 .env files in your local `mobile` folder (they will be not pushed to the repo, as per gitignore).
+  - `.env.development.local`: environment variables to run the development build on the emulators/devices, with the expo dev client running in the background
+  - `.env.production.local`: similar to above, but with the production values in case you want to test that environment locally
+  - `.env.local`: shared values needed in both environments (e.g. Sentry API ket and others)
 
-After this initial checks, create an Expo development build using the following command:
+Create these 3 files in the root of the mobile app project, and fill them with the correct info. Here's a list of the variables currently used in the project:
+
+`.env.development/production.local` (same structure in both files):
+
+- APP_ENV
+- DEFAULT_STABLECOIN
+- AUTH_AZURE_B2C_LOGIN_ISSUER
+- AUTH_AZURE_B2C_SIGNUP_ISSUER
+- AUTH_AZURE_B2C_SCOPE
+- API_URL
+- AUTH_AZURE_B2C_PASSWORD_ISSUER
+- AUTH_AZURE_B2C_CLIENT_ID
+- AUTH_AZURE_B2C_CLIENT_SECRET
+
+`.env.local`:
+
+- POSTMAN_MOCK_API_KEY
+- POSTMAN_MOCK_API_URL
+- SENTRY_ORG
+- SENTRY_PROJECT
+- SENTRY_DSN
+- SENTRY_AUTH_TOKEN
+
+The correct syntax is the following (not the absence of quotes for the value):
+
+```bash
+KEY1=VALUE1
+KEY2=VALUE2
+...
+```
+
+After this, create an Expo development build using the following command:
 
 ```bash
 eas build --profile development
@@ -84,19 +116,19 @@ eas build --profile development
 When the build is ready, you will be able to run the app using the following command (select the development build you just created when prompted)
 
 ```bash
-npm start -- --dev-client
+npm start
 ```
 
 This command starts a local server. You can either use a simulator on your computer or the Expo Go app installed on your phone to run the app. Refer to the Expo official docs for the most-updated information.
 
 > Sometimes the app might retain old cached data from previous builds, leading to unexpected behaviors.
-> Use `npm start -- --dev-client -c` to clean the cache.
+> Use `npm start -- -c` to clean the cache.
 
 ### Different builds for different purposes
 
 Refer to the official Expo documentation to discover more about [how to handle development, test and production versions](https://docs.expo.dev/workflow/development-mode/).
 
-In the `app.config.ts` file you will find the Expo configuration for this project. Depending on the value of the `APP_ENV` env variable defined in the `.envrc` file, it will create a different version of the app (different package name, app icon and Azure environment configurations).
+In the `app.config.ts` file you will find the Expo configuration for this project. Depending on the value of the `APP_ENV` env variable, it will create a different version of the app (different package name, app icon and Azure environment configurations).
 
 Be aware that this project uses also [Expo Application Services (EAS)](https://docs.expo.dev/eas/), which allow to handle the building and deployment phases in a more abstract and easy way. Refer to the link above to understand better how it works, and check out the `eas.json` file in the `src` folder to see the current setup.
 
@@ -104,10 +136,8 @@ Be aware that this project uses also [Expo Application Services (EAS)](https://d
 
 When you will create builds using Expo Application Services (EAS), the env variables used will be the ones stores in the Secrets sections in your Expo account. Our recommendation is the following:
 
-- Use the `.envrc` file locally as explained above
-- Run `eas secret:push` to upload these variables to Expo, so that they can be used for the builds.
-
-> Note: the `APP_ENV` variable should be set to `production` on Expo Secrets, so that it would build the app for production by default.
+- Use the different env files locally, as explained above
+- Run `eas secret:push --scope project --env-file /path/to/file/you/fill` to upload these variables to Expo, so that they can be used for the builds. Note that you need to upload both the ones in `.env.production.local` and `.env.local` for it to work.
 
 ### Release the app
 
