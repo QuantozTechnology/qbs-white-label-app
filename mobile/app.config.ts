@@ -13,7 +13,9 @@
 const isDevEnv = process.env.APP_ENV === "development";
 
 const AppConfig = {
-  name: process.env.APP_NAME || "Quantoz Blockchain Solutions",
+  name: isDevEnv
+    ? "[Dev] Quantoz Blockchain Solutions"
+    : "Quantoz Blockchain Solutions",
   icon: "./assets/icon-qbs.png",
   image: "./assets/splash-qbs.png",
   ios: {
@@ -29,25 +31,14 @@ const AppConfig = {
   // They can be read through the `expo-constants` package (https://docs.expo.dev/guides/environment-variables/#reading-environment-variables)
   extra: {
     POSTMAN_MOCK_API_KEY: process.env.POSTMAN_MOCK_API_KEY,
+    POSTMAN_MOCK_API_URL: process.env.POSTMAN_MOCK_API_URL,
     API_URL: process.env.API_URL,
-    AUTH_AZURE_B2C_LOGIN_ISSUER: isDevEnv
-      ? process.env.DEV_AUTH_AZURE_B2C_LOGIN_ISSUER
-      : process.env.PROD_AUTH_AZURE_B2C_LOGIN_ISSUER,
-    AUTH_AZURE_B2C_SIGNUP_ISSUER: isDevEnv
-      ? process.env.DEV_AUTH_AZURE_B2C_SIGNUP_ISSUER
-      : process.env.PROD_AUTH_AZURE_B2C_SIGNUP_ISSUER,
-    AUTH_AZURE_B2C_CLIENT_ID: isDevEnv
-      ? process.env.DEV_AUTH_AZURE_B2C_CLIENT_ID
-      : process.env.PROD_AUTH_AZURE_B2C_CLIENT_ID,
-    AUTH_AZURE_B2C_CLIENT_SECRET: isDevEnv
-      ? process.env.DEV_AUTH_AZURE_B2C_CLIENT_SECRET
-      : process.env.PROD_AUTH_AZURE_B2C_CLIENT_SECRET,
-    AUTH_AZURE_B2C_SCOPE: isDevEnv
-      ? process.env.DEV_AUTH_AZURE_B2C_SCOPE
-      : process.env.PROD_AUTH_AZURE_B2C_SCOPE,
-    AUTH_AZURE_B2C_PASSWORD_ISSUER: isDevEnv
-      ? process.env.DEV_AUTH_AZURE_B2C_PASSWORD_ISSUER
-      : process.env.PROD_AUTH_AZURE_B2C_PASSWORD_ISSUER,
+    AUTH_AZURE_B2C_LOGIN_ISSUER: process.env.AUTH_AZURE_B2C_LOGIN_ISSUER,
+    AUTH_AZURE_B2C_SIGNUP_ISSUER: process.env.AUTH_AZURE_B2C_SIGNUP_ISSUER,
+    AUTH_AZURE_B2C_CLIENT_ID: process.env.AUTH_AZURE_B2C_CLIENT_ID,
+    AUTH_AZURE_B2C_CLIENT_SECRET: process.env.AUTH_AZURE_B2C_CLIENT_SECRET,
+    AUTH_AZURE_B2C_SCOPE: process.env.AUTH_AZURE_B2C_SCOPE,
+    AUTH_AZURE_B2C_PASSWORD_ISSUER: process.env.AUTH_AZURE_B2C_PASSWORD_ISSUER,
     APP_ENV: process.env.APP_ENV || null,
     SENTRY_ORG: process.env.SENTRY_ORG,
     SENTRY_PROJECT: process.env.SENTRY_PROJECT,
@@ -114,9 +105,7 @@ export default () => ({
       ],
     ],
     // defines the package name of the app
-    scheme: isDevEnv
-      ? "quantoz.qbs.dev"
-      : "quantoz.qb",
+    scheme: isDevEnv ? "quantoz.qbs.dev" : "quantoz.qbs",
     platforms: ["ios", "android"],
     runtimeVersion: {
       policy: "sdkVersion",

@@ -12,50 +12,23 @@
         "simulator": true
       },
       "env": {
-        "APP_ENV": "development",
-        "DEFAULT_STABLECOIN": "SCEUR"
-      }
-    },
-    "preview": {
-      "channel": "preview",
-      "distribution": "internal",
-      "env": {
-        "APP_ENV": "preview",
-        "DEFAULT_STABLECOIN": "TQEU"
-      }
-    },
-    "preview-store": {
-      "autoIncrement": true,
-      "channel": "preview-store",
-      "distribution": "store",
-      "env": {
-        "APP_ENV": "production",
-        "DEFAULT_STABLECOIN": "TQEU"
+        "APP_ENV": "development"
       }
     },
     "production": {
       "autoIncrement": true,
-      "channel": "production",
+      "channel":"test",
+      "distribution": "store",
       "env": {
-        "APP_ENV": "production",
-        "DEFAULT_STABLECOIN": "TQEU"
+        "APP_ENV": "production"
       }
     }
   },
   "submit": {
-    "preview-store": {
+    "test": {
       "android": {
         "serviceAccountKeyPath": "./google-service-account.json",
         "track": "internal"
-      },
-      "ios": {
-        "ascAppId": "6446848462"
-      }
-    },
-    "production": {
-      "android": {
-        "serviceAccountKeyPath": "./google-service-account.json",
-        "track": "production"
       },
       "ios": {
         "ascAppId": "6446848462"

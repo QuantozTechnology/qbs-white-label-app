@@ -20,7 +20,7 @@ async function getToken({ tokenCode }: GetTokenProps) {
 
 export function useToken({ tokenCode }: GetTokenProps) {
   return useQuery({
-    queryKey: ["token"],
+    queryKey: ["token", tokenCode],
     queryFn: () => getToken({ tokenCode }),
   });
 }

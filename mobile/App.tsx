@@ -29,8 +29,7 @@ const queryClient = new QueryClient();
 
 Sentry.init({
   dsn: Constants.expoConfig?.extra?.SENTRY_DSN,
-  enableInExpoDevelopment:
-    Constants.expoConfig?.extra?.APP_ENV !== "development",
+  enableInExpoDevelopment: Constants.expoConfig?.extra?.APP_ENV !== "development",
   debug: Constants.expoConfig?.extra?.APP_ENV !== "development",
 });
 

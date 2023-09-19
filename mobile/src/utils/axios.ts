@@ -9,9 +9,7 @@ import { AuthService } from "../auth/authService";
 
 export const backendApiUrl = Constants.expoConfig?.extra?.API_URL;
 
-export const mockApiUrl =
-  "https://519450f7-7251-4594-97e4-e940683cb978.mock.pstmn.io";
-
+export const mockApiUrl = Constants.expoConfig?.extra?.POSTMAN_MOCK_API_URL;
 export const mockPaymentsApi = axios.create({
   baseURL: mockApiUrl,
   headers: {

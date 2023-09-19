@@ -11,8 +11,8 @@
     "lint": "eslint",
     "prepare": "cd .. && husky install",
     "eas-build-pre-install": "npm config set legacy-peer-deps true",
-    "create-stores-build": "eas build --profile preview-store --platform all --non-interactive --auto-submit",
-    "update-stores-build": "eas update --branch preview-store"
+    "create-stores-build": "eas build --profile production --platform all --non-interactive --auto-submit",
+    "update-stores-build": "eas update --branch production"
   },
   "dependencies": {
     "@expo/config-plugins": "~7.2.2",
