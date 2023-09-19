@@ -11,7 +11,7 @@
     "lint": "eslint",
     "prepare": "cd .. && husky install",
     "eas-build-pre-install": "npm config set legacy-peer-deps true",
-    "create-stores-build": "eas build --profile production --platform all --non-interactive --auto-submit",
+    "create-stores-build": "eas build --profile production --platform all --non-interactive --auto-submit-with-profile test",
     "update-stores-build": "eas update --branch production"
   },
   "dependencies": {
