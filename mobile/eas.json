@@ -12,7 +12,11 @@
         "simulator": true
       },
       "env": {
-        "APP_ENV": "development"
+        "APP_ENV": "development",
+        "EXPO_PUBLIC_APP_NAME": "[Dev] Quantoz Blockchain Solutions",
+        "EXPO_PUBLIC_IOS_BUNDLE_IDENTIFIER": "com.quantoz.qbs.dev",
+        "EXPO_PUBLIC_ANDROID_PACKAGE_NAME": "com.quantoz.qbs.dev",
+        "EXPO_PUBLIC_SCHEME": "quantoz.qbs.dev"
       }
     },
     "production": {
@@ -20,7 +24,11 @@
       "channel":"test",
       "distribution": "store",
       "env": {
-        "APP_ENV": "production"
+        "APP_ENV": "production",
+        "EXPO_PUBLIC_APP_NAME": "Quantoz Blockchain Solutions",
+        "EXPO_PUBLIC_IOS_BUNDLE_IDENTIFIER": "com.quantoz.qbs",
+        "EXPO_PUBLIC_ANDROID_PACKAGE_NAME": "com.quantoz.qbs",
+        "EXPO_PUBLIC_SCHEME": "quantoz.qbs"
       }
     }
   },

@@ -10,22 +10,18 @@
 // - .envrc file (for local development)
 // - Expo Secrets (for build processes)
 
-const isDevEnv = process.env.APP_ENV === "development";
-
 const AppConfig = {
-  name: isDevEnv
-    ? "[Dev] Quantoz Blockchain Solutions"
-    : "Quantoz Blockchain Solutions",
+  name: process.env.EXPO_PUBLIC_APP_NAME,
   icon: "./assets/icon-qbs.png",
   image: "./assets/splash-qbs.png",
   ios: {
-    bundleIdentifier: isDevEnv ? "com.quantoz.qbs.dev" : "com.quantoz.qbs",
+    bundleIdentifier: process.env.EXPO_PUBLIC_IOS_BUNDLE_IDENTIFIER,
   },
   android: {
     adaptiveIcon: {
       foregroundImage: "./assets/adaptive-icon-qbs.png",
     },
-    package: isDevEnv ? "com.quantoz.qbs.dev" : "com.quantoz.qbs",
+    package: process.env.EXPO_PUBLIC_ANDROID_PACKAGE_NAME,
   },
   // This logic sets the correct env variables to use throughout the app
   // They can be read through the `expo-constants` package (https://docs.expo.dev/guides/environment-variables/#reading-environment-variables)
@@ -104,8 +100,7 @@ export default () => ({
         },
       ],
     ],
-    // defines the package name of the app
-    scheme: isDevEnv ? "quantoz.qbs.dev" : "quantoz.qbs",
+    scheme: process.env.EXPO_PUBLIC_SCHEME,
     platforms: ["ios", "android"],
     runtimeVersion: {
       policy: "sdkVersion",
