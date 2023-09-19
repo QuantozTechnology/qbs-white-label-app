@@ -71,12 +71,14 @@ If you wish to change/add authentication providers, refer to the [documentation 
 
 First of all, check the following settings are correct:
 
-- You need to have 3 .env files in your local `mobile` folder (they will be not pushed to the repo, as per gitignore).
+- You need to have 5 .env files in your local `mobile` folder (the one ending in .local will be not pushed to the repo, as per gitignore).
   - `.env.development.local`: environment variables to run the development build on the emulators/devices, with the expo dev client running in the background
   - `.env.production.local`: similar to above, but with the production values in case you want to test that environment locally
   - `.env.local`: shared values needed in both environments (e.g. Sentry API ket and others)
+  - `.env.development`: used to assign app and package name, plus other details in development.
+  - `.env.production`: same as above, but for production.
 
-Create these 3 files in the root of the mobile app project, and fill them with the correct info. Here's a list of the variables currently used in the project:
+Create these 5 files in the root of the mobile app project, and fill them with the correct info. Here's a list of the variables currently used in the project:
 
 `.env.development/production.local` (same structure in both files):
 
@@ -99,6 +101,13 @@ Create these 3 files in the root of the mobile app project, and fill them with t
 - SENTRY_DSN
 - SENTRY_AUTH_TOKEN
 
+`.env.development/production` (same structure in both files):
+
+- EXPO_PUBLIC_APP_NAME
+- EXPO_PUBLIC_IOS_BUNDLE_IDENTIFIER
+- EXPO_PUBLIC_ANDROID_PACKAGE_NAME
+- EXPO_PUBLIC_SCHEME
+
 The correct syntax is the following (not the absence of quotes for the value):
 
 ```bash
@@ -112,6 +121,8 @@ After this, create an Expo development build using the following command:
 ```bash
 eas build --profile development
 ```
+
+IMPORTANT: as of Expo SDK 49, EAS Build will use the variables set in the `eas.json` file (extra.env object), and after loading these also using the ones stored in EAS Secrets (read further down)
 
 When the build is ready, you will be able to run the app using the following command (select the development build you just created when prompted)
 
