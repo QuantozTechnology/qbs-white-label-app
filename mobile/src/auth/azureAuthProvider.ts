@@ -19,6 +19,10 @@ import * as Linking from "expo-linking";
 import { decode } from "./utils";
 import Constants from "expo-constants";
 
+const appScheme = Array.isArray(Constants.expoConfig?.scheme)
+  ? Constants.expoConfig?.scheme[0]
+  : Constants.expoConfig?.scheme;
+
 /**
  * Default implementation using AzureB2C as identity provider.
  * @returns IAsyncAuthService
@@ -30,7 +34,7 @@ export const azureAuthProvider = (): IAsyncAuthProvider => {
   async function authorize(isSignUp: boolean): Promise<AuthorizeResponse> {
     try {
       const redirectUri = AuthSession.makeRedirectUri({
-        scheme: Constants.expoConfig?.scheme,
+        scheme: appScheme,
         path: "authorize",
       });
 
@@ -117,7 +121,7 @@ export const azureAuthProvider = (): IAsyncAuthProvider => {
   async function changePassword(): Promise<AuthorizeResponse> {
     try {
       const redirectUri = AuthSession.makeRedirectUri({
-        scheme: Constants.expoConfig?.scheme,
+        scheme: appScheme,
         path: "authorize",
       });
 

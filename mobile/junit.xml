@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="jest tests" tests="3" failures="0" errors="0" time="3.795">
+  <testsuite name="TokenDetails" errors="0" failures="0" skipped="0" timestamp="2023-09-19T11:45:42" time="3.487" tests="3">
+    <testcase classname="TokenDetails shows the UI for correctly loaded tokens" name="TokenDetails shows the UI for correctly loaded tokens" time="0.12">
+    </testcase>
+    <testcase classname="TokenDetails shows an error when the API call for token details fails" name="TokenDetails shows an error when the API call for token details fails" time="0.096">
+    </testcase>
+    <testcase classname="TokenDetails goes to the related webpage on press of the external url icon" name="TokenDetails goes to the related webpage on press of the external url icon" time="0.067">
+    </testcase>
+  </testsuite>
+</testsuites>

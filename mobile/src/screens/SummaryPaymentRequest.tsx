@@ -3,14 +3,13 @@
 // of this distribution or at http://www.apache.org/licenses/LICENSE-2.0
 
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { Button, Skeleton, Text, View, VStack } from "native-base";
+import { Button, ScrollView, Skeleton, Text, View, VStack } from "native-base";
 import { displayFiatAmount } from "../utils/currencies";
 import QRCode from "react-native-qrcode-svg";
 import { Share, useWindowDimensions } from "react-native";
 import DataDisplayField from "../components/DataDisplayField";
 import { PortfolioStackParamList } from "../navigation/PortfolioStack";
 import ScreenWrapper from "../components/ScreenWrapper";
-import { ScrollView } from "react-native-gesture-handler";
 import { defaultConfig } from "../config/config";
 import { usePaymentRequest } from "../api/paymentrequest/paymentRequest";
 import { formatDateTime } from "../utils/dates";

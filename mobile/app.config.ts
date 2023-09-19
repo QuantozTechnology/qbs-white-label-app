@@ -10,57 +10,31 @@
 // - .envrc file (for local development)
 // - Expo Secrets (for build processes)
 
-const isDevEnv = process.env.APP_ENV === "development";
-const isPreviewEnv = process.env.APP_ENV === "preview";
-
 const AppConfig = {
-  name: isDevEnv
-    ? "Quantoz Blockchain Solutions (Dev)"
-    : isPreviewEnv
-      ? "Quantoz Blockchain Solutions (Test)"
-      : "Quantoz Blockchain Solutions",
+  name: process.env.EXPO_PUBLIC_APP_NAME,
   icon: "./assets/icon-qbs.png",
   image: "./assets/splash-qbs.png",
   ios: {
-    bundleIdentifier: isDevEnv
-      ? "com.quantoz.qbs.dev"
-      : isPreviewEnv
-        ? "com.quantoz.qbs.preview"
-        : "com.quantoz.qbs",
+    bundleIdentifier: process.env.EXPO_PUBLIC_IOS_BUNDLE_IDENTIFIER,
   },
   android: {
     adaptiveIcon: {
       foregroundImage: "./assets/adaptive-icon-qbs.png",
     },
-    package: isDevEnv
-      ? "com.quantoz.qbs.dev"
-      : isPreviewEnv
-        ? "com.quantoz.qbs.preview"
-        : "com.quantoz.qbs",
+    package: process.env.EXPO_PUBLIC_ANDROID_PACKAGE_NAME,
   },
   // This logic sets the correct env variables to use throughout the app
   // They can be read through the `expo-constants` package (https://docs.expo.dev/guides/environment-variables/#reading-environment-variables)
   extra: {
     POSTMAN_MOCK_API_KEY: process.env.POSTMAN_MOCK_API_KEY,
-    API_URL: isDevEnv ? process.env.DEV_API_URL : process.env.PROD_API_URL,
-    AUTH_AZURE_B2C_LOGIN_ISSUER: isDevEnv
-      ? process.env.DEV_AUTH_AZURE_B2C_LOGIN_ISSUER
-      : process.env.PROD_AUTH_AZURE_B2C_LOGIN_ISSUER,
-    AUTH_AZURE_B2C_SIGNUP_ISSUER: isDevEnv
-      ? process.env.DEV_AUTH_AZURE_B2C_SIGNUP_ISSUER
-      : process.env.PROD_AUTH_AZURE_B2C_SIGNUP_ISSUER,
-    AUTH_AZURE_B2C_CLIENT_ID: isDevEnv
-      ? process.env.DEV_AUTH_AZURE_B2C_CLIENT_ID
-      : process.env.PROD_AUTH_AZURE_B2C_CLIENT_ID,
-    AUTH_AZURE_B2C_CLIENT_SECRET: isDevEnv
-      ? process.env.DEV_AUTH_AZURE_B2C_CLIENT_SECRET
-      : process.env.PROD_AUTH_AZURE_B2C_CLIENT_SECRET,
-    AUTH_AZURE_B2C_SCOPE: isDevEnv
-      ? process.env.DEV_AUTH_AZURE_B2C_SCOPE
-      : process.env.PROD_AUTH_AZURE_B2C_SCOPE,
-    AUTH_AZURE_B2C_PASSWORD_ISSUER: isDevEnv
-      ? process.env.DEV_AUTH_AZURE_B2C_PASSWORD_ISSUER
-      : process.env.PROD_AUTH_AZURE_B2C_PASSWORD_ISSUER,
+    POSTMAN_MOCK_API_URL: process.env.POSTMAN_MOCK_API_URL,
+    API_URL: process.env.API_URL,
+    AUTH_AZURE_B2C_LOGIN_ISSUER: process.env.AUTH_AZURE_B2C_LOGIN_ISSUER,
+    AUTH_AZURE_B2C_SIGNUP_ISSUER: process.env.AUTH_AZURE_B2C_SIGNUP_ISSUER,
+    AUTH_AZURE_B2C_CLIENT_ID: process.env.AUTH_AZURE_B2C_CLIENT_ID,
+    AUTH_AZURE_B2C_CLIENT_SECRET: process.env.AUTH_AZURE_B2C_CLIENT_SECRET,
+    AUTH_AZURE_B2C_SCOPE: process.env.AUTH_AZURE_B2C_SCOPE,
+    AUTH_AZURE_B2C_PASSWORD_ISSUER: process.env.AUTH_AZURE_B2C_PASSWORD_ISSUER,
     APP_ENV: process.env.APP_ENV || null,
     SENTRY_ORG: process.env.SENTRY_ORG,
     SENTRY_PROJECT: process.env.SENTRY_PROJECT,
@@ -126,12 +100,7 @@ export default () => ({
         },
       ],
     ],
-    // defines the package name of the app
-    scheme: isDevEnv
-      ? "quantoz.qbs.dev"
-      : isPreviewEnv
-        ? "quantoz.qbs.preview"
-        : "quantoz.qbs",
+    scheme: process.env.EXPO_PUBLIC_SCHEME,
     platforms: ["ios", "android"],
     runtimeVersion: {
       policy: "sdkVersion",

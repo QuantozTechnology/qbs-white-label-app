@@ -21,4 +21,7 @@ jest.mock("react-native-reanimated", () => {
 jest.mock("react-native/Libraries/Animated/NativeAnimatedHelper");
 
 // mock url called by tests
-Constants.expoConfig.extra = { API_URL: "http://test.com" };
+Constants.expoConfig.extra = {
+  API_URL: "http://test.com",
+  POSTMAN_MOCK_API_URL: "http://localhost",
+};
