@@ -10,8 +10,12 @@ import ScreenWrapper from "../components/ScreenWrapper";
 import { defaultConfig } from "../config/config";
 import { composeEmail } from "../utils/email";
 import * as Linking from "expo-linking";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { SettingsStackParamList } from "../navigation/Settings";
 
-function Settings() {
+type Props = NativeStackScreenProps<SettingsStackParamList, "SettingsHome">;
+
+function SettingsHome({ navigation }: Props) {
   const { data } = useCustomer();
 
   return (
@@ -31,6 +35,18 @@ function Settings() {
             }
             mr={2}
             onPress={handleSupportPress}
+          />
+        }
+      />
+      <DataDisplayField
+        accessibilityLabel="security code"
+        label="Security code"
+        value="Confirm login, or add a new device"
+        action={
+          <IconButton
+            icon={<Icon as={Ionicons} name="arrow-forward-outline" size="lg" />}
+            mr={2}
+            onPress={handleSecurityCodePress}
           />
         }
       />
@@ -69,5 +85,9 @@ function Settings() {
   function handleTermsPress() {
     Linking.openURL(defaultConfig.termsUrl);
   }
+
+  function handleSecurityCodePress() {
+    navigation.navigate("SecurityCode");
+  }
 }
-export default Settings;
+export default SettingsHome;
