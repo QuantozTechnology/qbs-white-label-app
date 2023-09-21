@@ -7,59 +7,75 @@ const totp: any = require("totp-generator");
 import * as SecureStore from "expo-secure-store";
 import FullScreenMessage from "../components/FullScreenMessage";
 import * as Sentry from "sentry-expo";
+import FullScreenLoadingSpinner from "../components/FullScreenLoadingSpinner";
 
 export function SecurityCode() {
   const [otp, setOtp] = useState<string>("");
-  const [otpSeed, setOtpSeed] = useState("JBSWY3DPEHPK3PXP");
+  const [otpSeed, setOtpSeed] = useState<string | null>(null);
   const [otpGenerationError, setOtpGenerationError] = useState(false);
   const period = 30;
   const progressAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     retrieveOTPKeyFromSecureStore();
-    updateOtpAndProgressBar();
-
-    // Periodic updates
-    const interval = setInterval(() => {
-      updateOtpAndProgressBar();
-    }, 1000); // Check every second for more accurate synchronization
-
-    return () => {
-      clearInterval(interval);
-    };
   }, []);
+
+  useEffect(() => {
+    if (otpSeed !== null) {
+      updateOtpAndProgressBar();
+
+      const interval = setInterval(() => {
+        updateOtpAndProgressBar();
+      }, 1000);
+
+      return () => {
+        clearInterval(interval);
+      };
+    }
+  }, [otpSeed]);
 
   if (otpGenerationError) {
     return (
       <ScreenWrapper flex={1}>
         <FullScreenMessage
           title="Error"
-          message="Could not generate a security code. Please try later or contact support."
+          message={`Could not generate a security code.
+Please try later or contact support.`}
         />
+      </ScreenWrapper>
+    );
+  }
+
+  if (otpSeed === null) {
+    return (
+      <ScreenWrapper flex={1}>
+        <FullScreenLoadingSpinner />
       </ScreenWrapper>
     );
   }
 
   return (
     <ScreenWrapper flex={1}>
-      <Text flex={1}>
-        Input the following code when requested, to confirm your identity
+      <Text flex={1} fontSize="md">
+        Input the following code when requested, to confirm your identity.
       </Text>
       <Text fontSize="6xl" letterSpacing="2xl" textAlign="center" my={3}>
         {otp}
       </Text>
-      <Box width="90%" flex={1}>
-        <Animated.View
-          style={{
-            height: 8,
-            backgroundColor: theme.colors.primary[500],
-            borderRadius: 4,
-            width: progressAnim.interpolate({
-              inputRange: [0, 100],
-              outputRange: ["0%", "100%"],
-            }),
-          }}
-        />
+      <Box width="100%" flex={1} alignItems="center">
+        <Box width="65%">
+          <Animated.View
+            style={{
+              height: 8,
+              backgroundColor: theme.colors.primary[500],
+              borderRadius: 4,
+              width: progressAnim.interpolate({
+                inputRange: [0, 100],
+                outputRange: ["0%", "100%"],
+              }),
+            }}
+          />
+        </Box>
       </Box>
     </ScreenWrapper>
   );
@@ -76,10 +92,10 @@ export function SecurityCode() {
   async function retrieveOTPKeyFromSecureStore() {
     try {
       const isSecureStoreAvailable = await SecureStore.isAvailableAsync();
-      const otpSeed = await SecureStore.getItemAsync("otpSeed");
+      const otpSeedFromSecureStore = await SecureStore.getItemAsync("otpSeed");
 
-      if (isSecureStoreAvailable && otpSeed !== null) {
-        setOtpSeed(otpSeed);
+      if (isSecureStoreAvailable && otpSeedFromSecureStore !== null) {
+        setOtpSeed(otpSeedFromSecureStore);
       } else {
         setOtpGenerationError(true);
 
@@ -88,7 +104,7 @@ export function SecurityCode() {
           {
             level: "warning",
             tags: { key: "SecureStoreNotAvailableOrOtpSeedNull" },
-            extra: { isSecureStoreAvailable, otpSeed },
+            extra: { isSecureStoreAvailable, otpSeedFromSecureStore },
           }
         );
       }

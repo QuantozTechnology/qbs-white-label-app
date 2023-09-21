@@ -72,8 +72,8 @@ export default () => ({
           "FaceID is used to authenticate you and to access your account",
       },
       config: {
-        usesNonExemptEncryption: false
-      }
+        usesNonExemptEncryption: false,
+      },
     },
     android: {
       adaptiveIcon: {
