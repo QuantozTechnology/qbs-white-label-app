@@ -18,6 +18,7 @@ import { biometricValidation } from "../utils/biometric";
 import FullScreenMessage from "../components/FullScreenMessage";
 import { useCustomer } from "../api/customer/customer";
 import * as LocalAuthentication from "expo-local-authentication";
+import { RSA } from "react-native-rsa-native";
 
 export type WelcomeStackParamList = {
   Home: undefined;
@@ -223,9 +224,17 @@ Please enable one of these to be able to use the app.`,
       );
     }
 
+    generateKeyPair();
+
     return (
       <WelcomeStack.Screen name="AppStack" component={AppBottomTabNavigator} />
     );
     // }
+  }
+
+  async function generateKeyPair() {
+    const { public: pubKey, private: privKey } = await RSA.generateKeys(256);
+    console.log("public key: ", pubKey);
+    console.log("private key: ", privKey);
   }
 }
