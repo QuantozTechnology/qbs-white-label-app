@@ -16,11 +16,16 @@ export function SecurityCode() {
   const period = 30;
   const progressAnim = useRef(new Animated.Value(0)).current;
 
+  // console.log("otpSeed: ", otpSeed);
+  // console.log("otpGenerationError: ", otpGenerationError);
+
   useEffect(() => {
+    // console.log("[useEffect] retrieveOTPKeyFromSecureStore()");
     retrieveOTPKeyFromSecureStore();
   }, []);
 
   useEffect(() => {
+    // console.log("[useEffect] otpSeed: ", otpSeed);
     if (otpSeed !== null) {
       updateOtpAndProgressBar();
 
@@ -55,16 +60,23 @@ Please try later or contact support.`}
   }
 
   return (
-    <ScreenWrapper flex={1}>
-      <Text flex={1} fontSize="md">
+    <ScreenWrapper flex={1} accessibilityLabel="security code screen">
+      <Text flex={1} fontSize="md" accessibilityLabel="instructions">
         Input the following code when requested, to confirm your identity.
       </Text>
-      <Text fontSize="6xl" letterSpacing="2xl" textAlign="center" my={3}>
+      <Text
+        fontSize="6xl"
+        letterSpacing="2xl"
+        textAlign="center"
+        my={3}
+        accessibilityLabel="otp code"
+      >
         {otp}
       </Text>
       <Box width="100%" flex={1} alignItems="center">
         <Box width="65%">
           <Animated.View
+            accessibilityLabel="progress bar"
             style={{
               height: 8,
               backgroundColor: theme.colors.primary[500],
@@ -91,8 +103,12 @@ Please try later or contact support.`}
 
   async function retrieveOTPKeyFromSecureStore() {
     try {
+      // console.log("[retrieveOTPKeyFromSecureStore] try");
       const isSecureStoreAvailable = await SecureStore.isAvailableAsync();
       const otpSeedFromSecureStore = await SecureStore.getItemAsync("otpSeed");
+
+      // console.log("isSecureStoreAvailable: ", isSecureStoreAvailable);
+      // console.log("getItemAsync: ", otpSeedFromSecureStore);
 
       if (isSecureStoreAvailable && otpSeedFromSecureStore !== null) {
         setOtpSeed(otpSeedFromSecureStore);
@@ -109,6 +125,7 @@ Please try later or contact support.`}
         );
       }
     } catch (error) {
+      // console.log("[retrieveOTPKeyFromSecureStore] catch");
       setOtpGenerationError(true);
       Sentry.Native.captureException(error);
     }
