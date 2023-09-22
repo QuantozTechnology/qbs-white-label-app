@@ -16,16 +16,11 @@ export function SecurityCode() {
   const period = 30;
   const progressAnim = useRef(new Animated.Value(0)).current;
 
-  // console.log("otpSeed: ", otpSeed);
-  // console.log("otpGenerationError: ", otpGenerationError);
-
   useEffect(() => {
-    // console.log("[useEffect] retrieveOTPKeyFromSecureStore()");
     retrieveOTPKeyFromSecureStore();
   }, []);
 
   useEffect(() => {
-    // console.log("[useEffect] otpSeed: ", otpSeed);
     if (otpSeed !== null) {
       updateOtpAndProgressBar();
 
@@ -107,9 +102,6 @@ Please try later or contact support.`}
       const isSecureStoreAvailable = await SecureStore.isAvailableAsync();
       const otpSeedFromSecureStore = await SecureStore.getItemAsync("otpSeed");
 
-      // console.log("isSecureStoreAvailable: ", isSecureStoreAvailable);
-      // console.log("getItemAsync: ", otpSeedFromSecureStore);
-
       if (isSecureStoreAvailable && otpSeedFromSecureStore !== null) {
         setOtpSeed(otpSeedFromSecureStore);
       } else {
@@ -125,7 +117,6 @@ Please try later or contact support.`}
         );
       }
     } catch (error) {
-      // console.log("[retrieveOTPKeyFromSecureStore] catch");
       setOtpGenerationError(true);
       Sentry.Native.captureException(error);
     }
