@@ -85,5 +85,18 @@ namespace Core.Presentation.Controllers
             var response = ConstructCustomResponse(customerLimits, CustomerLimitResponse.FromCustomerLimit);
             return Ok(response);
         }
+
+        [HttpPost("device", Name = "UploadCustomerFiles")]
+        [ProducesResponseType(typeof(CustomResponse<EmptyCustomResponse>), 201)]
+        [ProducesResponseType(typeof(CustomErrorsResponse), 400)]
+        [ProducesResponseType(typeof(CustomErrorsResponse), 404)]
+        [ProducesResponseType(typeof(CustomErrorsResponse), 500)]
+        [RequiredScope("Customer.File.Create")]
+        public async Task<IActionResult> CheckCustomerDeviceAsync([FromForm] CreateDeviceRequest request)
+        {
+            var command = request.ToCommand(GetUserId(), GetIP());
+            await _sender.Send(command);
+            return CreatedAtRoute("GetCustomer", null, new EmptyCustomResponse());
+        }
     }
 }
