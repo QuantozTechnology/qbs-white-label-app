@@ -8,13 +8,13 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Core.Persistence.Configurations
 {
-    internal class CustomerDeviceConfiguration : BaseConfiguration<CustomerDevice>
+    internal class CustomerOTPKeyStoreConfiguration : BaseConfiguration<CustomerOTPKeyStore>
     {
-        public override void Configure(EntityTypeBuilder<CustomerDevice> builder)
+        public override void Configure(EntityTypeBuilder<CustomerOTPKeyStore> builder)
         {
             base.Configure(builder);
 
-            builder.ToTable("CustomerDevices");
+            builder.ToTable("CustomerOTPKeyStorage");
 
             builder.HasKey(c => c.Id);
 
@@ -22,12 +22,6 @@ namespace Core.Persistence.Configurations
                 .HasColumnName("CustomerCode")
                 .HasMaxLength(40)
                 .IsRequired();
-
-            builder.Property(c => c.PublicKeys)
-                .HasColumnName("PublicKeys")
-                .IsRequired()
-                .HasConversion(v => string.Join(",", v),
-                    v => v.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList());
 
             builder.Property(c => c.OTPKey)
                 .HasColumnName("OTPKey")
@@ -41,6 +35,10 @@ namespace Core.Persistence.Configurations
             builder.Property(c => c.UpdatedOn)
             .HasColumnName("UpdatedOn")
             .IsRequired(false);
+
+            builder.HasMany(c => c.PublicKeys)
+            .WithOne(c => c.CustomerOTPKeyStore)
+            .HasForeignKey(c => c.CustomerOTPKeyStoreId);
         }
     }
 }

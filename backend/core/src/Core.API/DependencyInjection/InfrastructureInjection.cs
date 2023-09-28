@@ -4,18 +4,18 @@
 
 using Core.Domain.Abstractions;
 using Core.Domain.Repositories;
+using Core.Infrastructure.Compliance;
 using Core.Infrastructure.Compliance.IPLocator;
 using Core.Infrastructure.Compliance.Sanctionlist;
-using Core.Infrastructure.Compliance;
 using Core.Infrastructure.CustomerFileStorage;
+using Core.Infrastructure.Jobs;
+using Core.Infrastructure.Nexus;
 using Core.Infrastructure.Nexus.Repositories;
 using Core.Infrastructure.Nexus.SigningService;
 using Microsoft.Extensions.Options;
 using Nexus.SDK.Shared.Http;
 using Nexus.Token.SDK.Extensions;
 using Quartz;
-using Core.Infrastructure.Jobs;
-using Core.Infrastructure.Nexus;
 
 namespace Core.API.DependencyInjection
 {
@@ -30,6 +30,7 @@ namespace Core.API.DependencyInjection
                 .AddSigningService(configuration)
                 .AddBlobStorage(configuration)
                 .AddCompliance(configuration)
+                .AddTOTPGenerator()
                 .AddBackgroundJobs(configuration);
 
             return services;
@@ -153,6 +154,13 @@ namespace Core.API.DependencyInjection
             services.AddSingleton(sp => sp.GetRequiredService<IOptions<BlobStorageOptions>>().Value);
 
             services.AddScoped<ICustomerFileStorage, BlobStorage>();
+
+            return services;
+        }
+
+        private static IServiceCollection AddTOTPGenerator(this IServiceCollection services)
+        {
+            services.AddSingleton<ICustomerOTPGenerator, TOTPGenerator>();
 
             return services;
         }

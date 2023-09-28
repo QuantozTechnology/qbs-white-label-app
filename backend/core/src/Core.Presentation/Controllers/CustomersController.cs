@@ -7,7 +7,6 @@ using Core.Presentation.Models;
 using Core.Presentation.Models.Requests.CustomerRequests;
 using Core.Presentation.Models.Responses.CustomerResponses;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Identity.Web.Resource;
 
@@ -86,17 +85,18 @@ namespace Core.Presentation.Controllers
             return Ok(response);
         }
 
-        [HttpPost("device", Name = "UploadCustomerFiles")]
-        [ProducesResponseType(typeof(CustomResponse<EmptyCustomResponse>), 201)]
+        [HttpPost("devices", Name = "DeviceAuthentication")]
+        [ProducesResponseType(typeof(CustomResponse<DeviceAuthenticationResponse>), 201)]
         [ProducesResponseType(typeof(CustomErrorsResponse), 400)]
         [ProducesResponseType(typeof(CustomErrorsResponse), 404)]
         [ProducesResponseType(typeof(CustomErrorsResponse), 500)]
-        [RequiredScope("Customer.File.Create")]
-        public async Task<IActionResult> CheckCustomerDeviceAsync([FromForm] CreateDeviceRequest request)
+        [RequiredScope("Customer.Create")]
+        public async Task<IActionResult> DeviceAuthenticationAsync([FromBody] CreateDeviceAuthenticationRequest request)
         {
             var command = request.ToCommand(GetUserId(), GetIP());
-            await _sender.Send(command);
-            return CreatedAtRoute("GetCustomer", null, new EmptyCustomResponse());
+            var result = await _sender.Send(command);
+            var response = ConstructCustomResponse(result, DeviceAuthenticationResponse.FromOTPKey);
+            return Ok(response);
         }
     }
 }

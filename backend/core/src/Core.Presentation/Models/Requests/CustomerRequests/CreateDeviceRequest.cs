@@ -7,16 +7,16 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Core.Presentation.Models.Requests.CustomerRequests
 {
-    public class CreateDeviceRequest
+    public class CreateDeviceAuthenticationRequest
     {
         [Required]
         public required string PublicKey { get; set; }
 
         public string? OTPCode { get; set; }
 
-        public CreateDeviceCommand ToCommand(string customerCode, string ip)
+        public DeviceAuthenticationCommand ToCommand(string customerCode, string ip)
         {
-            return new CreateDeviceCommand
+            return new DeviceAuthenticationCommand
             {
                 CustomerCode = customerCode,
                 PublicKey = PublicKey,
