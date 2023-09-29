@@ -1,0 +1,34 @@
+name: Add Headers to Source Files
+
+on:
+  push:
+    branches:
+      - add-comments-top-file-ci
+
+jobs:
+  add-headers:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Check out code
+      uses: actions/checkout@v2
+      
+    - name: Check and Prepend Comments
+      run: |
+        for file in $(find . -type f \( -name "*.ts" -o -name "*.tsx" -o -name "*.js" -o -name "*.cs" \)); do
+          if ! grep -q "Copyright 2023 Quantoz Technology B.V. and contributors." "$file"; then
+            echo -e "// Copyright 2023 Quantoz Technology B.V. and contributors. Licensed\n// under the Apache License, Version 2.0. See the NOTICE file at the root\n// of this distribution or at http://www.apache.org/licenses/LICENSE-2.0\n\n$(cat $file)" > $file
+          fi
+        done
+
+    - name: Commit and Push Changes
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add -A
+        if [[ $(git diff --cached) ]]; then
+          git commit -m "Add headers to source files"
+          git push
+        else
+          echo "No changes to commit"
+        fi
