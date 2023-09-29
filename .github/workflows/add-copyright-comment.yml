@@ -2,8 +2,8 @@ name: Prepend Comments
 
 on:
   push:
-    branches:
-      - fin-fin-comments
+    branches-ignore:
+      - main
 
 jobs:
   prepend-comments:
