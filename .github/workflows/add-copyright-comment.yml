@@ -1,0 +1,31 @@
+name: Prepend Comments
+
+on:
+  push:
+    branches:
+      - final-comments
+
+jobs:
+  prepend-comments:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      - name: Check and Prepend Comments
+        run: |
+          for file in $(find . -type d \( -path "./backend/signin-service/src" -o -path "./backend/web/Web.Portal/wwwroot" \) -prune -o -type f \( -name "*.ts" -o -name "*.tsx" -o -name "*.js" -o -name "*.cs" \) -print); do
+            if ! grep -q "Copyright 2023 Quantoz Technology B.V. and contributors." "$file"; then
+              echo -e "// Copyright 2023 Quantoz Technology B.V. and contributors. Licensed\n// under the Apache License, Version 2.0. See the NOTICE file at the root\n// of this distribution or at http://www.apache.org/licenses/LICENSE-2.0\n\n$(cat $file)" > $file
+            fi
+          done
+
+      - name: Commit and push if changed
+        run: |
+          git config --global user.name 'GitHub Action'
+          git config --global user.email 'action@github.com'
+          git add -A
+          if [[ $(git status --porcelain) ]]; then
+            git commit -m "Prepend comments to source files"
+            git push
+          fi
