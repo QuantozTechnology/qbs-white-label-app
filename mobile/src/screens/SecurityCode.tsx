@@ -47,11 +47,7 @@ Please try later or contact support.`}
   }
 
   if (otpSeed === null) {
-    return (
-      <ScreenWrapper flex={1}>
-        <FullScreenLoadingSpinner />
-      </ScreenWrapper>
-    );
+    return <FullScreenLoadingSpinner />;
   }
 
   return (
