@@ -1,3 +1,7 @@
+// Copyright 2023 Quantoz Technology B.V. and contributors. Licensed
+// under the Apache License, Version 2.0. See the NOTICE file at the root
+// of this distribution or at http://www.apache.org/licenses/LICENSE-2.0
+
 ﻿/*
    Copyright Copyright 2018 Elucidsoft    
 
@@ -102,7 +106,7 @@ public class HDWallet
     public static string GenerateMnemonic()
     {
         var bip39 = new BIP39();
-        var mnemonic = bip39.GenerateMnemonic(160, BIP39Wordlist.English).Replace("\r", "");
+        var mnemonic = bip39.GenerateMnemonic(160, BIP39Wordlist.English).Replace("", "");
         return mnemonic;
     }
 }
