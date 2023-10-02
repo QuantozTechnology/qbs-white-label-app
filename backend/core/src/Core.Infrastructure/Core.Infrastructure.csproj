@@ -19,4 +19,8 @@
     <ProjectReference Include="..\Core.Domain\Core.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Compliance\Authentication\" />
+  </ItemGroup>
+
 </Project>
