@@ -3,7 +3,7 @@
 // of this distribution or at http://www.apache.org/licenses/LICENSE-2.0
 
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import Feedback from "../screens/Feedback";
 import { ImageIdentifier } from "../utils/images";
 import AppBottomTabNavigator from "./AppBottomTab";
@@ -14,10 +14,15 @@ import { useAuth } from "../auth/AuthContext";
 import { useCustomerState } from "../context/CustomerContext";
 import FullScreenLoadingSpinner from "../components/FullScreenLoadingSpinner";
 import CreateAccount from "../screens/CreateAccount";
-import { biometricValidation } from "../utils/biometric";
 import FullScreenMessage from "../components/FullScreenMessage";
 import { useCustomer } from "../api/customer/customer";
-import * as LocalAuthentication from "expo-local-authentication";
+import { Icon } from "native-base";
+import { Ionicons } from "@expo/vector-icons";
+import { useDeviceVerification } from "../utils/hooks/useDeviceVerification";
+import { useBiometricValidation } from "../utils/hooks/useBiometricValidation";
+import { useDeviceHasScreenLock } from "../utils/hooks/useDeviceHasScreenLock";
+import CustomNavigationHeader from "../components/CustomNavigationHeader";
+import ConfirmDevice from "../screens/ConfirmDevice";
 
 export type WelcomeStackParamList = {
   Home: undefined;
@@ -26,6 +31,7 @@ export type WelcomeStackParamList = {
   Feedback: FeedbackProps;
   SignIn: undefined;
   CreateAccount: undefined;
+  ConfirmDevice: undefined;
 };
 
 type FeedbackButtonProps = {
@@ -54,12 +60,23 @@ export type CustomerStatus = {
 export default function WelcomeStackNavigator() {
   const auth = useAuth();
   const customerContext = useCustomerState();
-
-  const [isBiometricCheckPassed, setIsBiometricCheckPassed] = useState<
-    boolean | undefined
-  >();
-  const [retryBiometric, setRetryBiometric] = useState<boolean | undefined>();
-  const [has2faMechanism, setHas2faMechanism] = useState<boolean>();
+  const {
+    setupAndVerifyDeviceSecurity,
+    error: deviceVerificationError,
+    isLoading: isVerifyingDevice,
+    deviceConflict,
+  } = useDeviceVerification();
+  const {
+    hasScreenLockMechanism,
+    isLoading: isCheckingScreenLockMechanism,
+    error: screenLockMechanismError,
+  } = useDeviceHasScreenLock();
+  const {
+    isBiometricCheckPassed,
+    triggerRetry,
+    error: biometricCheckError,
+    isLoading: isCheckingBiometric,
+  } = useBiometricValidation();
 
   const { data: customer } = useCustomer({
     enabled: auth?.userSession !== null,
@@ -67,67 +84,18 @@ export default function WelcomeStackNavigator() {
 
   useEffect(() => {
     WebBrowser.warmUpAsync();
-
-    const checkDeviceSecurityLevel = async () => {
-      const result = await LocalAuthentication.getEnrolledLevelAsync();
-
-      setHas2faMechanism(result !== LocalAuthentication.SecurityLevel.NONE);
-    };
-
-    checkDeviceSecurityLevel();
+    (async () => await setupAndVerifyDeviceSecurity())();
 
     return () => {
       WebBrowser.coolDownAsync();
     };
   }, []);
 
-  useEffect(() => {
-    // check biometric
-    async function checkBiometric() {
-      setIsBiometricCheckPassed(undefined);
-      const biometricCheck = await biometricValidation();
-
-      if (biometricCheck.result === "success") {
-        setIsBiometricCheckPassed(true);
-      } else {
-        setIsBiometricCheckPassed(false);
-      }
-    }
-
-    if (
-      auth?.userSession !== null &&
-      (typeof isBiometricCheckPassed === "undefined" || retryBiometric)
-    ) {
-      checkBiometric();
-    }
-  }, [auth?.userSession, retryBiometric]);
-
-  if (typeof has2faMechanism === "undefined") {
-    return <FullScreenLoadingSpinner />;
-  }
-
-  if (!has2faMechanism) {
-    return (
-      <WelcomeStack.Navigator
-        screenOptions={{ headerShown: false, gestureEnabled: false }}
-      >
-        <WelcomeStack.Screen
-          name="Feedback"
-          component={Feedback}
-          initialParams={{
-            title: "Security issue",
-            description: `Your device has no security measures set up (pin, passcode or fingerprint/faceID).
-Please enable one of these to be able to use the app.`,
-            illustration: ImageIdentifier.Find,
-          }}
-        />
-      </WelcomeStack.Navigator>
-    );
-  }
-
   if (auth?.isLoading) {
     return <FullScreenLoadingSpinner />;
   }
+
+  // if no user session exists, show sign in screen
   if (auth?.userSession === null && !auth.isLoading) {
     return (
       <WelcomeStack.Navigator
@@ -138,11 +106,56 @@ Please enable one of these to be able to use the app.`,
     );
   }
 
-  if (
-    customerContext?.isLoading ||
-    typeof isBiometricCheckPassed === "undefined"
-  ) {
-    return <FullScreenLoadingSpinner />;
+  // TODO customer context checks?
+
+  if (screenLockMechanismError) {
+    return (
+      <WelcomeStack.Navigator>
+        {showGenericErrorScreen()}
+      </WelcomeStack.Navigator>
+    );
+  }
+
+  if (isCheckingScreenLockMechanism) {
+    return (
+      <FullScreenLoadingSpinner
+        message="Checking screen lock mechanism..."
+        showLoginAgainButton={false}
+      />
+    );
+  }
+
+  if (!hasScreenLockMechanism) {
+    return (
+      <WelcomeStack.Navigator>
+        <WelcomeStack.Screen
+          name="Feedback"
+          component={Feedback}
+          initialParams={{
+            title: "Security issue",
+            description: `Your device has no security measures set up (pin, passcode or fingerprint/faceID).
+Please enable one of these to be able to use the app.`,
+          }}
+        />
+      </WelcomeStack.Navigator>
+    );
+  }
+
+  if (biometricCheckError) {
+    return (
+      <WelcomeStack.Navigator>
+        {showGenericErrorScreen()}
+      </WelcomeStack.Navigator>
+    );
+  }
+
+  if (isCheckingBiometric) {
+    return (
+      <FullScreenLoadingSpinner
+        message="Checking biometric security..."
+        showLoginAgainButton={false}
+      />
+    );
   }
 
   if (!isBiometricCheckPassed) {
@@ -151,9 +164,34 @@ Please enable one of these to be able to use the app.`,
         title="Biometric check error"
         message="Please try again"
         actionButton={{
-          label: "Biometric check",
-          callback: () => setRetryBiometric(true),
+          label: "Try again",
+          callback: triggerRetry,
         }}
+      />
+    );
+  }
+
+  if (deviceConflict) {
+    return (
+      <WelcomeStack.Navigator>
+        {showConfirmDeviceScreens()}
+      </WelcomeStack.Navigator>
+    );
+  }
+
+  if (deviceVerificationError) {
+    return (
+      <WelcomeStack.Navigator>
+        {showGenericErrorScreen()}
+      </WelcomeStack.Navigator>
+    );
+  }
+
+  if (isVerifyingDevice) {
+    return (
+      <FullScreenLoadingSpinner
+        message="Verifying device, it could take up to 1 minute..."
+        showLoginAgainButton={false}
       />
     );
   }
@@ -183,6 +221,7 @@ Please enable one of these to be able to use the app.`,
         </>
       );
     }
+
     if (customerContext?.isUnderReview) {
       return (
         <WelcomeStack.Screen
@@ -226,6 +265,52 @@ Please enable one of these to be able to use the app.`,
     return (
       <WelcomeStack.Screen name="AppStack" component={AppBottomTabNavigator} />
     );
-    // }
+  }
+
+  function showConfirmDeviceScreens() {
+    return (
+      <>
+        <WelcomeStack.Screen
+          name="ConfirmDevice"
+          component={ConfirmDevice}
+          options={{
+            title: "Confirm device",
+            header: (props) => (
+              <CustomNavigationHeader
+                {...props}
+                customIcon={
+                  <Icon
+                    as={Ionicons}
+                    name="close"
+                    size="xl"
+                    color="primary.500"
+                  />
+                }
+              />
+            ),
+          }}
+        />
+        <WelcomeStack.Screen name="Feedback" component={Feedback} />
+        <WelcomeStack.Screen
+          name="AppStack"
+          component={AppBottomTabNavigator}
+          options={{ headerShown: false, gestureEnabled: false }}
+        />
+      </>
+    );
+  }
+
+  function showGenericErrorScreen() {
+    return (
+      <WelcomeStack.Screen
+        name="Feedback"
+        component={Feedback}
+        initialParams={{
+          title: "Oops",
+          description: `Something went wrong. Please close the app and try again later.`,
+          illustration: ImageIdentifier.Find,
+        }}
+      />
+    );
   }
 }
