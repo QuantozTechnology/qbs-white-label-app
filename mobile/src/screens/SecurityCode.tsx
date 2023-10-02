@@ -94,7 +94,6 @@ Please try later or contact support.`}
 
   async function retrieveOTPKeyFromSecureStore() {
     try {
-      // console.log("[retrieveOTPKeyFromSecureStore] try");
       const isSecureStoreAvailable = await SecureStore.isAvailableAsync();
       const otpSeedFromSecureStore = await SecureStore.getItemAsync("otpSeed");
 
