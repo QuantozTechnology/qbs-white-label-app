@@ -10,13 +10,14 @@ import CustomTabBarLabel from "../components/CustomTabBarLabel";
 import CustomTabBarIcon from "../components/CustomTabBarIcon";
 import UserProfileStack from "./UserProfileStack";
 import PaymentRequestsNativeStackNavigator from "./PaymentRequestsStack";
-import Settings from "../screens/Settings";
+import SettingsStackNavigator from "./Settings";
 
 export type AppBottomTabParamList = {
   PortfolioOverview: undefined;
   PaymentRequests: undefined;
   UserProfileStack: undefined;
   Settings: undefined;
+  SecurityCode: undefined;
   Support: undefined;
 };
 
@@ -42,6 +43,7 @@ export default function AppBottomTabNavigator() {
       "UpgradeAccountStack",
       "PaymentRequestDetails",
       "TokenDetails",
+      "SecurityCode",
     ];
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     return hideOnScreens.indexOf(routeName!) <= -1;
@@ -108,7 +110,7 @@ export default function AppBottomTabNavigator() {
       />
       <AppBottomTab.Screen
         name="Settings"
-        component={Settings}
+        component={SettingsStackNavigator}
         options={({ route }) => ({
           title: "Settings",
           tabBarLabel({ focused }) {
@@ -120,8 +122,6 @@ export default function AppBottomTabNavigator() {
           tabBarIcon: ({ focused }) => {
             return <CustomTabBarIcon focused={focused} iconName="cog" />;
           },
-          headerShown: true,
-          header: (props) => <CustomNavigationHeader {...props} />,
         })}
       />
     </AppBottomTab.Navigator>

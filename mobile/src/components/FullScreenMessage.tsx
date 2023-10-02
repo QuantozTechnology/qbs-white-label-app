@@ -45,7 +45,7 @@ function FullScreenMessage({
       space={3}
     >
       {icon}
-      <Box mx={20}>
+      <Box mx={2}>
         {illustration && (
           <Image
             // any needed to cast from string of enum to type requested from source
