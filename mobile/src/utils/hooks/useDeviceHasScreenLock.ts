@@ -29,6 +29,5 @@ export const useDeviceHasScreenLock = () => {
 
     checkDeviceSecurityLevel();
   }, []);
-
   return { hasScreenLockMechanism, error, isLoading };
 };

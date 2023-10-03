@@ -176,15 +176,15 @@ export default function ConfirmDevice({ navigation }: ConfirmDeviceProps) {
 
   async function isCodeCorrect(otp: string) {
     try {
-      const pubKey = await SecureStore.getItemAsync("publicKey");
+      const pubKeyFromStore = await SecureStore.getItemAsync("publicKey");
 
-      if (pubKey === null) {
+      if (pubKeyFromStore === null) {
         showErrorNotification("Could not verify device, please try again.");
         return;
       }
 
       await verifyDevice({
-        publicKey: pubKey,
+        publicKey: pubKeyFromStore,
         otpCode: otp,
       });
 

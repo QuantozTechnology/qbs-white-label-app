@@ -61,7 +61,6 @@ export default function WelcomeStackNavigator() {
   const auth = useAuth();
   const customerContext = useCustomerState();
   const {
-    setupAndVerifyDeviceSecurity,
     error: deviceVerificationError,
     isLoading: isVerifyingDevice,
     deviceConflict,
@@ -84,7 +83,6 @@ export default function WelcomeStackNavigator() {
 
   useEffect(() => {
     WebBrowser.warmUpAsync();
-    (async () => await setupAndVerifyDeviceSecurity())();
 
     return () => {
       WebBrowser.coolDownAsync();
@@ -171,14 +169,6 @@ Please enable one of these to be able to use the app.`,
     );
   }
 
-  if (deviceConflict) {
-    return (
-      <WelcomeStack.Navigator>
-        {showConfirmDeviceScreens()}
-      </WelcomeStack.Navigator>
-    );
-  }
-
   if (deviceVerificationError) {
     return (
       <WelcomeStack.Navigator>
@@ -193,6 +183,14 @@ Please enable one of these to be able to use the app.`,
         message="Verifying device, it could take up to 1 minute..."
         showLoginAgainButton={false}
       />
+    );
+  }
+
+  if (deviceConflict) {
+    return (
+      <WelcomeStack.Navigator>
+        {showConfirmDeviceScreens()}
+      </WelcomeStack.Navigator>
     );
   }
 
@@ -262,8 +260,6 @@ Please enable one of these to be able to use the app.`,
       );
     }
 
-    generateKeyPair();
-
     return (
       <WelcomeStack.Screen name="AppStack" component={AppBottomTabNavigator} />
     );
@@ -314,11 +310,5 @@ Please enable one of these to be able to use the app.`,
         }}
       />
     );
-  }
-
-  async function generateKeyPair() {
-    const { public: pubKey, private: privKey } = await RSA.generateKeys(256);
-    console.log("public key: ", pubKey);
-    console.log("private key: ", privKey);
   }
 }

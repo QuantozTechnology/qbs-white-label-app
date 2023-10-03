@@ -10,9 +10,5 @@ import { GenericApiResponse } from "../utils/api.interface";
 export function verifyDevice(
   payload: DevicesPayload
 ): Promise<AxiosResponse<GenericApiResponse<Device>, DevicesPayload>> {
-  return paymentsApi.post("/api/customers/devices", payload, {
-    // headers: {
-    //   "x-mock-response-code": 200,
-    // },
-  });
+  return paymentsApi.post("/api/customers/devices", payload);
 }
