@@ -194,6 +194,10 @@ Please enable one of these to be able to use the app.`,
     );
   }
 
+  if (customerContext?.isLoading) {
+    return <FullScreenLoadingSpinner message="Checking your account..." />;
+  }
+
   return (
     <WelcomeStack.Navigator
       screenOptions={{ headerShown: false, gestureEnabled: false }}
@@ -258,6 +262,10 @@ Please enable one of these to be able to use the app.`,
           }}
         />
       );
+    }
+
+    if (customerContext?.isLoading) {
+      return;
     }
 
     return (
