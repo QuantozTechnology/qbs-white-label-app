@@ -48,7 +48,7 @@ export default function ConfirmDevice({ navigation }: ConfirmDeviceProps) {
   }, [codes]);
 
   return (
-    <ScreenWrapper flex={1}>
+    <ScreenWrapper flex={1} accessibilityLabel="confirm device screen">
       <Text fontSize="md">
         This device is not associated with your account yet.
       </Text>

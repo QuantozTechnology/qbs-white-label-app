@@ -104,12 +104,12 @@ export default function WelcomeStackNavigator() {
     );
   }
 
-  // TODO customer context checks?
-
   if (screenLockMechanismError) {
     return (
       <WelcomeStack.Navigator>
-        {showGenericErrorScreen()}
+        {showGenericErrorScreen(
+          "Cannot verify if your device has a screen lock mechanism. Please try again later"
+        )}
       </WelcomeStack.Navigator>
     );
   }
@@ -142,7 +142,9 @@ Please enable one of these to be able to use the app.`,
   if (biometricCheckError) {
     return (
       <WelcomeStack.Navigator>
-        {showGenericErrorScreen()}
+        {showGenericErrorScreen(
+          "Cannot verify your biometric security. Please try again later"
+        )}
       </WelcomeStack.Navigator>
     );
   }
@@ -172,7 +174,9 @@ Please enable one of these to be able to use the app.`,
   if (deviceVerificationError) {
     return (
       <WelcomeStack.Navigator>
-        {showGenericErrorScreen()}
+        {showGenericErrorScreen(
+          "Cannot securely verify your device. Please try again later"
+        )}
       </WelcomeStack.Navigator>
     );
   }
@@ -306,14 +310,16 @@ Please enable one of these to be able to use the app.`,
     );
   }
 
-  function showGenericErrorScreen() {
+  function showGenericErrorScreen(message?: string) {
     return (
       <WelcomeStack.Screen
         name="Feedback"
         component={Feedback}
         initialParams={{
           title: "Oops",
-          description: `Something went wrong. Please close the app and try again later.`,
+          description:
+            message ??
+            `Something went wrong. Please close the app and try again later.`,
           illustration: ImageIdentifier.Find,
         }}
       />

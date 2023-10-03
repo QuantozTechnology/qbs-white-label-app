@@ -15,6 +15,23 @@ export const devicesMockResponse: GenericApiResponse<Device> = {
 
 export const devicesMocks = [
   rest.post(`${backendApiUrl}/api/customers/devices`, (_req, rest, ctx) => {
-    return rest(ctx.status(200));
+    return rest(
+      ctx.status(200),
+      ctx.json<typeof devicesMockResponse>(devicesMockResponse)
+    );
   }),
 ];
+
+export const deviceNotKnownApiResponse = rest.post(
+  `${backendApiUrl}/api/customers/devices`,
+  (_req, res, ctx) => {
+    return res(ctx.status(409));
+  }
+);
+
+export const devicesApiErrorResponse = rest.post(
+  `${backendApiUrl}/api/customers/devices`,
+  (_req, res, ctx) => {
+    return res(ctx.status(400));
+  }
+);
