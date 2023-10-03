@@ -67,11 +67,18 @@ function Feedback({ navigation, route }: FeedbackProps) {
           letterSpacing="md"
           pb={2}
           textAlign="center"
+          accessibilityLabel="feedback title"
         >
           {title}
         </Heading>
         {description && (
-          <Text maxW="90%" lineHeight="md" fontSize="lg" textAlign="center">
+          <Text
+            maxW="90%"
+            lineHeight="md"
+            fontSize="lg"
+            textAlign="center"
+            accessibilityLabel="feedback description"
+          >
             {description}
           </Text>
         )}

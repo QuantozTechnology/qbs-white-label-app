@@ -7,7 +7,15 @@ import { Box, Heading, Image, Link, Spinner, Text, VStack } from "native-base";
 import { useWindowDimensions } from "react-native";
 import { useAuth } from "../auth/AuthContext";
 
-function FullScreenLoadingSpinner() {
+type FullScreenLoadingSpinnerProps = {
+  message?: string;
+  showLoginAgainButton?: boolean;
+};
+
+function FullScreenLoadingSpinner({
+  message = "Hang tight, we are getting things ready for you",
+  showLoginAgainButton = true,
+}: FullScreenLoadingSpinnerProps) {
   const auth = useAuth();
   const { height } = useWindowDimensions();
   return (
@@ -39,23 +47,25 @@ function FullScreenLoadingSpinner() {
         justifyContent="center"
         alignItems="center"
         space={4}
-        paddingX={20}
+        paddingX={12}
       >
         <Spinner size={"lg"} color="white" />
         <Heading size="md" color="white" textAlign="center">
-          Hang tight, we are getting things ready for you
+          {message}
         </Heading>
       </VStack>
-      <Box alignItems="center">
-        <Text color="white">Taking too long?</Text>
-        <Link
-          _text={{ color: "primary.400", fontSize: "md" }}
-          isUnderlined={false}
-          onPress={async () => await auth?.logout()}
-        >
-          Login again
-        </Link>
-      </Box>
+      {showLoginAgainButton && (
+        <Box alignItems="center">
+          <Text color="white">Taking too long?</Text>
+          <Link
+            _text={{ color: "primary.400", fontSize: "md" }}
+            isUnderlined={false}
+            onPress={async () => await auth?.logout()}
+          >
+            Login again
+          </Link>
+        </Box>
+      )}
     </VStack>
   );
 }
