@@ -41,7 +41,9 @@ namespace Core.Domain
         PropertyRequiredError,
         ExpiredError,
         InvalidStatusError,
-        InvalidPropertyError
+        InvalidPropertyError,
+        ExistingKeyError,
+        SecurityCheckError
     }
 
     public enum PaymentRequestStatus
