@@ -242,3 +242,4 @@ AzureB2C/custom-policies/output
 /backend/core/src/Core.API/appsettings.Development.json
 mobile/.env*.local
 .vscode
+mobile/junit.xml
