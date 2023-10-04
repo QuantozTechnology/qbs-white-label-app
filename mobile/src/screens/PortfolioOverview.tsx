@@ -49,7 +49,12 @@ function PortfolioOverview() {
   }, [error]);
 
   return (
-    <ScreenWrapper p={-4} bg="white" flex={1}>
+    <ScreenWrapper
+      p={-4}
+      bg="white"
+      flex={1}
+      accessibilityLabel="portfolio screen"
+    >
       <BalancePanel
         selectedToken={selectedToken}
         setSelectedToken={setSelectedToken}

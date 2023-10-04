@@ -7,7 +7,6 @@ using Core.Presentation.Models;
 using Core.Presentation.Models.Requests.CustomerRequests;
 using Core.Presentation.Models.Responses.CustomerResponses;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Identity.Web.Resource;
 
@@ -83,6 +82,21 @@ namespace Core.Presentation.Controllers
             var query = new GetCustomerLimitsQuery(GetUserId());
             var customerLimits = await _sender.Send(query);
             var response = ConstructCustomResponse(customerLimits, CustomerLimitResponse.FromCustomerLimit);
+            return Ok(response);
+        }
+
+        [HttpPost("devices", Name = "DeviceAuthentication")]
+        [ProducesResponseType(typeof(CustomResponse<DeviceAuthenticationResponse>), 201)]
+        [ProducesResponseType(typeof(CustomErrorsResponse), 400)]
+        [ProducesResponseType(typeof(CustomErrorsResponse), 404)]
+        [ProducesResponseType(typeof(CustomErrorsResponse), 500)]
+        [ProducesResponseType(typeof(CustomErrorsResponse), 409)]
+        [RequiredScope("Customer.Create")]
+        public async Task<IActionResult> DeviceAuthenticationAsync([FromBody] CreateDeviceAuthenticationRequest request)
+        {
+            var command = request.ToCommand(GetUserId(), GetIP());
+            var result = await _sender.Send(command);
+            var response = ConstructCustomResponse(result, DeviceAuthenticationResponse.FromOTPKey);
             return Ok(response);
         }
     }

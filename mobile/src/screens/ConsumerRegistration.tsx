@@ -123,7 +123,7 @@ function ConsumerRegistration() {
   });
 
   return (
-    <ScreenWrapper flex={1}>
+    <ScreenWrapper flex={1} accessibilityLabel="consumer registration screen">
       <KeyboardAvoidingView
         behavior={getPlatformOS() === "ios" ? "padding" : undefined}
         flex={1}

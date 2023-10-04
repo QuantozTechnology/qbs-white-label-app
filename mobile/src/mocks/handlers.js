@@ -14,6 +14,7 @@ import { paymentsMocks } from "../api/payments/payments.mocks";
 import { transactionMocks } from "../api/transactions/transactions.mocks";
 import { withdrawMocks } from "../api/withdraw/withdraw.mocks";
 import { tokenDetailsMocks } from "../api/tokens/tokens.mocks";
+import { devicesMocks } from "../api/customer/devices.mocks";
 
 export const handlers = [
   ...accountsMocks,
@@ -28,4 +29,5 @@ export const handlers = [
   ...trustlevelsMocks,
   ...withdrawMocks,
   ...tokenDetailsMocks,
+  ...devicesMocks,
 ];

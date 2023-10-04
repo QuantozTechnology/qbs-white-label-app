@@ -67,6 +67,10 @@ namespace Core.API.ResponseHandling
                     {
                         statusCode = 404;
                     }
+                    else if(error.Code.Contains("ExistingKeyError"))
+                    {
+                        statusCode = 409;
+                    }
                 }
             }
             else

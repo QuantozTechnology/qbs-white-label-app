@@ -71,6 +71,9 @@ export default () => ({
         NSFaceIDUsageDescription:
           "FaceID is used to authenticate you and to access your account",
       },
+      config: {
+        usesNonExemptEncryption: false,
+      },
     },
     android: {
       adaptiveIcon: {
