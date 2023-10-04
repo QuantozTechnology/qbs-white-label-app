@@ -90,6 +90,7 @@ namespace Core.Presentation.Controllers
         [ProducesResponseType(typeof(CustomErrorsResponse), 400)]
         [ProducesResponseType(typeof(CustomErrorsResponse), 404)]
         [ProducesResponseType(typeof(CustomErrorsResponse), 500)]
+        [ProducesResponseType(typeof(CustomErrorsResponse), 409)]
         [RequiredScope("Customer.Create")]
         public async Task<IActionResult> DeviceAuthenticationAsync([FromBody] CreateDeviceAuthenticationRequest request)
         {

@@ -46,56 +46,66 @@ namespace Core.Application.Commands.CustomerCommands
 
             if (customerDevice is null)
             {
-                // Customer does not exist, create a new customer and device
-                otpKey = _otpGenerator.GenerateNewOTPKey().Result;
-
-                // Create a new customer OTP key store and associated device
-                var newDevice = CustomerOTPKeyStore.New(request.CustomerCode, otpKey, request.PublicKey);
-
-                // Add the new customer OTP key store and device to the repository
-                _customerDeviceRepository.Add(newDevice);
-
-                await _unitOfWork.SaveChangesAsync(cancellationToken);
+                // Customer does not exist, create a new customer device
+                otpKey = CreateNewCustomerDevice(request);
             }
-            else
+            else if (!string.IsNullOrWhiteSpace(request.OTPCode))
             {
-                // Customer exists, check if the public key already exists
-                if (customerDevice.PublicKeys.Any(pk => pk.PublicKey == request.PublicKey))
-                {
-                    throw new CustomErrorsException(DomainErrorCode.SecurityCheckError.ToString(), request.CustomerCode, "Public Key already exists.");
-                }
-
-                // Append the publicKey to the existing list
-                customerDevice.PublicKeys.Add(CustomerDevicePublicKeys.NewCustomerDevicePublicKey(request.PublicKey, customerDevice.Id));
-
-                if (string.IsNullOrWhiteSpace(customerDevice.OTPKey))
-                {
-                    // Generate a new OTPKey if none exists
-                    otpKey = _otpGenerator.GenerateNewOTPKey().Result;
-                    customerDevice.OTPKey = otpKey;
-                }
-                else
-                {
-                    otpKey = customerDevice.OTPKey;
-                }
-
-                _customerDeviceRepository.Update(customerDevice);
-
-                await _unitOfWork.SaveChangesAsync(cancellationToken);
+                otpKey = VerifyAndProcessOTPCode(request, customerDevice);
             }
-
-            if (!string.IsNullOrWhiteSpace(request.OTPCode))
+            else if (string.IsNullOrWhiteSpace(request.OTPCode) && !CustomerHasPublicKey(customerDevice, request.PublicKey))
             {
-                // Verify the OTPCode against the OTPKey
-                var result = _otpGenerator.VerifyOTP(otpKey, request.OTPCode);
-
-                if (!result)
-                {
-                    throw new CustomErrorsException(DomainErrorCode.SecurityCheckError.ToString(), request.CustomerCode, "OTP code verification failed.");
-                }
+                throw new CustomErrorsException(DomainErrorCode.ExistingKeyError.ToString(), request.CustomerCode, "Verfication needed.");
             }
+
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             return new DeviceAuthentication { OTPKey = otpKey };
+        }
+
+        private string VerifyAndProcessOTPCode(DeviceAuthenticationCommand request, CustomerOTPKeyStore customerDevice)
+        {
+            string otpKey = customerDevice.OTPKey;
+
+            // Verify the OTPCode against the OTPKey
+            var result = _otpGenerator.VerifyOTP(otpKey, request.OTPCode!);
+
+            if (!result)
+            {
+                throw new CustomErrorsException(DomainErrorCode.SecurityCheckError.ToString(), request.CustomerCode, "OTP code verification failed.");
+            }
+
+            // Append the publicKey to the existing list
+            customerDevice.PublicKeys.Add(CustomerDevicePublicKeys.NewCustomerDevicePublicKey(request.PublicKey, customerDevice.Id));
+
+            if (string.IsNullOrWhiteSpace(customerDevice.OTPKey))
+            {
+                // Generate a new OTPKey if none exists
+                otpKey = _otpGenerator.GenerateNewOTPKey().Result;
+                customerDevice.OTPKey = otpKey;
+            }
+
+            _customerDeviceRepository.Update(customerDevice);
+
+            return otpKey;
+        }
+
+        private string CreateNewCustomerDevice(DeviceAuthenticationCommand request)
+        {
+            string otpKey = _otpGenerator.GenerateNewOTPKey().Result;
+
+            // Create a new customer OTP key store and associated device
+            var newDevice = CustomerOTPKeyStore.New(request.CustomerCode, otpKey, request.PublicKey);
+
+            // Add the new customer OTP key store and device to the repository
+            _customerDeviceRepository.Add(newDevice);
+
+            return otpKey;
+        }
+
+        private static bool CustomerHasPublicKey(CustomerOTPKeyStore customerDevice, string publicKey)
+        {
+            return customerDevice.PublicKeys.Any(pk => pk.PublicKey == publicKey);
         }
     }
 }

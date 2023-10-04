@@ -42,6 +42,7 @@ namespace Core.Domain
         ExpiredError,
         InvalidStatusError,
         InvalidPropertyError,
+        ExistingKeyError,
         SecurityCheckError
     }
 
