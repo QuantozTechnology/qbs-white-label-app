@@ -23,13 +23,15 @@ import { CustomerProvider } from "./src/context/CustomerContext";
 import { Feather } from "@expo/vector-icons";
 import * as Sentry from "sentry-expo";
 import Constants from "expo-constants";
+import { ToastProvider } from "./src/context/NotificationContext";
 
 const prefix = Linking.createURL("/");
 const queryClient = new QueryClient();
 
 Sentry.init({
   dsn: Constants.expoConfig?.extra?.SENTRY_DSN,
-  enableInExpoDevelopment: Constants.expoConfig?.extra?.APP_ENV !== "development",
+  enableInExpoDevelopment:
+    Constants.expoConfig?.extra?.APP_ENV !== "development",
   debug: Constants.expoConfig?.extra?.APP_ENV !== "development",
 });
 
@@ -73,9 +75,11 @@ export default function App() {
           >
             <QueryClientProvider client={queryClient}>
               <CustomerProvider>
-                <ErrorBoundary>
-                  <WelcomeStackNavigator />
-                </ErrorBoundary>
+                <ToastProvider>
+                  <ErrorBoundary>
+                    <WelcomeStackNavigator />
+                  </ErrorBoundary>
+                </ToastProvider>
               </CustomerProvider>
             </QueryClientProvider>
           </NavigationContainer>

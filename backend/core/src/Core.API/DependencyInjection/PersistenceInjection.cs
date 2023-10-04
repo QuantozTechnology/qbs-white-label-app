@@ -26,6 +26,7 @@ namespace Core.API.DependencyInjection
             services.AddScoped<IPaymentRequestRepository, PaymentRequestRepository>();
             services.AddScoped<ICallbackRepository, CallbackRepository>();
             services.AddScoped<IPaymentRepository, PaymentRepository>();
+            services.AddScoped<ICustomerDeviceRepository, CustomerDeviceRepository>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
 
             return services;
