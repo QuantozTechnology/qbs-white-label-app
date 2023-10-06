@@ -151,11 +151,17 @@ export default function ConfirmDevice({ navigation }: ConfirmDeviceProps) {
       const isCodeCorrectResponse = await isCodeCorrect(otp);
 
       if (!isCodeCorrectResponse) {
-        showErrorNotification("The code you entered is incorrect");
+        showErrorNotification("The code you entered is incorrect", {
+          position: "top",
+        });
         setCodes(["", "", "", "", "", ""]);
-        if (inputsRef.current[0]) {
-          inputsRef.current[0].focus();
-        }
+
+        // Add delay before refocusing, otherwise it does not autofocus correctly
+        setTimeout(() => {
+          if (inputsRef.current[0]) {
+            inputsRef.current[0].focus();
+          }
+        }, 200);
       } else {
         navigation.navigate("Feedback", {
           title: "Device verified!",
@@ -173,7 +179,6 @@ export default function ConfirmDevice({ navigation }: ConfirmDeviceProps) {
           },
         });
       }
-
       setIsCheckingCode(false);
     }
   }
@@ -183,7 +188,9 @@ export default function ConfirmDevice({ navigation }: ConfirmDeviceProps) {
       const pubKeyFromStore = await SecureStore.getItemAsync("publicKey");
 
       if (pubKeyFromStore === null) {
-        showErrorNotification("Could not verify device, please try again.");
+        showErrorNotification("Could not verify device, please try again.", {
+          position: "top",
+        });
         return;
       }
 
