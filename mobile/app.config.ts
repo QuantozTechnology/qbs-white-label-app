@@ -64,7 +64,7 @@ export default () => ({
     },
     assetBundlePatterns: ["**/*"],
     ios: {
-      bundleIdentifier: AppConfig.ios.bundleIdentifier,
+      bundleIdentifier: process.env.IOS_BUNDLE_IDENTIFIER,
       infoPlist: {
         NSCameraUsageDescription:
           "This app uses the camera to take photos of your documents, in order to upgrade to a higher tier.",
