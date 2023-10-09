@@ -11,17 +11,17 @@
 // - Expo Secrets (for build processes)
 
 const AppConfig = {
-  name: process.env.EXPO_PUBLIC_APP_NAME,
+  name: process.env.APP_NAME,
   icon: "./assets/icon-qbs.png",
   image: "./assets/splash-qbs.png",
   ios: {
-    bundleIdentifier: process.env.EXPO_PUBLIC_IOS_BUNDLE_IDENTIFIER,
+    bundleIdentifier: process.env.IOS_BUNDLE_IDENTIFIER,
   },
   android: {
     adaptiveIcon: {
       foregroundImage: "./assets/adaptive-icon-qbs.png",
     },
-    package: process.env.EXPO_PUBLIC_ANDROID_PACKAGE_NAME,
+    package: process.env.ANDROID_PACKAGE_NAME,
   },
   // This logic sets the correct env variables to use throughout the app
   // They can be read through the `expo-constants` package (https://docs.expo.dev/guides/environment-variables/#reading-environment-variables)
@@ -103,7 +103,7 @@ export default () => ({
         },
       ],
     ],
-    scheme: process.env.EXPO_PUBLIC_SCHEME,
+    scheme: process.env.SCHEME,
     platforms: ["ios", "android"],
     runtimeVersion: {
       policy: "sdkVersion",
