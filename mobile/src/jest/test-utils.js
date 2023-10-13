@@ -9,6 +9,7 @@ import { NavigationContainer } from "@react-navigation/native";
 import PropTypes from "prop-types";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { CustomerProvider } from "../context/CustomerContext";
+import { ToastProvider } from "../context/NotificationContext";
 
 // Configuration for rendering with NativeBase: https://docs.nativebase.io/testing
 const inset = {
@@ -35,9 +36,11 @@ const AllTheProviders = ({ children }) => {
     <AuthProvider>
       <NativeBaseProvider initialWindowMetrics={inset}>
         <NavigationContainer>
-          <QueryClientProvider client={queryClient}>
-            <CustomerProvider>{children}</CustomerProvider>
-          </QueryClientProvider>
+          <ToastProvider>
+            <QueryClientProvider client={queryClient}>
+              <CustomerProvider>{children}</CustomerProvider>
+            </QueryClientProvider>
+          </ToastProvider>
         </NavigationContainer>
       </NativeBaseProvider>
     </AuthProvider>

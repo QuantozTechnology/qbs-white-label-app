@@ -1,9 +1,22 @@
+// Copyright 2023 Quantoz Technology B.V. and contributors. Licensed
+// under the Apache License, Version 2.0. See the NOTICE file at the root
+// of this distribution or at http://www.apache.org/licenses/LICENSE-2.0
+
 import { render, screen, within } from "../../jest/test-utils";
-import Settings from "../Settings";
+import SettingsHome from "../Settings";
 
 describe("Settings", () => {
+  const createTestProps = (props: Record<string, unknown>) => ({
+    navigation: {},
+    ...props,
+  });
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let props: any;
+
   it("shows the expected elements of the page", () => {
-    render(<Settings />);
+    props = createTestProps({});
+    render(<SettingsHome {...props} />);
 
     const supportEntry = screen.getByLabelText("support");
     const termsEntry = screen.getByLabelText("terms");

@@ -8,13 +8,13 @@ namespace Core.Presentation.Models.Responses.CustomerResponses
 {
     public class DeviceAuthenticationResponse
     {
-        public required string OTPKey { get; set; }
+        public required string OTPSeed { get; set; }
 
         public static DeviceAuthenticationResponse FromOTPKey(DeviceAuthentication device)
         {
             return new DeviceAuthenticationResponse
             {
-                OTPKey = device.OTPKey
+                OTPSeed = device.OTPKey
             };
         }
     }

@@ -2,10 +2,12 @@
 // under the Apache License, Version 2.0. See the NOTICE file at the root
 // of this distribution or at http://www.apache.org/licenses/LICENSE-2.0
 
-import axios from "axios";
+import axios, { AxiosResponse, InternalAxiosRequestConfig } from "axios";
 import Constants from "expo-constants";
 import { authStorageService } from "../auth/authStorageService";
 import { AuthService } from "../auth/authService";
+import * as SecureStore from "expo-secure-store";
+import forge from "node-forge";
 
 export const backendApiUrl = Constants.expoConfig?.extra?.API_URL;
 
@@ -26,45 +28,77 @@ export const paymentsApi = axios.create({
   },
 });
 
-paymentsApi.interceptors.request.use(async (config) => {
+paymentsApi.interceptors.request.use(requestInterceptor);
+paymentsApi.interceptors.response.use(
+  responseInterceptor,
+  responseInterceptorError
+);
+
+mockPaymentsApi.interceptors.request.use(requestInterceptor);
+mockPaymentsApi.interceptors.response.use(
+  responseInterceptor,
+  responseInterceptorError
+);
+
+async function requestInterceptor(config: InternalAxiosRequestConfig) {
   const storage = authStorageService();
   const accessToken = await storage.getAccessToken();
   const authorizationHeader =
     paymentsApi.defaults.headers.common["Authorization"];
 
+  const pubKeyFromStore = await SecureStore.getItemAsync("publicKey");
+  const privKeyFromStore = await SecureStore.getItemAsync("privateKey");
+
   if (accessToken !== null || authorizationHeader == null) {
-    // If the token is valid, add it to the request header
-
-    paymentsApi.defaults.headers.common[
-      "Authorization"
-    ] = `Bearer ${accessToken}`;
-    paymentsApi.defaults.headers.common["x-api-version"] = "1.0";
-
     if (config.headers) {
-      // add it also to the current config
       config.headers["Authorization"] = `Bearer ${accessToken}`;
-      config.headers["x-api-version"] = "1.0";
+
+      if (pubKeyFromStore !== null && privKeyFromStore != null) {
+        config.headers["x-public-key"] = JSON.stringify(pubKeyFromStore);
+
+        const payload: {
+          publicKey: string;
+          timestamp: number;
+          postPayload?: unknown;
+        } = {
+          publicKey: pubKeyFromStore,
+          timestamp: Date.now(),
+        };
+
+        // hash POST payload if available
+        if (config.method === "post") {
+          payload.postPayload = config.data;
+        }
+
+        // create hash and sign it
+        const privateKey = forge.pki.privateKeyFromPem(privKeyFromStore);
+        const md = forge.md.sha256.create();
+        md.update(JSON.stringify(payload), "utf8");
+        const signature = privateKey.sign(md);
+
+        config.headers["x-signature"] = forge.util.encode64(signature);
+      }
     }
   }
 
   return config;
-});
+}
 
-paymentsApi.interceptors.response.use(
-  (response) => {
-    return response;
-  },
-  async function (error) {
-    const originalRequest = error.config;
+async function responseInterceptor(response: AxiosResponse) {
+  return response;
+}
 
-    if (error.response.status === 401) {
-      const result = await AuthService().refresh();
-      if (result.type === "error") {
-        await AuthService().logout();
-      }
-      return paymentsApi(originalRequest);
-    } else {
-      return Promise.reject(error);
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function responseInterceptorError(error: any) {
+  const originalRequest = error.config;
+
+  if (error.response.status === 401) {
+    const result = await AuthService().refresh();
+    if (result.type === "error") {
+      await AuthService().logout();
     }
+    return paymentsApi(originalRequest);
+  } else {
+    return Promise.reject(error);
   }
-);
+}
