@@ -7,6 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Compliance\Authentication\**" />
+    <EmbeddedResource Remove="Compliance\Authentication\**" />
+    <None Remove="Compliance\Authentication\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.1" />
     <PackageReference Include="Otp.NET" Version="1.3.0" />
     <PackageReference Include="Quartz" Version="3.6.0" />
@@ -17,10 +23,6 @@
   <ItemGroup>
     <ProjectReference Include="..\Core.Application\Core.Application.csproj" />
     <ProjectReference Include="..\Core.Domain\Core.Domain.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Compliance\Authentication\" />
   </ItemGroup>
 
 </Project>
