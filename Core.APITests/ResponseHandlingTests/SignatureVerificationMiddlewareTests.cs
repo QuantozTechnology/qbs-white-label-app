@@ -31,7 +31,7 @@ namespace Core.APITests.ResponseHandlingTests
             var payload = new
             {
                 publicKey,
-                timestamp = currentTimestamp.ToString(),
+                timestamp = currentTimestamp,
                 postPayload
             };
 
@@ -66,8 +66,8 @@ namespace Core.APITests.ResponseHandlingTests
         public async Task Middleware_ValidSignature_WithPostPayload_ContinuesWithRequest()
         {
             // Arrange
-            var publicKeyHeader = "-----BEGIN PUBLIC KEY-----\r\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAnLQKInx7UeHsc99RPHHT\r\ndBs5jQZoTOswJc6pE4+dggmbf4b/XKDxNrKCpHVXMKRrotGdHKv9xOMhJFHPyZHz\r\nd2ZPjyeakERGjS2ZKBCo1ysYnP0bROdoNAEbAIOyMutiTkYEuf/a7Rr5ptJQ323s\r\n3hVLOzdLlHEisjTkHUsDJATg8J8EHx/pRJD48+Q0LHkArhmbIKol4lDRe2ODfgko\r\n+bVQxtv1/ZiGhDsWUPNGss1hXmXBQCzx4VXgi6DfeTkn/GyyaonumVEkaR+KUKxZ\r\nwRvezSnUfGcY0h/HG/TMs1EGfUecgI6bCsIv6lD5U4AMkHvt4e+dckRgSV5cnJ+f\r\ngwIDAQAB\r\n-----END PUBLIC KEY-----";
-            var privateKey = "-----BEGIN RSA PRIVATE KEY-----\r\nMIIEpAIBAAKCAQEAnLQKInx7UeHsc99RPHHTdBs5jQZoTOswJc6pE4+dggmbf4b/\r\nXKDxNrKCpHVXMKRrotGdHKv9xOMhJFHPyZHzd2ZPjyeakERGjS2ZKBCo1ysYnP0b\r\nROdoNAEbAIOyMutiTkYEuf/a7Rr5ptJQ323s3hVLOzdLlHEisjTkHUsDJATg8J8E\r\nHx/pRJD48+Q0LHkArhmbIKol4lDRe2ODfgko+bVQxtv1/ZiGhDsWUPNGss1hXmXB\r\nQCzx4VXgi6DfeTkn/GyyaonumVEkaR+KUKxZwRvezSnUfGcY0h/HG/TMs1EGfUec\r\ngI6bCsIv6lD5U4AMkHvt4e+dckRgSV5cnJ+fgwIDAQABAoIBAQCXZIl2D/XEghTD\r\nTblaQE4eGj9btBkIVyBJJoPK1jFB9K46Yt5LS2I/ie8VnBgEcpVa1FCJ5tBha14V\r\njMTG5S7m5/1tPMHjJ1NSCf+x6YZ1erlo0k+KHldaBsdjk9iRwT9Uh+kBGeMUt78C\r\nIKbpdXYmiUQJjb6DR1pR+S957YK3REro6HWBhYwRAnPCukchaD6efaUN2yoqm/7g\r\nMy5avNFeJ+3VaR+RejylZd+IoGIAYRW7Lgu5x2g9SD1O2HaX/tfPj9ouz+5c8J2e\r\nciNnDqI8M78zhgpcFvgoFdHNL+UiSUEGen+ZCT9JiPNEH/AI2zxc8TtCjIpA0qJk\r\nJ/MxRP6BAoGBANpd9+wC/meOcsOPBZYra/vIc7Oo2OVOrdYZQQ89so2ZlbtSoPP6\r\n9wN84d6M56oulApE4F4zdlgojSWo3S/4qN93ZptR1vuSIml7eAkH9BQJSnlHgFjf\r\ntdF1zcXV4bSxnqkdZh5i77aioVm0fCkdJgQyRbewiqp7Jp/z5dqpseYRAoGBALe1\r\njmeXZ3bIzbq33EO+pc3NIQODhpDiRsZJfrneH7tm4N2UWp8vBKBqjwmMxFO4LMPx\r\nH0amnhtLvq0cOCgVyN9zekTWtIuyOw9KKfrmJ3zfRY1oRV2Fn+h6dWIveWj1hm0H\r\n6yv5xznaUuNzlRubXshWyC/eyMPAUatYrf5tKYhTAoGAMt5/GcDcyPz7KSlRMNlu\r\nr1nT8j9cP5bjkiOR7139EVV89wVZr1yAXJSj/XcvpIpzPC0tY2RzpjfUIbjDxiAU\r\nHvKuuXIINdSmJZJ4tQngRyae7b/FW27J6UCbLgIUMUbLYjQSDPQZSZ97HO2Zmu5K\r\nY+HeMdtzgiFsLwjfO+AaLDECgYAO9SFbHeC2szLM+RteCK/HSeRePN8//Kx2iJVg\r\n3M0InR/B6spWG6XsycBLrsJtbpl2erNpNTe6UTh9L8cCvINWbjiOUkzw8toMLKWu\r\nX/7nE+a91LeRHcgfTZkxHVxtR1BioDptojCubTBChK6nSMc22JoEC8ec6JO9t8Ky\r\n7IBtMQKBgQDWIihg/WYVZh6a7LQ2LayHJ39JvOUhOPUK0LN3hxlUnIiJWczJf41i\r\nt8c/ooKmrFMGh3Nc9P42wqdsRQrnt1de3otGNQmAgrO65QZbOvr7hhSp6znb6d+T\r\nytUeiYdFC/xmBbQoZ6Fz3r72T36VWuRatULkYrOAGTKlwtWKD3oByQ==\r\n-----END RSA PRIVATE KEY-----";
+            var publicKeyHeader = "-----BEGIN PUBLIC KEY-----MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAnLQKInx7UeHsc99RPHHTdBs5jQZoTOswJc6pE4+dggmbf4b/XKDxNrKCpHVXMKRrotGdHKv9xOMhJFHPyZHzd2ZPjyeakERGjS2ZKBCo1ysYnP0bROdoNAEbAIOyMutiTkYEuf/a7Rr5ptJQ323s3hVLOzdLlHEisjTkHUsDJATg8J8EHx/pRJD48+Q0LHkArhmbIKol4lDRe2ODfgko+bVQxtv1/ZiGhDsWUPNGss1hXmXBQCzx4VXgi6DfeTkn/GyyaonumVEkaR+KUKxZwRvezSnUfGcY0h/HG/TMs1EGfUecgI6bCsIv6lD5U4AMkHvt4e+dckRgSV5cnJ+fgwIDAQAB-----END PUBLIC KEY-----";
+            var privateKey = "-----BEGIN RSA PRIVATE KEY-----MIIEpAIBAAKCAQEAnLQKInx7UeHsc99RPHHTdBs5jQZoTOswJc6pE4+dggmbf4b/XKDxNrKCpHVXMKRrotGdHKv9xOMhJFHPyZHzd2ZPjyeakERGjS2ZKBCo1ysYnP0bROdoNAEbAIOyMutiTkYEuf/a7Rr5ptJQ323s3hVLOzdLlHEisjTkHUsDJATg8J8EHx/pRJD48+Q0LHkArhmbIKol4lDRe2ODfgko+bVQxtv1/ZiGhDsWUPNGss1hXmXBQCzx4VXgi6DfeTkn/GyyaonumVEkaR+KUKxZwRvezSnUfGcY0h/HG/TMs1EGfUecgI6bCsIv6lD5U4AMkHvt4e+dckRgSV5cnJ+fgwIDAQABAoIBAQCXZIl2D/XEghTDTblaQE4eGj9btBkIVyBJJoPK1jFB9K46Yt5LS2I/ie8VnBgEcpVa1FCJ5tBha14VjMTG5S7m5/1tPMHjJ1NSCf+x6YZ1erlo0k+KHldaBsdjk9iRwT9Uh+kBGeMUt78CIKbpdXYmiUQJjb6DR1pR+S957YK3REro6HWBhYwRAnPCukchaD6efaUN2yoqm/7gMy5avNFeJ+3VaR+RejylZd+IoGIAYRW7Lgu5x2g9SD1O2HaX/tfPj9ouz+5c8J2eciNnDqI8M78zhgpcFvgoFdHNL+UiSUEGen+ZCT9JiPNEH/AI2zxc8TtCjIpA0qJkJ/MxRP6BAoGBANpd9+wC/meOcsOPBZYra/vIc7Oo2OVOrdYZQQ89so2ZlbtSoPP69wN84d6M56oulApE4F4zdlgojSWo3S/4qN93ZptR1vuSIml7eAkH9BQJSnlHgFjftdF1zcXV4bSxnqkdZh5i77aioVm0fCkdJgQyRbewiqp7Jp/z5dqpseYRAoGBALe1jmeXZ3bIzbq33EO+pc3NIQODhpDiRsZJfrneH7tm4N2UWp8vBKBqjwmMxFO4LMPxH0amnhtLvq0cOCgVyN9zekTWtIuyOw9KKfrmJ3zfRY1oRV2Fn+h6dWIveWj1hm0H6yv5xznaUuNzlRubXshWyC/eyMPAUatYrf5tKYhTAoGAMt5/GcDcyPz7KSlRMNlur1nT8j9cP5bjkiOR7139EVV89wVZr1yAXJSj/XcvpIpzPC0tY2RzpjfUIbjDxiAUHvKuuXIINdSmJZJ4tQngRyae7b/FW27J6UCbLgIUMUbLYjQSDPQZSZ97HO2Zmu5KY+HeMdtzgiFsLwjfO+AaLDECgYAO9SFbHeC2szLM+RteCK/HSeRePN8//Kx2iJVg3M0InR/B6spWG6XsycBLrsJtbpl2erNpNTe6UTh9L8cCvINWbjiOUkzw8toMLKWuX/7nE+a91LeRHcgfTZkxHVxtR1BioDptojCubTBChK6nSMc22JoEC8ec6JO9t8Ky7IBtMQKBgQDWIihg/WYVZh6a7LQ2LayHJ39JvOUhOPUK0LN3hxlUnIiJWczJf41it8c/ooKmrFMGh3Nc9P42wqdsRQrnt1de3otGNQmAgrO65QZbOvr7hhSp6znb6d+TytUeiYdFC/xmBbQoZ6Fz3r72T36VWuRatULkYrOAGTKlwtWKD3oByQ==-----END RSA PRIVATE KEY-----";
             string postPayload = "{\"publicKey\": \"" + publicKeyHeader + "\", \"otpcode\": \"123456\"}";
 
             long currentTimestamp = (long)(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1))).TotalSeconds;
@@ -76,7 +76,7 @@ namespace Core.APITests.ResponseHandlingTests
             var payload = new
             {
                 publicKey = publicKeyHeader,
-                timestamp = currentTimestamp.ToString(),
+                timestamp = currentTimestamp,
                 postPayload
             };
 
@@ -122,7 +122,7 @@ namespace Core.APITests.ResponseHandlingTests
             var payload = new
             {
                 publicKey = publicKeyHeader,
-                timestamp = currentTimestamp.ToString(),
+                timestamp = currentTimestamp,
                 postPayload = invalidPostPayload // Using an invalid payload
             };
 

@@ -61,7 +61,7 @@ namespace Core.API.ResponseHandling
                 string payload = JsonConvert.SerializeObject(new
                 {
                     publicKey = publicKeyHeader,
-                    timestamp = currentTimestamp.ToString(),
+                    timestamp = currentTimestamp,
                     postPayload
                 }, Formatting.None);
 
@@ -83,7 +83,7 @@ namespace Core.API.ResponseHandling
                     string updatedPayload = JsonConvert.SerializeObject(new
                     {
                         publicKey = publicKeyHeader,
-                        timestamp = previousTimestamp.ToString(),
+                        timestamp = previousTimestamp,
                         postPayload
                     });
 
