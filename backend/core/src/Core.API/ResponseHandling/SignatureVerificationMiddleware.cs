@@ -49,21 +49,35 @@ namespace Core.API.ResponseHandling
                 currentTimestamp = (currentTimestamp / 30) * 30; // Round to the nearest 30 seconds
 
                 string? postPayload = string.Empty;
+                string? payload = null;
 
-                if (method == "POST")
+                switch (method)
                 {
-                    using (StreamReader reader = new StreamReader(context.Request.Body, Encoding.UTF8))
-                    {
-                        postPayload = await reader.ReadToEndAsync();
-                    }
+                    case "POST":
+                    case "PUT":
+                        {
+                            using (StreamReader reader = new(context.Request.Body, Encoding.UTF8))
+                            {
+                                postPayload = await reader.ReadToEndAsync();
+                            }
+
+                            payload = JsonConvert.SerializeObject(new
+                            {
+                                publicKey = publicKeyHeader,
+                                timestamp = currentTimestamp,
+                                postPayload
+                            }, Formatting.None);
+                            break;
+                        }
+
+                    default:
+                        payload = JsonConvert.SerializeObject(new
+                        {
+                            publicKey = publicKeyHeader,
+                            timestamp = currentTimestamp
+                        }, Formatting.None);
+                        break;
                 }
-
-                string payload = JsonConvert.SerializeObject(new
-                {
-                    publicKey = publicKeyHeader,
-                    timestamp = currentTimestamp,
-                    postPayload
-                }, Formatting.None);
 
                 byte[] payloadBytes = Encoding.UTF8.GetBytes(payload);
 
@@ -80,12 +94,30 @@ namespace Core.API.ResponseHandling
                     // Check the previous timestamp (30 seconds ago)
                     long previousTimestamp = currentTimestamp - 30;
 
-                    string updatedPayload = JsonConvert.SerializeObject(new
+                    string? updatedPayload = null;
+
+                    switch (method)
                     {
-                        publicKey = publicKeyHeader,
-                        timestamp = previousTimestamp,
-                        postPayload
-                    });
+                        case "POST":
+                        case "PUT":
+                            {
+                                updatedPayload = JsonConvert.SerializeObject(new
+                                {
+                                    publicKey = publicKeyHeader,
+                                    timestamp = previousTimestamp,
+                                    postPayload
+                                });
+                                break;
+                            }
+
+                        default:
+                            updatedPayload = JsonConvert.SerializeObject(new
+                            {
+                                publicKey = publicKeyHeader,
+                                timestamp = previousTimestamp
+                            });
+                            break;
+                    }
 
                     payloadBytes = Encoding.UTF8.GetBytes(updatedPayload);
 
@@ -121,6 +153,8 @@ namespace Core.API.ResponseHandling
 
         private static bool VerifySignature(string publicKey, byte[] payload, byte[] signature)
         {
+            publicKey = publicKey.Replace("\\n", "\n");
+
             try
             {
                 using (RSA rsa = RSA.Create())
