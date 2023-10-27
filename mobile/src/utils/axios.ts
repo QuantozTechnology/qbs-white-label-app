@@ -70,13 +70,19 @@ async function requestInterceptor(config: InternalAxiosRequestConfig) {
           payload.postPayload = config.data;
         }
 
+        console.log("Public Key ", pubKeyFromStore);
+
         // create hash and sign it
         const privateKey = forge.pki.privateKeyFromPem(privKeyFromStore);
         const md = forge.md.sha256.create();
         md.update(JSON.stringify(payload), "utf8");
         const signature = privateKey.sign(md);
 
-        config.headers["x-signature"] = forge.util.encode64(signature);
+        console.log("Base64 Encoded: ", forge.util.encode64(signature));
+
+        // Encode the signature in Base64 format
+        const base64Signature = forge.util.encode64(signature);
+        config.headers["x-signature"] = base64Signature;
       }
     }
   }
