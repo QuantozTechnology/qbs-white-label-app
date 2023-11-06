@@ -13,7 +13,7 @@ namespace Core.Infrastructure.Nexus.SigningService
         {
             if (signableResponse.BlockchainResponse.RequiredSignatures == null)
             {
-                throw new InvalidOperationException("Invalid blockchain response, are you using the correct key pair?");
+                throw new InvalidOperationException("No Algorand transactions to sign");
             }
 
             var unsignedTransactions = signableResponse.BlockchainResponse.RequiredSignatures
@@ -38,7 +38,7 @@ namespace Core.Infrastructure.Nexus.SigningService
         {
             if (signableResponse.BlockchainResponse.RequiredSignatures == null)
             {
-                throw new InvalidOperationException("Invalid blockchain response, are you using the correct key pair?");
+                throw new InvalidOperationException("No Stellar transactions to sign");
             }
 
             var unsignedTransactions = signableResponse.BlockchainResponse.RequiredSignatures
