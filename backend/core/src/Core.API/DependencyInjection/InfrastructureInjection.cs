@@ -13,8 +13,8 @@ using Core.Infrastructure.Nexus;
 using Core.Infrastructure.Nexus.Repositories;
 using Core.Infrastructure.Nexus.SigningService;
 using Microsoft.Extensions.Options;
-using Nexus.SDK.Shared.Http;
-using Nexus.Token.SDK.Extensions;
+using Nexus.Sdk.Shared.Http;
+using Nexus.Sdk.Token.Extensions;
 using Quartz;
 
 namespace Core.API.DependencyInjection
