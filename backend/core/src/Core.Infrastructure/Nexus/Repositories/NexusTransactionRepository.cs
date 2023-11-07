@@ -7,8 +7,8 @@ using Core.Domain.Exceptions;
 using Core.Domain.Primitives;
 using Core.Domain.Repositories;
 using Core.Infrastructure.Nexus.SigningService;
-using Nexus.Token.SDK;
-using Nexus.Token.SDK.Responses;
+using Nexus.Sdk.Token;
+using Nexus.Sdk.Token.Responses;
 
 namespace Core.Infrastructure.Nexus.Repositories
 {

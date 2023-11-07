@@ -5,7 +5,7 @@
 using Core.Domain.Entities.SettingsAggregate;
 using Core.Domain.Exceptions;
 using Core.Domain.Repositories;
-using Nexus.Token.SDK;
+using Nexus.Sdk.Token;
 
 namespace Core.Infrastructure.Nexus.Repositories
 {

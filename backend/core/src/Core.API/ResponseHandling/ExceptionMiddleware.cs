@@ -4,8 +4,7 @@
 
 using Core.Domain.Exceptions;
 using Core.Presentation.Models;
-using Microsoft.EntityFrameworkCore;
-using Nexus.SDK.Shared.ErrorHandling;
+using Nexus.Sdk.Shared.ErrorHandling;
 using System.Text.Json;
 
 namespace Core.API.ResponseHandling
