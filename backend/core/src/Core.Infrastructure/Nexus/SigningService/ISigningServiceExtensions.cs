@@ -2,45 +2,61 @@
 // under the Apache License, Version 2.0. See the NOTICE file at the root
 // of this distribution or at http://www.apache.org/licenses/LICENSE-2.0
 
-using Nexus.Token.SDK.Requests;
-using Nexus.Token.SDK.Responses;
+using Nexus.Sdk.Token.Requests;
+using Nexus.Sdk.Token.Responses;
 
 namespace Core.Infrastructure.Nexus.SigningService
 {
     public static class ISigningServiceExtensions
     {
-        public static async Task<AlgorandSubmitRequest[]> SignAlgorandTransactionAsync(this ISigningService signingService, string publicKey, SignableResponse signableResponse)
+        public static Task<AlgorandSubmitSignatureRequest[]> SignAlgorandTransactionAsync(this ISigningService signingService, string publicKey, SignableResponse signableResponse)
         {
-            var algorandTransactions = signableResponse.BlockchainResponse.AlgorandTransactions;
-
-            if (algorandTransactions == null || !algorandTransactions.Any())
+            if (signableResponse.BlockchainResponse.RequiredSignatures == null)
             {
                 throw new InvalidOperationException("No Algorand transactions to sign");
             }
 
-            var algorandTransaction = algorandTransactions.First();
-            var encodedTransaction = algorandTransaction.EncodedTransaction;
+            var unsignedTransactions = signableResponse.BlockchainResponse.RequiredSignatures
+                .Where(r => r.PublicKey == publicKey)
+                .ToList();
 
-            var request = new SignRequest(Blockchain.ALGORAND, publicKey, encodedTransaction);
-            var signedTransaction = await signingService.Sign(request);
+            var submitRequests = unsignedTransactions.Select(async unsignedTransaction =>
+            {
+                var encodedUnsignedTransaction = unsignedTransaction.EncodedTransaction;
+                var hash = unsignedTransaction.Hash;
 
-            var submitRequest = new AlgorandSubmitRequest(algorandTransaction.Hash, publicKey, signedTransaction);
-            return new AlgorandSubmitRequest[] { submitRequest };
+                var signRequest = new SignRequest(Blockchain.ALGORAND, publicKey, encodedUnsignedTransaction);
+                var encodedSignedTransaction = await signingService.Sign(signRequest);
+
+                return new AlgorandSubmitSignatureRequest(hash, publicKey, encodedSignedTransaction);
+            });
+
+            return Task.FromResult(submitRequests.Select(t => t.Result).ToArray());
         }
 
-        public static async Task<StellarSubmitRequest> SignStellarTransactionEnvelopeAsync(this ISigningService signingService, string publicKey, SignableResponse signableResponse)
+        public static Task<StellarSubmitSignatureRequest[]> SignStellarTransactionEnvelopeAsync(this ISigningService signingService, string publicKey, SignableResponse signableResponse)
         {
-            var encodedStellarEnvelope = signableResponse.BlockchainResponse.EncodedStellarEnvelope;
-
-            if (encodedStellarEnvelope == null)
+            if (signableResponse.BlockchainResponse.RequiredSignatures == null)
             {
-                throw new InvalidOperationException("No Stellar transaction envelopes to sign");
+                throw new InvalidOperationException("No Stellar transactions to sign");
             }
 
-            var request = new SignRequest(Blockchain.STELLAR, publicKey, encodedStellarEnvelope);
-            var signedTransactionEnvelope = await signingService.Sign(request);
+            var unsignedTransactions = signableResponse.BlockchainResponse.RequiredSignatures
+                .Where(r => r.PublicKey == publicKey)
+                .ToList();
 
-            return new StellarSubmitRequest(signedTransactionEnvelope);
+            var submitRequests = unsignedTransactions.Select(async unsignedTransaction =>
+            {
+                var encodedUnsignedTransaction = unsignedTransaction.EncodedTransaction;
+                var hash = unsignedTransaction.Hash;
+
+                var signRequest = new SignRequest(Blockchain.STELLAR, publicKey, encodedUnsignedTransaction);
+                var encodedSignedTransaction = await signingService.Sign(signRequest);
+
+                return new StellarSubmitSignatureRequest(hash, publicKey, encodedSignedTransaction);
+            });
+
+            return Task.FromResult(submitRequests.Select(t => t.Result).ToArray());
         }
     }
 }

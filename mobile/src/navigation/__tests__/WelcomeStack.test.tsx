@@ -116,8 +116,8 @@ describe("WelcomeStack", () => {
 
   describe("Biometric checks", () => {
     it("shows an error screen if the biometric check throws error", async () => {
-      LocalAuthentication.isEnrolledAsync.mockRejectedValueOnce(
-        new Error("Cannot check biometric")
+      (biometricValidation as jest.Mock).mockImplementationOnce(() =>
+        Promise.reject()
       );
 
       render(<WelcomeStack />);

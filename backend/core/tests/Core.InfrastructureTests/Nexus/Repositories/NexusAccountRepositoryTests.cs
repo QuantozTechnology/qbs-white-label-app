@@ -10,9 +10,9 @@ using Core.Infrastructure.Nexus.SigningService;
 using Core.InfrastructureTests.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using Nexus.Token.SDK;
-using Nexus.Token.SDK.Requests;
-using Nexus.Token.SDK.Responses;
+using Nexus.Sdk.Token;
+using Nexus.Sdk.Token.Requests;
+using Nexus.Sdk.Token.Responses;
 
 namespace Core.InfrastructureTests.Nexus.Repositories
 {
@@ -96,7 +96,7 @@ namespace Core.InfrastructureTests.Nexus.Repositories
                 .Returns(Task.FromResult(true));
             server.Setup(s => s.Accounts.CreateOnStellarAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<IEnumerable<string>>(), It.IsAny<string>()))
                 .Returns(Task.FromResult(NexusSDKHelper.SignableResponse()));
-            server.Setup(s => s.Submit.OnStellarAsync(It.IsAny<StellarSubmitRequest>()))
+            server.Setup(s => s.Submit.OnStellarAsync(It.IsAny<IEnumerable<StellarSubmitSignatureRequest>>()))
                 .Returns(Task.CompletedTask);
 
             var signingService = new Mock<ISigningService>();

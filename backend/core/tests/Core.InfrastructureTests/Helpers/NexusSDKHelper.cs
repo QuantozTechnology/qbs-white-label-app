@@ -2,9 +2,9 @@
 // under the Apache License, Version 2.0. See the NOTICE file at the root
 // of this distribution or at http://www.apache.org/licenses/LICENSE-2.0
 
-using Nexus.SDK.Shared.Requests;
-using Nexus.SDK.Shared.Responses;
-using Nexus.Token.SDK.Responses;
+using Nexus.Sdk.Shared.Requests;
+using Nexus.Sdk.Shared.Responses;
+using Nexus.Sdk.Token.Responses;
 
 namespace Core.InfrastructureTests.Helpers
 {
@@ -43,7 +43,16 @@ namespace Core.InfrastructureTests.Helpers
 
         public static SignableResponse SignableResponse()
         {
-            var response = new BlockchainResponse("TestHash", "EncodedEnvelope", Array.Empty<AlgorandTransactionResponse>());
+            var response = new BlockchainResponse(
+                "TestHash",
+                "EncodedEnvelope",
+                new RequiredSignaturesResponse[]
+                {
+                    new RequiredSignaturesResponse("c1cdb46f894dfc80e50efeb27727517f3227303e4ef9ea83d2f1b3b250a91317",
+                    "AAAAAgAAAACN5Y0YBD6bCPzSRzpJt6ZbEkQEKJXzaiE1h8ayIbnOjgBMS0AAAUhyAAAAGwAAAAAAAAAAAAAABQAAAAEAAAAAjeWNGAQ+mwj80kc6SbemWxJEBCiV82ohNYfGsiG5zo4AAAAAAAAAABvC06B170rV0q+i7svuTL0JdIVfuMt0eSWe7OXQgSkwAAAAAAExLQAAAAABAAAAABvC06B170rV0q+i7svuTL0JdIVfuMt0eSWe7OXQgSkwAAAABgAAAAI5OGMxYzc1NgAAAAAAAAAAcjHJmVw1cnxWiB+Ip6yft9txmoVd160+Bx221MHSqSd//////////wAAAAEAAAAAcjHJmVw1cnxWiB+Ip6yft9txmoVd160+Bx221MHSqScAAAAVAAAAABvC06B170rV0q+i7svuTL0JdIVfuMt0eSWe7OXQgSkwAAAAAjk4YzFjNzU2AAAAAAAAAAByMcmZXDVyfFaIH4inrJ+323GahV3XrT4HHbbUwdKpJwAAAAAAAAABAAAAAQAAAAAbwtOgde9K1dKvou7L7ky9CXSFX7jLdHklnuzl0IEpMAAAAAYAAAACNmMzN2E2MTUAAAAAAAAAAHW+Oaaa8Gw0gaFzg6bpf24PMDQCippaxMGLaHB0Wq5pf/////////8AAAABAAAAAHW+Oaaa8Gw0gaFzg6bpf24PMDQCippaxMGLaHB0Wq5pAAAAFQAAAAAbwtOgde9K1dKvou7L7ky9CXSFX7jLdHklnuzl0IEpMAAAAAI2YzM3YTYxNQAAAAAAAAAAdb45pprwbDSBoXODpul/bg8wNAKKmlrEwYtocHRarmkAAAAAAAAAAQAAAAAAAAADIbnOjgAAAEAy9d9mWNtOwjAgWSatW4dmnK6z5AQKYiDGDYMAP0PYQ55XsPXKyR8aIO775L7EFR4oFubsPwlCS/OKUeburYMLwdKpJwAAAEATt/zrgkHcp4bwxJipQtcP2rTSV7JT51xMW6lXsyeN9NTIYgDdCdHQ8nqmjT45Qp5Y9ysfTo6x/EtNhp76LcMDdFquaQAAAEBlUa5rw7eHt73DRsYZLCeCcjl0MEYrDad8r6ALrZ+x8h/a8SGQO5MqEv/rqg6RkHYBSO+Sx55AcAe58E7tIF8D",
+                    DefaultPublicKey )
+                });
+
             return new SignableResponse
             {
                 BlockchainResponse = response

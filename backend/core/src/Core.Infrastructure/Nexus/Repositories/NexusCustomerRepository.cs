@@ -5,9 +5,9 @@
 using Core.Domain.Entities.CustomerAggregate;
 using Core.Domain.Exceptions;
 using Core.Domain.Repositories;
-using Nexus.SDK.Shared.Requests;
-using Nexus.Token.SDK;
-using Nexus.Token.SDK.Responses;
+using Nexus.Sdk.Shared.Requests;
+using Nexus.Sdk.Token;
+using Nexus.Sdk.Token.Responses;
 
 namespace Core.Infrastructure.Nexus.Repositories
 {
