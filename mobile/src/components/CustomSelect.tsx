@@ -54,6 +54,7 @@ function CustomCountrySelect({
         dropDownContainerStyle={{
           borderColor: customTheme.colors.gray[300],
         }}
+        listMode="SCROLLVIEW"
         labelStyle={{
           fontSize: customTheme.fontSizes.xs,
         }}
