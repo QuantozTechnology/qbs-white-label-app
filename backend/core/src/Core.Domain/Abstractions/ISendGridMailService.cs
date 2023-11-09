@@ -2,12 +2,9 @@
 // under the Apache License, Version 2.0. See the NOTICE file at the root
 // of this distribution or at http://www.apache.org/licenses/LICENSE-2.0
 
-using Core.Domain.Entities.MailAggregate;
-
-namespace Core.Domain.Repositories
+namespace Core.Domain.Abstractions
 {
-    public interface IMailsRepository
+    public interface ISendGridMailService
     {
-        Task<IEnumerable<Mail>> GetMailsAsync(string status, CancellationToken cancellationToken = default);
     }
 }

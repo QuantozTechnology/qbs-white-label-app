@@ -4,6 +4,7 @@
 
 using Core.Domain;
 using Core.Domain.Repositories;
+using Core.Infrastructure.Nexus;
 using Microsoft.Extensions.Logging;
 using Quartz;
 using System.Net.Http.Json;
@@ -14,63 +15,108 @@ namespace Core.Infrastructure.Jobs
     {
         private readonly HttpClient _client;
         private readonly ILogger<ProcessEmailsJob> _logger;
-        private readonly ICallbackRepository _callbackRepository;
+        private readonly IMailsRepository _mailsRepository;
+        private readonly ICustomerRepository _customerRepository;
+        private readonly ITransactionRepository _transactionRepository;
         private readonly IUnitOfWork _unitOfWork;
 
         public ProcessEmailsJob(HttpClient client,
             ILogger<ProcessEmailsJob> logger,
-            ICallbackRepository callbackRepository,
+            IMailsRepository mailsRepository,
+            ICustomerRepository customerRepository,
+            ITransactionRepository transactionRepository,
             IUnitOfWork unitOfWork)
         {
             _client = client;
             _logger = logger;
-            _callbackRepository = callbackRepository;
+            _mailsRepository = mailsRepository;
+            _customerRepository = customerRepository;
+            _transactionRepository = transactionRepository;
             _unitOfWork = unitOfWork;
         }
 
         public async Task Execute(IJobExecutionContext context)
         {
-            var callbacks = await _callbackRepository.GetLatestCreatedAsync(context.CancellationToken);
+            var mails = _mailsRepository.GetMailsAsync(MailStatus.ReadyToSend.ToString(), context.CancellationToken).Result;
 
-            if (callbacks.Any())
+            if (mails.Any())
             {
-                _logger.LogInformation("Sending callbacks");
-
-                foreach (var callback in callbacks)
+                // Integrate sendgrid to send emails
+                foreach (var mail in mails)
                 {
-                    var body = new
-                    {
-                        callback.Code,
-                        callback.Content,
-                        CreatedOn = DateTimeProvider.ToUnixTimeInMilliseconds(callback.CreatedOn),
-                        Type = callback.Type.ToString()
-                    };
+                    // call customer repo for customer name
+                    string customerName = string.Empty;
+                    var customerCode = mail.References.CustomerCode;
 
-                    try
-                    {
-                        var response = await _client.PostAsJsonAsync(callback.DestinationUrl, body);
+                    var customer = await _customerRepository.GetAsync(customerCode, context.CancellationToken);
 
-                        if (response.IsSuccessStatusCode)
-                        {
-                            callback.Sent();
-                        }
-                        else
-                        {
-                            callback.Failed();
-                        }
-                    }
-                    catch (Exception ex)
+                    
+
+                    if (customer != null)
                     {
-                        _logger.LogError("An error occured sending callback {code} with message {message}", callback.Code, ex.Message);
-                        callback.Failed();
+                        customerName = customer.GetName();
                     }
 
+                    // call transaction repo for tx details
+                    var transaction = await _transactionRepository.GetByCodeAsync(mail.References.TransactionCode, context.CancellationToken);
 
-                    _callbackRepository.Update(callback);
+
+
+
+                    // call mail service also pass customerName, tx amount
+
+
+                    //// Check the MailType before sending email
+                    //// For Payout, the MailType should be TransactionSellFinish
+                    //if (mail.Type == MailType.TransactionSellFinish.ToString())
+                    //{
+                    //    // This is for Payout, so use payout template on sendgrid
+                    //}
                 }
+            }
+
+
+
+
+            //if (callbacks.Any())
+            //{
+            //    _logger.LogInformation("Sending callbacks");
+
+            //    foreach (var callback in callbacks)
+            //    {
+            //        var body = new
+            //        {
+            //            callback.Code,
+            //            callback.Content,
+            //            CreatedOn = DateTimeProvider.ToUnixTimeInMilliseconds(callback.CreatedOn),
+            //            Type = callback.Type.ToString()
+            //        };
+
+            //        try
+            //        {
+            //            var response = await _client.PostAsJsonAsync(callback.DestinationUrl, body);
+
+            //            if (response.IsSuccessStatusCode)
+            //            {
+            //                callback.Sent();
+            //            }
+            //            else
+            //            {
+            //                callback.Failed();
+            //            }
+            //        }
+            //        catch (Exception ex)
+            //        {
+            //            _logger.LogError("An error occured sending callback {code} with message {message}", callback.Code, ex.Message);
+            //            callback.Failed();
+            //        }
+
+
+            //        _callbackRepository.Update(callback);
+            //    }
 
                 await _unitOfWork.SaveChangesAsync();
             }
         }
     }
-}
+

@@ -31,4 +31,9 @@ namespace Core.Infrastructure.Nexus
     {
         ReadyToSend = 1
     }
+
+    public enum MailType
+    {
+        TransactionSellFinish = 1
+    }
 }

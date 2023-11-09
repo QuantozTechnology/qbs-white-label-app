@@ -24,7 +24,7 @@ namespace Core.Domain.Entities.TransactionAggregate
 
         public string? Memo { get; set; }
 
-        public required string Direction { get; set; }
+        public string? Direction { get; set; }
 
         public Payment? Payment { get; set; }
 

@@ -109,6 +109,24 @@ namespace Core.Infrastructure.Nexus.Repositories
             };
         }
 
+        public async Task<Transaction> GetByCodeAsync(string transactionCode, CancellationToken cancellationToken = default)
+        {
+            var response = await _tokenServer.Operations.Get(transactionCode);
+
+            return new Transaction()
+            {
+                TransactionCode = response.Code,
+                Amount = response.Amount,
+                Created = DateTimeOffset.Parse(response.Created),
+                Status = response.Status,
+                TokenCode = response.TokenCode,
+                Type = response.Type,
+                ToAccountCode = response.ReceiverAccount?.AccountCode,
+                FromAccountCode = response.SenderAccount?.AccountCode,
+                Memo = response?.Memo
+            };
+        }
+
         #region private methods
 
         private async Task<string> CreateAlgorandPayment(Payment payment, string? ip = null)
