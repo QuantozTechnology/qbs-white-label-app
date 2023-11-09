@@ -6,7 +6,7 @@ using Core.Domain.Entities.AccountAggregate;
 using Core.Domain.Exceptions;
 using Core.Domain.Repositories;
 using Core.Infrastructure.Nexus.SigningService;
-using Nexus.Token.SDK;
+using Nexus.Sdk.Token;
 
 namespace Core.Infrastructure.Nexus.Repositories
 {

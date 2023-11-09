@@ -8,8 +8,8 @@ using Core.Infrastructure.Nexus.Repositories;
 using Core.InfrastructureTests.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using Nexus.SDK.Shared.Requests;
-using Nexus.Token.SDK;
+using Nexus.Sdk.Shared.Requests;
+using Nexus.Sdk.Token;
 
 namespace Core.InfrastructureTests.Nexus.Repositories
 {
