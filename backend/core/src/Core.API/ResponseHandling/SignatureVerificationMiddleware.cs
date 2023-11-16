@@ -3,6 +3,7 @@
 // of this distribution or at http://www.apache.org/licenses/LICENSE-2.0
 
 using Core.Domain.Exceptions;
+using Core.Domain.SignatureVerification;
 using Core.Presentation.Models;
 using Newtonsoft.Json;
 using System.Net;
@@ -46,7 +47,6 @@ namespace Core.API.ResponseHandling
 
                 // Get the current Unix UTC timestamp (rounded to 30 seconds)
                 long currentTimestamp = (long)(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1))).TotalSeconds;
-                currentTimestamp = (currentTimestamp / 30) * 30; // Round to the nearest 30 seconds
 
                 string? postPayload = string.Empty;
                 string? payload = null;
@@ -61,21 +61,23 @@ namespace Core.API.ResponseHandling
                                 postPayload = await reader.ReadToEndAsync();
                             }
 
-                            payload = JsonConvert.SerializeObject(new
+                            payload = JsonConvert.SerializeObject(new SignaturePayload
                             {
-                                publicKey = publicKeyHeader,
-                                timestamp = currentTimestamp,
-                                postPayload
+                                PublicKey = publicKeyHeader,
+                                Timestamp = currentTimestamp,
+                                PostPayload = postPayload
                             }, Formatting.None);
+
                             break;
                         }
 
                     default:
-                        payload = JsonConvert.SerializeObject(new
+                        payload = JsonConvert.SerializeObject(new SignaturePayload
                         {
-                            publicKey = publicKeyHeader,
-                            timestamp = currentTimestamp
+                            PublicKey = publicKeyHeader,
+                            Timestamp = currentTimestamp
                         }, Formatting.None);
+
                         break;
                 }
 
@@ -101,21 +103,21 @@ namespace Core.API.ResponseHandling
                         case "POST":
                         case "PUT":
                             {
-                                updatedPayload = JsonConvert.SerializeObject(new
+                                updatedPayload = JsonConvert.SerializeObject(new SignaturePayload
                                 {
-                                    publicKey = publicKeyHeader,
-                                    timestamp = previousTimestamp,
-                                    postPayload
-                                });
+                                    PublicKey = publicKeyHeader,
+                                    Timestamp = previousTimestamp,
+                                    PostPayload = postPayload
+                                }, Formatting.None);
                                 break;
                             }
 
                         default:
-                            updatedPayload = JsonConvert.SerializeObject(new
+                            updatedPayload = JsonConvert.SerializeObject(new SignaturePayload
                             {
-                                publicKey = publicKeyHeader,
-                                timestamp = previousTimestamp
-                            });
+                                PublicKey = publicKeyHeader,
+                                Timestamp = previousTimestamp,
+                            }, Formatting.None);
                             break;
                     }
 
@@ -153,8 +155,6 @@ namespace Core.API.ResponseHandling
 
         private static bool VerifySignature(string publicKey, byte[] payload, byte[] signature)
         {
-            publicKey = publicKey.Replace("\\n", "\n");
-
             try
             {
                 using (RSA rsa = RSA.Create())
