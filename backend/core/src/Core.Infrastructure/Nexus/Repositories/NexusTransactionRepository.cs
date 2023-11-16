@@ -7,6 +7,7 @@ using Core.Domain.Exceptions;
 using Core.Domain.Primitives;
 using Core.Domain.Repositories;
 using Core.Infrastructure.Nexus.SigningService;
+using Microsoft.Extensions.Logging;
 using Nexus.Sdk.Token;
 using Nexus.Sdk.Token.Responses;
 
@@ -109,22 +110,36 @@ namespace Core.Infrastructure.Nexus.Repositories
             };
         }
 
-        public async Task<Transaction> GetByCodeAsync(string transactionCode, CancellationToken cancellationToken = default)
+        public async Task<Transaction?> GetByCodeAsync(string transactionCode, CancellationToken cancellationToken = default)
         {
             var response = await _tokenServer.Operations.Get(transactionCode);
-
-            return new Transaction()
+            if (response != null)
             {
-                TransactionCode = response.Code,
-                Amount = response.Amount,
-                Created = DateTimeOffset.Parse(response.Created),
-                Status = response.Status,
-                TokenCode = response.TokenCode,
-                Type = response.Type,
-                ToAccountCode = response.ReceiverAccount?.AccountCode,
-                FromAccountCode = response.SenderAccount?.AccountCode,
-                Memo = response?.Memo
-            };
+                Transaction? transaction = new()
+                {
+                    TransactionCode = response.Code,
+                    Amount = response.Amount,
+                    Created = DateTimeOffset.Parse(response.Created),
+                    Status = response.Status,
+                    TokenCode = response.TokenCode,
+                    Type = response.Type,
+                    ToAccountCode = response.ReceiverAccount?.AccountCode,
+                    FromAccountCode = response.SenderAccount?.AccountCode,
+                    Memo = response?.Memo,
+
+                    Payment = response?.Type == "Payment"
+                        ? await _paymentRepository.HasTransactionAsync(response.Code, cancellationToken)
+                            ? await _paymentRepository.GetByTransactionCodeAsync(response.Code, cancellationToken)
+                            : null
+                        : null
+                };
+
+                return transaction;
+            }
+            else
+            {
+                return null;
+            }
         }
 
         #region private methods

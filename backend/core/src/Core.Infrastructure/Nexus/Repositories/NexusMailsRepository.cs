@@ -42,6 +42,15 @@ namespace Core.Infrastructure.Nexus.Repositories
             return items;
         }
 
+        public async Task<Mail> UpdateMailSent(string code, CancellationToken cancellationToken = default)
+        {
+            Task<MailsResponse> response = await _tokenServer.Compliance.Mails.UpdateMailSent(code);
+
+            var mail = response.Result;
+
+            return ConvertToMailAsync(mail, cancellationToken);
+        }
+
         private static Mail ConvertToMailAsync(MailsResponse mail, CancellationToken cancellationToken = default)
         {
             var response = new Mail
@@ -51,23 +60,23 @@ namespace Core.Infrastructure.Nexus.Repositories
                 Status = mail.Status,
                 Content = new Domain.Entities.MailAggregate.MailContent
                 {
-                    Html = mail.Content.Html,
-                    Subject = mail.Content.Subject,
-                    Text = mail.Content.Text
+                    Html = mail.Content?.Html,
+                    Subject = mail.Content?.Subject,
+                    Text = mail.Content?.Text
                 },
                 Count = mail.Count,
                 Created = mail.Created,
                 Recipient = new Domain.Entities.MailAggregate.MailRecipient
                 {
-                    BCC = mail.Recipient.BCC,
-                    CC = mail.Recipient.CC,
-                    Email = mail.Recipient.Email
+                    BCC = mail.Recipient?.BCC,
+                    CC = mail.Recipient?.CC,
+                    Email = mail.Recipient!.Email
                 },
                 References = new Domain.Entities.MailAggregate.MailEntityCodes
                 {
-                    AccountCode = mail.References.AccountCode,
-                    CustomerCode = mail.References.CustomerCode,
-                    TransactionCode = mail.References.TransactionCode
+                    AccountCode = mail.References?.AccountCode,
+                    CustomerCode = mail.References?.CustomerCode,
+                    TransactionCode = mail.References?.TransactionCode
                 },
                 Sent = mail.Sent
             };

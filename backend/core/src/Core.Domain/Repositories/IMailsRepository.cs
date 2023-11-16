@@ -9,5 +9,7 @@ namespace Core.Domain.Repositories
     public interface IMailsRepository
     {
         Task<IEnumerable<Mail>> GetMailsAsync(string status, CancellationToken cancellationToken = default);
+
+        Task<Mail> UpdateMailSent(string code, CancellationToken cancellationToken = default);
     }
 }
