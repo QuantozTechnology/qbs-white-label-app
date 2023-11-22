@@ -10,6 +10,7 @@ import * as SecureStore from "expo-secure-store";
 import forge from "node-forge";
 
 export const backendApiUrl = Constants.expoConfig?.extra?.API_URL;
+// console.log("backend", backendApiUrl);
 
 export const mockApiUrl = Constants.expoConfig?.extra?.POSTMAN_MOCK_API_URL;
 export const mockPaymentsApi = axios.create({
@@ -48,36 +49,42 @@ async function requestInterceptor(config: InternalAxiosRequestConfig) {
 
   const pubKeyFromStore = await SecureStore.getItemAsync("publicKey");
   const privKeyFromStore = await SecureStore.getItemAsync("privateKey");
+  // console.log(privKeyFromStore);
 
   if (accessToken !== null || authorizationHeader == null) {
     if (config.headers) {
       config.headers["Authorization"] = `Bearer ${accessToken}`;
 
       if (pubKeyFromStore !== null && privKeyFromStore != null) {
-        config.headers["x-public-key"] = JSON.stringify(pubKeyFromStore);
-
+        console.log("pubkey", pubKeyFromStore);
+        config.headers["x-public-key"] = pubKeyFromStore;
+        // TODO add/correct timestamp to number instad of fix value Date.now() later.
         const payload: {
           publicKey: string;
-          timestamp: number;
+          // timestamp: number;
           postPayload?: unknown;
         } = {
           publicKey: pubKeyFromStore,
-          timestamp: Date.now(),
+          // timestamp: 1700136384437,
         };
-
         // hash POST payload if available
         if (config.method === "post") {
           payload.postPayload = config.data;
         }
+        // console.log("METHOD", config.method);
 
         // create hash and sign it
         const privateKey = forge.pki.privateKeyFromPem(privKeyFromStore);
         const md = forge.md.sha256.create();
         md.update(JSON.stringify(payload), "utf8");
+        // console.log(JSON.stringify(payload), "utf8");
+
         const signature = privateKey.sign(md);
+        // console.log(signature);
 
         // Encode the signature in Base64 format
         const base64Signature = forge.util.encode64(signature);
+        // console.log("base64Signature", base64Signature);
         config.headers["x-signature"] = base64Signature;
       }
     }

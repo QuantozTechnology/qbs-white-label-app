@@ -83,6 +83,7 @@ export default function WelcomeStackNavigator() {
 
   useEffect(() => {
     WebBrowser.warmUpAsync();
+    // (async () => await auth?.logout())();
 
     return () => {
       WebBrowser.coolDownAsync();
