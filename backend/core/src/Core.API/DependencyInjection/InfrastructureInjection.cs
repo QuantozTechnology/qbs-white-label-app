@@ -177,6 +177,9 @@ namespace Core.API.DependencyInjection
 
                 // Register the ProcessPaymentRequestsJob, loading the schedule from configuration
                 q.AddJobAndTrigger<ProcessExpiredPaymentRequestJob>(configuration);
+
+                // Register the ProcessEmailsJob, loading the schedule from configuration
+                q.AddJobAndTrigger<ProcessEmailsJob>(configuration);
             });
 
             services.AddQuartzHostedService(opt =>

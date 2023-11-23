@@ -44,11 +44,9 @@ namespace Core.Infrastructure.Nexus.Repositories
 
         public async Task<Mail> UpdateMailSent(string code, CancellationToken cancellationToken = default)
         {
-            Task<MailsResponse> response = await _tokenServer.Compliance.Mails.UpdateMailSent(code);
+            var response = await _tokenServer.Compliance.Mails.UpdateMailSent(code);
 
-            var mail = response.Result;
-
-            return ConvertToMailAsync(mail, cancellationToken);
+            return ConvertToMailAsync(response, cancellationToken);
         }
 
         private static Mail ConvertToMailAsync(MailsResponse mail, CancellationToken cancellationToken = default)
