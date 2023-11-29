@@ -90,6 +90,7 @@ namespace Core.API.ResponseHandling
 
                 // Get the current Unix UTC timestamp (rounded to 30 seconds)
                 long currentTimestamp = (long)(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1))).TotalSeconds;
+                currentTimestamp = (currentTimestamp / 30) * 30; // Round to the nearest 30 seconds
 
                 // Decode the signature header from Base64
                 byte[]? signatureBytes = Convert.FromBase64String(signatureHeader);
