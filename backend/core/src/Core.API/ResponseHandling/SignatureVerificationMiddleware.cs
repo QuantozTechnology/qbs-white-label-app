@@ -138,7 +138,8 @@ namespace Core.API.ResponseHandling
             catch (Exception ex)
             {
                 _logger.LogError("Unknown exception thrown: {message}", ex.Message);
-                throw new Exception("Unknown exception thrown: {message}", ex);
+                var customErrors = new CustomErrors(new CustomError("Forbidden", ex.Message, ex.Source!));
+                await WriteCustomErrors(context.Response, customErrors, (int)HttpStatusCode.Forbidden);
             }
         }
 
