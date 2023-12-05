@@ -21,5 +21,12 @@ namespace Core.Domain
             public const string ContactPersonFullName = "ContactPersonFullName";
             public const string CountryOfRegistration = "CountryOfRegistration";
         }
+
+        public static class SignaturePayload
+        {
+            public const string PublicKey = "publicKey";
+            public const string Timestamp = "timestamp";
+            public const string PostPayload = "postPayload";
+        }
     }
 }

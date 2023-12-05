@@ -2,8 +2,6 @@
 // under the Apache License, Version 2.0. See the NOTICE file at the root
 // of this distribution or at http://www.apache.org/licenses/LICENSE-2.0
 
-using System.Text.Json.Serialization;
-
 namespace Core.Presentation.Models
 {
     public class CustomResponse<T>

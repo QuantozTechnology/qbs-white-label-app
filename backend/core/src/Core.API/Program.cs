@@ -41,6 +41,7 @@ app.UseHttpsRedirection();
 
 app.ConfigureCustomAuthenticationMiddleware();
 app.ConfigureCustomExceptionMiddleware();
+app.ConfigureSignatureVerificationMiddleware();
 
 app.UseAuthentication();
 app.UseRouting();
