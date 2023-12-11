@@ -74,7 +74,7 @@ namespace Core.Infrastructure.Nexus.Repositories
                 {
                     AccountCode = mail.References?.AccountCode,
                     CustomerCode = mail.References?.CustomerCode,
-                    TransactionCode = mail.References?.TransactionCode
+                    TokenPaymentCode = mail.References?.TokenPaymentCode
                 },
                 Sent = mail.Sent
             };

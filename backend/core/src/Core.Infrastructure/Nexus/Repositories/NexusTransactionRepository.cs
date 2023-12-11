@@ -7,7 +7,6 @@ using Core.Domain.Exceptions;
 using Core.Domain.Primitives;
 using Core.Domain.Repositories;
 using Core.Infrastructure.Nexus.SigningService;
-using Microsoft.Extensions.Logging;
 using Nexus.Sdk.Token;
 using Nexus.Sdk.Token.Responses;
 
@@ -110,36 +109,58 @@ namespace Core.Infrastructure.Nexus.Repositories
             };
         }
 
-        public async Task<Transaction?> GetByCodeAsync(string transactionCode, CancellationToken cancellationToken = default)
+        public async Task<Paged<Transaction>> GetAsync(Dictionary<string, string>? additionalParams = null, CancellationToken cancellationToken = default)
         {
-            var response = await _tokenServer.Operations.Get(transactionCode);
-            if (response != null)
+            int page = 1; // default value
+            int pageSize = 10; // default value
+
+            var query = new Dictionary<string, string>();
+
+            if (additionalParams != null)
             {
-                Transaction? transaction = new()
+                // Check if the dictionary contains "page" key and parse its value
+                if (additionalParams.TryGetValue("page", out var pageValue) && int.TryParse(pageValue, out var parsedPage))
                 {
-                    TransactionCode = response.Code,
-                    Amount = response.Amount,
-                    Created = DateTimeOffset.Parse(response.Created),
-                    Status = response.Status,
-                    TokenCode = response.TokenCode,
-                    Type = response.Type,
-                    ToAccountCode = response.ReceiverAccount?.AccountCode,
-                    FromAccountCode = response.SenderAccount?.AccountCode,
-                    Memo = response?.Memo,
+                    page = parsedPage;
+                }
 
-                    Payment = response?.Type == "Payment"
-                        ? await _paymentRepository.HasTransactionAsync(response.Code, cancellationToken)
-                            ? await _paymentRepository.GetByTransactionCodeAsync(response.Code, cancellationToken)
-                            : null
-                        : null
-                };
+                // Check if the dictionary contains "limit" key and parse its value
+                if (additionalParams.TryGetValue("limit", out var pageSizeValue) && int.TryParse(pageSizeValue, out var parsedPageSize))
+                {
+                    pageSize = parsedPageSize;
+                }
 
-                return transaction;
+                query.Add("page", page.ToString());
+                query.Add("limit", pageSize.ToString());
+
+                foreach (var kvp in additionalParams)
+                {
+                    if (kvp.Value != null)
+                    {
+                        query.Add(kvp.Key, kvp.Value);
+                    }
+                }
             }
-            else
+
+            var response = await _tokenServer.Operations.Get(query);
+
+            var operations = response.Records;
+
+            var items = new List<Transaction>();
+
+            foreach (var operation in operations)
             {
-                return null;
+                var item = await ConvertAsync(operation, cancellationToken);
+                items.Add(item);
             }
+
+            return new Paged<Transaction>
+            {
+                Items = items,
+                Page = page,
+                PageSize = pageSize,
+                Total = response.Total
+            };
         }
 
         #region private methods
@@ -282,6 +303,36 @@ namespace Core.Infrastructure.Nexus.Repositories
 
             return transaction;
         }
+
+        private async Task<Transaction> ConvertAsync(TokenOperationResponse operation, CancellationToken cancellationToken = default)
+        {
+            var transaction = new Transaction
+            {
+                Amount = operation.Amount,
+                FromAccountCode = operation.SenderAccount?.AccountCode,
+                ToAccountCode = operation.ReceiverAccount?.AccountCode,
+                Created = DateTimeOffset.Parse(operation.Created),
+                Finished = operation.Finished != null ? DateTimeOffset.Parse(operation.Finished) : null,
+                Status = operation.Status,
+                TokenCode = operation.TokenCode,
+                TransactionCode = operation.Code,
+                Memo = operation.Memo,
+                Type = operation.Type
+            };
+
+            if (transaction.Type == "Payment")
+            {
+                var hasTransaction = await _paymentRepository.HasTransactionAsync(transaction.TransactionCode, cancellationToken);
+
+                if (hasTransaction)
+                {
+                    transaction.Payment = await _paymentRepository.GetByTransactionCodeAsync(transaction.TransactionCode, cancellationToken);
+                }
+            }
+
+            return transaction;
+        }
+
         #endregion
     }
 }

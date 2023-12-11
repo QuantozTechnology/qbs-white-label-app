@@ -18,6 +18,8 @@ namespace Core.Domain.Entities.TransactionAggregate
 
         public required DateTimeOffset Created { get; set; }
 
+        public DateTimeOffset? Finished { get; set; }
+
         public required string Status { get; set; }
 
         public required string Type { get; set; }

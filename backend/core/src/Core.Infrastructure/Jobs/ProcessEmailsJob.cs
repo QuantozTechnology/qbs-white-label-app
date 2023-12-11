@@ -3,17 +3,18 @@
 // of this distribution or at http://www.apache.org/licenses/LICENSE-2.0
 
 using Core.Domain.Abstractions;
+using Core.Domain.Entities.TransactionAggregate;
 using Core.Domain.Exceptions;
 using Core.Domain.Repositories;
 using Core.Infrastructure.Nexus;
 using Microsoft.Extensions.Logging;
+using Org.BouncyCastle.Asn1.Ocsp;
 using Quartz;
 
 namespace Core.Infrastructure.Jobs
 {
     public class ProcessEmailsJob : IJob
     {
-        private readonly HttpClient _client;
         private readonly ILogger<ProcessEmailsJob> _logger;
         private readonly IMailsRepository _mailsRepository;
         private readonly ICustomerRepository _customerRepository;
@@ -21,7 +22,7 @@ namespace Core.Infrastructure.Jobs
         private readonly IUnitOfWork _unitOfWork;
         private readonly ISendGridMailService _sendGridMailService;
 
-        public ProcessEmailsJob(HttpClient client,
+        public ProcessEmailsJob(
             ILogger<ProcessEmailsJob> logger,
             IMailsRepository mailsRepository,
             ICustomerRepository customerRepository,
@@ -29,7 +30,6 @@ namespace Core.Infrastructure.Jobs
             ISendGridMailService sendGridMailService,
             IUnitOfWork unitOfWork)
         {
-            _client = client;
             _logger = logger;
             _mailsRepository = mailsRepository;
             _customerRepository = customerRepository;
@@ -42,7 +42,7 @@ namespace Core.Infrastructure.Jobs
         {
             var mails = _mailsRepository.GetMailsAsync(MailStatus.ReadyToSend.ToString(), context.CancellationToken).Result;
 
-            if (mails.Any())
+            if (mails != null && mails.Any())
             {
                 foreach (var mail in mails)
                 {
@@ -55,23 +55,27 @@ namespace Core.Infrastructure.Jobs
 
                     var customer = await _customerRepository.GetAsync(customerCode, context.CancellationToken);
 
-                    if (mail.References == null || string.IsNullOrWhiteSpace(mail.References.TransactionCode))
+                    if (mail.References == null || string.IsNullOrWhiteSpace(mail.References.TokenPaymentCode))
                     {
-                        throw new CustomErrorsException("MailService", "transactionCode", "An error occured while sending mail.");
+                        throw new CustomErrorsException("MailService", "TokenPaymentCode", "An error occured while sending mail.");
                     }
 
-                    var transaction = await _transactionRepository.GetByCodeAsync(mail.References.TransactionCode, context.CancellationToken);
-
-                    decimal amount = 0;
-
-                    if (transaction != null)
+                    var queryParams = new Dictionary<string, string>
                     {
-                        amount = transaction.Amount;
+                        { "code", mail.References.TokenPaymentCode }
+                    };
+
+                    var transactions = await _transactionRepository.GetAsync(queryParams, context.CancellationToken);
+
+                    Transaction? transaction = null;
+                    if (transactions != null && transactions.Items.Any())
+                    {
+                        transaction = transactions.Items.FirstOrDefault();
                     }
 
                     try
                     {
-                        await _sendGridMailService.SendMailAsync(mail, customer, amount);
+                        await _sendGridMailService.SendMailAsync(mail, customer, transaction!);
                     }
                     catch (Exception ex)
                     {

@@ -31,7 +31,7 @@ namespace Core.Domain.Entities.MailAggregate
 
         public string? CustomerCode { get; set; }
 
-        public string? TransactionCode { get; set; }
+        public string? TokenPaymentCode { get; set; }
     }
 
     public class MailContent

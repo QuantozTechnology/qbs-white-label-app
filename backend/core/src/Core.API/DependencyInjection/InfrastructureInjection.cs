@@ -7,6 +7,7 @@ using Core.Domain.Repositories;
 using Core.Infrastructure.Compliance;
 using Core.Infrastructure.Compliance.IPLocator;
 using Core.Infrastructure.Compliance.Sanctionlist;
+using Core.Infrastructure.Compliance.SendGridMailService;
 using Core.Infrastructure.CustomerFileStorage;
 using Core.Infrastructure.Jobs;
 using Core.Infrastructure.Nexus;
@@ -31,6 +32,7 @@ namespace Core.API.DependencyInjection
                 .AddBlobStorage(configuration)
                 .AddCompliance(configuration)
                 .AddTOTPGenerator()
+                .AddSendGridMailService(configuration)
                 .AddBackgroundJobs(configuration);
 
             return services;
@@ -162,6 +164,20 @@ namespace Core.API.DependencyInjection
         private static IServiceCollection AddTOTPGenerator(this IServiceCollection services)
         {
             services.AddSingleton<ICustomerOTPGenerator, TOTPGenerator>();
+
+            return services;
+        }
+
+        private static IServiceCollection AddSendGridMailService(this IServiceCollection services, IConfiguration configuration)
+        {
+            services.AddOptions<SendGridMailServiceOptions>()
+              .Bind(configuration.GetSection("SendGridMailServiceOptions"))
+              .ValidateDataAnnotationsRecursively()
+              .ValidateOnStart();
+
+            services.AddSingleton(sp => sp.GetRequiredService<IOptions<SendGridMailServiceOptions>>().Value);
+
+            services.AddSingleton<ISendGridMailService, SendGridMailService>();
 
             return services;
         }

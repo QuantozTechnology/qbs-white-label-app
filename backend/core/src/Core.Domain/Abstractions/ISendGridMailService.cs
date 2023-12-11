@@ -4,11 +4,12 @@
 
 using Core.Domain.Entities.CustomerAggregate;
 using Core.Domain.Entities.MailAggregate;
+using Core.Domain.Entities.TransactionAggregate;
 
 namespace Core.Domain.Abstractions
 {
     public interface ISendGridMailService
     {
-        public Task SendMailAsync(Mail mail, Customer customer, decimal amount);
+        public Task SendMailAsync(Mail mail, Customer customer, Transaction transaction);
     }
 }

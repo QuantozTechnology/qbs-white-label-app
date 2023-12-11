@@ -34,6 +34,7 @@ namespace Core.Infrastructure.Nexus
 
     public enum MailType
     {
-        TransactionSellFinish = 1
+        TransactionSellFinish = 1,
+        TransactionBuyFinish = 2
     }
 }

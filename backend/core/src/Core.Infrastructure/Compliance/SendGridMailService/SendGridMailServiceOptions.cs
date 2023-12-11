@@ -4,7 +4,7 @@
 
 using System.ComponentModel.DataAnnotations;
 
-namespace Core.Infrastructure.Compliance.IPLocator
+namespace Core.Infrastructure.Compliance.SendGridMailService
 {
     public class SendGridMailServiceOptions
     {
