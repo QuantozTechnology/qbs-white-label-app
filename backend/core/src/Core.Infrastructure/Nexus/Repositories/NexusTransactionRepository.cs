@@ -109,40 +109,12 @@ namespace Core.Infrastructure.Nexus.Repositories
             };
         }
 
-        public async Task<Paged<Transaction>> GetAsync(Dictionary<string, string>? additionalParams = null, CancellationToken cancellationToken = default)
+        public async Task<Paged<Transaction>> GetByCodeAsync(string code, CancellationToken cancellationToken = default)
         {
             int page = 1; // default value
             int pageSize = 10; // default value
 
-            var query = new Dictionary<string, string>();
-
-            if (additionalParams != null)
-            {
-                // Check if the dictionary contains "page" key and parse its value
-                if (additionalParams.TryGetValue("page", out var pageValue) && int.TryParse(pageValue, out var parsedPage))
-                {
-                    page = parsedPage;
-                }
-
-                // Check if the dictionary contains "limit" key and parse its value
-                if (additionalParams.TryGetValue("limit", out var pageSizeValue) && int.TryParse(pageSizeValue, out var parsedPageSize))
-                {
-                    pageSize = parsedPageSize;
-                }
-
-                query.Add("page", page.ToString());
-                query.Add("limit", pageSize.ToString());
-
-                foreach (var kvp in additionalParams)
-                {
-                    if (kvp.Value != null)
-                    {
-                        query.Add(kvp.Key, kvp.Value);
-                    }
-                }
-            }
-
-            var response = await _tokenServer.Operations.Get(query);
+            var response = await _tokenServer.Operations.Get(code);
 
             var operations = response.Records;
 

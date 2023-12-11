@@ -8,7 +8,6 @@ using Core.Domain.Exceptions;
 using Core.Domain.Repositories;
 using Core.Infrastructure.Nexus;
 using Microsoft.Extensions.Logging;
-using Org.BouncyCastle.Asn1.Ocsp;
 using Quartz;
 
 namespace Core.Infrastructure.Jobs
@@ -60,12 +59,7 @@ namespace Core.Infrastructure.Jobs
                         throw new CustomErrorsException("MailService", "TokenPaymentCode", "An error occured while sending mail.");
                     }
 
-                    var queryParams = new Dictionary<string, string>
-                    {
-                        { "code", mail.References.TokenPaymentCode }
-                    };
-
-                    var transactions = await _transactionRepository.GetAsync(queryParams, context.CancellationToken);
+                    var transactions = await _transactionRepository.GetByCodeAsync(mail.References.TokenPaymentCode, context.CancellationToken);
 
                     Transaction? transaction = null;
                     if (transactions != null && transactions.Items.Any())
