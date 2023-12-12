@@ -7,6 +7,7 @@ using Core.Domain.Repositories;
 using Core.Infrastructure.Compliance;
 using Core.Infrastructure.Compliance.IPLocator;
 using Core.Infrastructure.Compliance.Sanctionlist;
+using Core.Infrastructure.Compliance.SendGridMailService;
 using Core.Infrastructure.CustomerFileStorage;
 using Core.Infrastructure.Jobs;
 using Core.Infrastructure.Nexus;
@@ -31,6 +32,7 @@ namespace Core.API.DependencyInjection
                 .AddBlobStorage(configuration)
                 .AddCompliance(configuration)
                 .AddTOTPGenerator()
+                .AddSendGridMailService(configuration)
                 .AddBackgroundJobs(configuration);
 
             return services;
@@ -51,6 +53,7 @@ namespace Core.API.DependencyInjection
             services.AddScoped<IAccountRepository, NexusAccountRepository>();
             services.AddScoped<ITransactionRepository, NexusTransactionRepository>();
             services.AddScoped<ISettingsRepository, NexusSettingsRepository>();
+            services.AddScoped<IMailsRepository, NexusMailsRepository>();
 
             return services;
         }
@@ -165,6 +168,20 @@ namespace Core.API.DependencyInjection
             return services;
         }
 
+        private static IServiceCollection AddSendGridMailService(this IServiceCollection services, IConfiguration configuration)
+        {
+            services.AddOptions<SendGridMailServiceOptions>()
+              .Bind(configuration.GetSection("SendGridMailServiceOptions"))
+              .ValidateDataAnnotationsRecursively()
+              .ValidateOnStart();
+
+            services.AddSingleton(sp => sp.GetRequiredService<IOptions<SendGridMailServiceOptions>>().Value);
+
+            services.AddSingleton<ISendGridMailService, SendGridMailService>();
+
+            return services;
+        }
+
         public static IServiceCollection AddBackgroundJobs(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddQuartz(q =>
@@ -176,6 +193,9 @@ namespace Core.API.DependencyInjection
 
                 // Register the ProcessPaymentRequestsJob, loading the schedule from configuration
                 q.AddJobAndTrigger<ProcessExpiredPaymentRequestJob>(configuration);
+
+                // Register the ProcessEmailsJob, loading the schedule from configuration
+                q.AddJobAndTrigger<ProcessEmailsJob>(configuration);
             });
 
             services.AddQuartzHostedService(opt =>

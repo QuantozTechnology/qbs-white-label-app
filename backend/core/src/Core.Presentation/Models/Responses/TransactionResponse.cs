@@ -25,6 +25,8 @@ namespace Core.Presentation.Models.Responses
 
         public long Created { get; set; }
 
+        public long? Finished { get; set; }
+
         public required string Status { get; set; }
 
         public required string Type { get; set; }
@@ -41,6 +43,7 @@ namespace Core.Presentation.Models.Responses
                 ToAccountCode = transaction.ToAccountCode,
                 Amount = transaction.Amount,
                 Created = DateTimeProvider.ToUnixTimeInMilliseconds(transaction.Created),
+                Finished = DateTimeProvider.ToUnixTimeInMilliseconds(transaction.Finished),
                 Direction = transaction.Direction,
                 Status = transaction.Status,
                 TokenCode = transaction.TokenCode,

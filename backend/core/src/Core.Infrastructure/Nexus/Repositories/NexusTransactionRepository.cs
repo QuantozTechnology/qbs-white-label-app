@@ -109,6 +109,32 @@ namespace Core.Infrastructure.Nexus.Repositories
             };
         }
 
+        public async Task<Paged<Transaction>> GetByCodeAsync(string code, CancellationToken cancellationToken = default)
+        {
+            int page = 1; // default value
+            int pageSize = 10; // default value
+
+            var response = await _tokenServer.Operations.Get(code);
+
+            var operations = response.Records;
+
+            var items = new List<Transaction>();
+
+            foreach (var operation in operations)
+            {
+                var item = await ConvertAsync(operation, cancellationToken);
+                items.Add(item);
+            }
+
+            return new Paged<Transaction>
+            {
+                Items = items,
+                Page = page,
+                PageSize = pageSize,
+                Total = response.Total
+            };
+        }
+
         #region private methods
 
         private async Task<string> CreateAlgorandPayment(Payment payment, string? ip = null)
@@ -249,6 +275,36 @@ namespace Core.Infrastructure.Nexus.Repositories
 
             return transaction;
         }
+
+        private async Task<Transaction> ConvertAsync(TokenOperationResponse operation, CancellationToken cancellationToken = default)
+        {
+            var transaction = new Transaction
+            {
+                Amount = operation.Amount,
+                FromAccountCode = operation.SenderAccount?.AccountCode,
+                ToAccountCode = operation.ReceiverAccount?.AccountCode,
+                Created = DateTimeOffset.Parse(operation.Created),
+                Finished = operation.Finished != null ? DateTimeOffset.Parse(operation.Finished) : null,
+                Status = operation.Status,
+                TokenCode = operation.TokenCode,
+                TransactionCode = operation.Code,
+                Memo = operation.Memo,
+                Type = operation.Type
+            };
+
+            if (transaction.Type == "Payment")
+            {
+                var hasTransaction = await _paymentRepository.HasTransactionAsync(transaction.TransactionCode, cancellationToken);
+
+                if (hasTransaction)
+                {
+                    transaction.Payment = await _paymentRepository.GetByTransactionCodeAsync(transaction.TransactionCode, cancellationToken);
+                }
+            }
+
+            return transaction;
+        }
+
         #endregion
     }
 }

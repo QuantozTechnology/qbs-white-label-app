@@ -26,4 +26,15 @@ namespace Core.Infrastructure.Nexus
         InvalidProperty = 5,
         TransactionNotFoundError = 6
     }
+
+    public enum MailStatus
+    {
+        ReadyToSend = 1
+    }
+
+    public enum MailType
+    {
+        TransactionSellFinish = 1,
+        TransactionBuyFinish = 2
+    }
 }

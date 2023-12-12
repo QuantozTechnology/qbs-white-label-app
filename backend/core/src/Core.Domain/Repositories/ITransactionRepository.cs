@@ -15,6 +15,8 @@ namespace Core.Domain.Repositories
 
         public Task<Paged<Transaction>> GetAsync(string publicKey, int page, int pageSize, CancellationToken cancellationToken = default);
 
+        public Task<Paged<Transaction>> GetByCodeAsync(string code, CancellationToken cancellationToken = default);
+
         public Task<WithdrawFees> GetWithdrawFeesAsync(Withdraw withdraw, CancellationToken cancellationToken = default);
     }
 }

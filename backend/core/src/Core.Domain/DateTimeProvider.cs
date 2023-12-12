@@ -34,6 +34,11 @@ namespace Core.Domain
         {
             return dateTime.ToUnixTimeMilliseconds();
         }
+
+        public static string? FormatDateTimeWithoutMilliseconds(DateTimeOffset? dateTime)
+        {
+            return dateTime?.ToString("yyyy-MM-dd HH:mm:ss");
+        }
     }
 
     public class DateTimeProviderContext : IDisposable
