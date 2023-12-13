@@ -32,6 +32,7 @@ namespace Core.API.ResponseHandling
                 // Retrieve headers from the request
                 string? signatureHeader = context.Request.Headers["x-signature"];
                 string? payloadHeader = context.Request.Headers["x-payload"];
+                string? publicKeyHeader = context.Request.Headers["x-public-key"];
 
                 // Retrieve method from the request
                 var method = context.Request.Method;
@@ -46,8 +47,16 @@ namespace Core.API.ResponseHandling
 
                 if (string.IsNullOrWhiteSpace(signatureHeader))
                 {
-                    _logger.LogError("Missing x-signature header");
+                    _logger.LogError("Missing signature header");
                     var customErrors = new CustomErrors(new CustomError("Forbidden", "Missing Header", "x-signature"));
+                    await WriteCustomErrors(context.Response, customErrors, (int)HttpStatusCode.Forbidden);
+                    return;
+                }
+
+                if (string.IsNullOrWhiteSpace(publicKeyHeader))
+                {
+                    _logger.LogError("Missing publicKey header");
+                    var customErrors = new CustomErrors(new CustomError("Forbidden", "Missing Header", "x-public-key"));
                     await WriteCustomErrors(context.Response, customErrors, (int)HttpStatusCode.Forbidden);
                     return;
                 }
@@ -56,7 +65,6 @@ namespace Core.API.ResponseHandling
 
                 JObject payloadJson = JObject.Parse(payloadHeader);
 
-                string? publicKey = null;
                 string? postPayload = null;
 
                 if (method == "POST" || method == "PUT")
@@ -73,19 +81,6 @@ namespace Core.API.ResponseHandling
                         await WriteCustomErrors(context.Response, customErrors, (int)HttpStatusCode.Forbidden);
                         return;
                     }
-                }
-
-                // Check if the "publicKey" property is present
-                if (payloadJson.TryGetValue(SignaturePayload.PublicKey, out var pubKey))
-                {
-                    publicKey = (string?)pubKey;
-                }
-                else
-                {
-                    _logger.LogError("Missing publicKey header");
-                    var customErrors = new CustomErrors(new CustomError("Forbidden", "Missing Header", "publicKey"));
-                    await WriteCustomErrors(context.Response, customErrors, (int)HttpStatusCode.Forbidden);
-                    return;
                 }
 
                 // Get the current Unix UTC timestamp (rounded to 30 seconds)
@@ -118,7 +113,7 @@ namespace Core.API.ResponseHandling
 
                 if (isCurrentTime || isWithin30Seconds)
                 {
-                    if (VerifySignature(publicKey!, payloadBytes, signatureBytes))
+                    if (VerifySignature(publicKeyHeader, payloadBytes, signatureBytes))
                     {
                         await _next(context); // Signature is valid, continue with the request
                     }
