@@ -61,9 +61,13 @@ namespace Core.API.ResponseHandling
                     return;
                 }
 
-                byte[] payloadBytes = Encoding.UTF8.GetBytes(payloadHeader);
+                byte[] payloadBytes = Convert.FromBase64String(payloadHeader);
+                var payloadString = Encoding.UTF8.GetString(payloadBytes);
 
-                JObject payloadJson = JObject.Parse(payloadHeader);
+                JObject payloadJson = JObject.Parse(payloadString);
+
+                byte[] publicKeyBytes = Convert.FromBase64String(publicKeyHeader);
+                var publicKey = Encoding.UTF8.GetString(publicKeyBytes);
 
                 string? postPayload = null;
 
@@ -113,7 +117,7 @@ namespace Core.API.ResponseHandling
 
                 if (isCurrentTime || isWithin30Seconds)
                 {
-                    if (VerifySignature(publicKeyHeader, payloadBytes, signatureBytes))
+                    if (VerifySignature(publicKey, payloadBytes, signatureBytes))
                     {
                         await _next(context); // Signature is valid, continue with the request
                     }
