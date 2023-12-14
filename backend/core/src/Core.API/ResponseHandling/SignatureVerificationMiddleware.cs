@@ -149,7 +149,7 @@ namespace Core.API.ResponseHandling
             await httpResponse.WriteAsync(json);
         }
 
-        private static bool VerifySignature(string publicKey, byte[] payload, byte[] signature)
+        public static bool VerifySignature(string publicKey, byte[] payload, byte[] signature)
         {
             try
             {
