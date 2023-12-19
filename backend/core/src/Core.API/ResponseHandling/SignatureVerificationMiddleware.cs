@@ -130,8 +130,8 @@ namespace Core.API.ResponseHandling
                 }
                 else
                 {
-                    _logger.LogError("Invalid signature");
-                    var customErrors = new CustomErrors(new CustomError("Forbidden", "Invalid signature", "x-signature"));
+                    _logger.LogError("Timestamp outdated");
+                    var customErrors = new CustomErrors(new CustomError("Forbidden", "Invalid timestamp", "timestamp"));
                     await WriteCustomErrors(context.Response, customErrors, (int)HttpStatusCode.Forbidden);
                 }
             }
