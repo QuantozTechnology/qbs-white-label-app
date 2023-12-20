@@ -83,6 +83,7 @@ export default function WelcomeStackNavigator() {
 
   useEffect(() => {
     WebBrowser.warmUpAsync();
+    (async () => await auth?.logout())();
 
     return () => {
       WebBrowser.coolDownAsync();
@@ -254,6 +255,7 @@ Please enable one of these to be able to use the app.`,
     }
 
     if (customerContext?.error) {
+      console.log(customerContext?.error, "error");
       return (
         <WelcomeStack.Screen
           name="Feedback"
