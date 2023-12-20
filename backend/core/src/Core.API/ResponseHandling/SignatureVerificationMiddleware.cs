@@ -69,14 +69,11 @@ namespace Core.API.ResponseHandling
                 byte[] publicKeyBytes = Convert.FromBase64String(publicKeyHeader);
                 var publicKey = Encoding.UTF8.GetString(publicKeyBytes);
 
-                string? postPayload = null;
-
                 if (method == "POST" || method == "PUT")
                 {
                     // Check if the "PostPayload" property is present
                     if (payloadJson.TryGetValue(SignaturePayload.PostPayload, out var post))
                     {
-                        postPayload = (string?)post;
                     }
                     else
                     {
