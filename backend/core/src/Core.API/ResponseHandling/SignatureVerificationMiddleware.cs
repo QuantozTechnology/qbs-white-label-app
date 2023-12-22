@@ -1,4 +1,4 @@
-﻿// Copyright 2023 Quantoz Technology B.V. and contributors. Licensed
+// Copyright 2023 Quantoz Technology B.V. and contributors. Licensed
 // under the Apache License, Version 2.0. See the NOTICE file at the root
 // of this distribution or at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -69,21 +69,6 @@ namespace Core.API.ResponseHandling
                 byte[] publicKeyBytes = Convert.FromBase64String(publicKeyHeader);
                 var publicKey = Encoding.UTF8.GetString(publicKeyBytes);
 
-                if (method == "POST" || method == "PUT")
-                {
-                    // Check if the "PostPayload" property is present
-                    if (payloadJson.TryGetValue(SignaturePayload.PostPayload, out var post))
-                    {
-                    }
-                    else
-                    {
-                        _logger.LogError("Missing postPayload header");
-                        var customErrors = new CustomErrors(new CustomError("Forbidden", "Missing Header", "postPayload"));
-                        await WriteCustomErrors(context.Response, customErrors, (int)HttpStatusCode.Forbidden);
-                        return;
-                    }
-                }
-
                 // Get the current Unix UTC timestamp (rounded to 30 seconds)
                 long currentTimestamp = (long)(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1))).TotalSeconds;
                 currentTimestamp = (currentTimestamp / 30) * 30; // Round to the nearest 30 seconds
@@ -131,6 +116,11 @@ namespace Core.API.ResponseHandling
                     var customErrors = new CustomErrors(new CustomError("Forbidden", "Invalid timestamp", "timestamp"));
                     await WriteCustomErrors(context.Response, customErrors, (int)HttpStatusCode.Forbidden);
                 }
+            }
+            catch (CustomErrorsException ex)
+            {
+                _logger.LogError("Unknown exception thrown: {message}", ex.Message);
+                throw;
             }
             catch (Exception ex)
             {
