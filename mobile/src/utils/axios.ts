@@ -76,12 +76,12 @@ async function requestInterceptor(config: InternalAxiosRequestConfig) {
         // hash POST payload if available
 
         if (config.method === "post") {
-          console.log(config.data);
+          // console.log(config.data);
           payload.postPayload = config.data;
-          console.log("postpayload", payload);
+          // console.log("postpayload", payload);
         }
 
-        console.log("METHOD", config.method);
+        // console.log("METHOD", config.method);
         config.headers["x-payload"] = forge.util.encode64(
           JSON.stringify(payload)
         );
@@ -102,7 +102,7 @@ async function requestInterceptor(config: InternalAxiosRequestConfig) {
       }
     }
   }
-  console.log("CONFIG", config.headers);
+  // console.log("CONFIG", config.headers);
 
   return config;
 }

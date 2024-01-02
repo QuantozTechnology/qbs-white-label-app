@@ -91,7 +91,7 @@ export function CustomerProvider({
 
   async function updateCustomerState() {
     try {
-      console.log("updating customer state");
+      // console.log("updating customer state");
       const customerResponse = await getCustomer();
 
       if (customerResponse.data.value.status === "UNDERREVIEW") {
@@ -103,8 +103,8 @@ export function CustomerProvider({
       }
       return true;
     } catch (error) {
-      console.log("error in customer context");
-      console.log(error);
+      // console.log("error in customer context");
+      // console.log(error);
       const axiosError = error as AxiosError<APIError>;
 
       if (
@@ -116,7 +116,7 @@ export function CustomerProvider({
           state: CustomerStateType.CUSTOMER_REQUIRED,
         });
 
-        console.log("this happens");
+        // console.log("this happens");
         return false;
       }
 
