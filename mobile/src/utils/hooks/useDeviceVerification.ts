@@ -35,9 +35,8 @@ export function useDeviceVerification() {
   useEffect(() => {
     const setupAndVerifyDeviceSecurity = async () => {
       setIsLoading(true);
-      console.log("device 1");
+
       try {
-        console.log("try");
         let pubKey = await SecureStore.getItemAsync("publicKey");
         let privKey = await SecureStore.getItemAsync("privateKey");
 
@@ -51,13 +50,9 @@ export function useDeviceVerification() {
 
         const { data } = await verifyDevice({ publicKey: pubKey });
 
-        console.log(data);
-
         await storeKeys(pubKey, privKey, data.value.otpSeed);
       } catch (e: unknown) {
-        console.log(e);
         if (isAxiosError(e) && e.response?.status === 409) {
-          console.log("device conflict");
           setDeviceConflict(true);
         } else {
           setError(new Error("Error verifying device: " + e));

@@ -44,13 +44,13 @@ mockPaymentsApi.interceptors.response.use(
 async function requestInterceptor(config: InternalAxiosRequestConfig) {
   const storage = authStorageService();
   const accessToken = await storage.getAccessToken();
-  const authorizationHeader =
-    paymentsApi.defaults.headers.common["Authorization"];
+  // const authorizationHeader =
+  //   paymentsApi.defaults.headers.common["Authorization"];
 
   const pubKeyFromStore = await SecureStore.getItemAsync("publicKey");
   const privKeyFromStore = await SecureStore.getItemAsync("privateKey");
 
-  if (accessToken !== null || authorizationHeader == null) {
+  if (accessToken !== null) {
     if (config.headers) {
       config.headers["Authorization"] = `Bearer ${accessToken}`;
 
@@ -74,10 +74,14 @@ async function requestInterceptor(config: InternalAxiosRequestConfig) {
         };
         //console.log(timestampInSeconds, "timestamp");
         // hash POST payload if available
+
         if (config.method === "post") {
+          console.log(config.data);
           payload.postPayload = config.data;
+          console.log("postpayload", payload);
         }
-        // console.log("METHOD", config.method);
+
+        console.log("METHOD", config.method);
         config.headers["x-payload"] = forge.util.encode64(
           JSON.stringify(payload)
         );
@@ -98,7 +102,8 @@ async function requestInterceptor(config: InternalAxiosRequestConfig) {
       }
     }
   }
-  console.log(config);
+  console.log("CONFIG", config.headers);
+
   return config;
 }
 

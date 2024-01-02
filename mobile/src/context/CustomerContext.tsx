@@ -91,6 +91,7 @@ export function CustomerProvider({
 
   async function updateCustomerState() {
     try {
+      console.log("updating customer state");
       const customerResponse = await getCustomer();
 
       if (customerResponse.data.value.status === "UNDERREVIEW") {
@@ -102,13 +103,20 @@ export function CustomerProvider({
       }
       return true;
     } catch (error) {
+      console.log("error in customer context");
+      console.log(error);
       const axiosError = error as AxiosError<APIError>;
 
-      if (axiosError.response?.status === 404) {
+      if (
+        axiosError.response?.status === 404 ||
+        axiosError.response?.status === 401
+      ) {
         dispatch({
           type: CustomerStateActionType.UPDATE_STATE,
           state: CustomerStateType.CUSTOMER_REQUIRED,
         });
+
+        console.log("this happens");
         return false;
       }
 
@@ -119,6 +127,8 @@ export function CustomerProvider({
             ? axiosError.response.data.Errors[0].Message
             : (error as Error).message,
       });
+
+      console.log(error);
 
       return false;
     }
