@@ -33,14 +33,12 @@ namespace Core.Application.Commands.PaymentRequestCommands
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<Unit> Handle(CancelPaymentRequestCommand request, CancellationToken cancellationToken)
+        public async Task Handle(CancelPaymentRequestCommand request, CancellationToken cancellationToken)
         {
             var paymentRequest = await _paymentRequestRepository.GetByCodeForCustomerAsync(request.CustomerCode, request.PaymentRequestCode, cancellationToken);
             paymentRequest.Cancel();
             _paymentRequestRepository.Update(paymentRequest);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
-
-            return Unit.Value;
         }
     }
 }

@@ -8,7 +8,7 @@ using MediatR;
 
 namespace Core.Application.Commands
 {
-    public class PayPaymentRequestCommand : IWithComplianceCheckCommand<Unit>
+    public class PayPaymentRequestCommand : IWithComplianceCheckCommand
     {
         public required string CustomerCode { get; set; }
         public required string PaymentRequestCode { get; set; }
@@ -40,7 +40,7 @@ namespace Core.Application.Commands
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<Unit> Handle(PayPaymentRequestCommand request, CancellationToken cancellationToken)
+        public async Task Handle(PayPaymentRequestCommand request, CancellationToken cancellationToken)
         {
             var customer = await _customerRepository.GetAsync(request.CustomerCode, cancellationToken);
             var account = await _accountRepository.GetByCustomerCodeAsync(customer.CustomerCode, cancellationToken);
@@ -70,8 +70,6 @@ namespace Core.Application.Commands
                 await _unitOfWork.SaveChangesAsync(cancellationToken);
                 throw;
             }
-
-            return Unit.Value;
         }
     }
 }

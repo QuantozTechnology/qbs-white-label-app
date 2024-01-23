@@ -10,7 +10,7 @@ using MediatR;
 
 namespace Core.Application.Pipelines
 {
-    public class ComplianceBehaviour<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse> where TRequest : IWithComplianceCheckCommand<TResponse>
+    public class ComplianceBehaviour<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse> where TRequest : IWithComplianceCheckCommand
     {
         private readonly IComplianceService _compliance;
         private readonly ICustomerRepository _customerRepository;

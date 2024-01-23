@@ -17,7 +17,7 @@ namespace Core.API.DependencyInjection
             services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ComplianceBehaviour<,>));
 
             services.AddValidatorsFromAssembly(Application.AssemblyReference.Assembly);
-            services.AddMediatR(Application.AssemblyReference.Assembly);
+            services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(ApplicationInjection).Assembly));
 
             return services;
         }
