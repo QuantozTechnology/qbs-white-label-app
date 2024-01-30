@@ -54,15 +54,15 @@ async function requestInterceptor(config: InternalAxiosRequestConfig) {
       config.headers["Authorization"] = `Bearer ${accessToken}`;
 
       if (pubKeyFromStore !== null && privKeyFromStore != null) {
-        config.headers["x-public-key"] = JSON.stringify(pubKeyFromStore);
+        config.headers["x-public-key"] = forge.util.encode64(pubKeyFromStore);
+
+        const timestampInSeconds = Math.floor(Date.now() / 1000); // Convert current time to Unix timestamp in seconds
 
         const payload: {
-          publicKey: string;
           timestamp: number;
           postPayload?: unknown;
         } = {
-          publicKey: pubKeyFromStore,
-          timestamp: Date.now(),
+          timestamp: timestampInSeconds,
         };
 
         // hash POST payload if available
@@ -70,13 +70,20 @@ async function requestInterceptor(config: InternalAxiosRequestConfig) {
           payload.postPayload = config.data;
         }
 
+        config.headers["x-payload"] = forge.util.encode64(
+          JSON.stringify(payload)
+        );
+
         // create hash and sign it
         const privateKey = forge.pki.privateKeyFromPem(privKeyFromStore);
         const md = forge.md.sha256.create();
         md.update(JSON.stringify(payload), "utf8");
         const signature = privateKey.sign(md);
 
-        config.headers["x-signature"] = forge.util.encode64(signature);
+        // Encode the signature in Base64 format
+        const base64Signature = forge.util.encode64(signature);
+        // console.log("base64Signature", base64Signature);
+        config.headers["x-signature"] = base64Signature;
       }
     }
   }

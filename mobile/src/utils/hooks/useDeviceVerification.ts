@@ -58,6 +58,7 @@ export function useDeviceVerification() {
           setError(new Error("Error verifying device: " + e));
         }
       } finally {
+        setError(null);
         setIsLoading(false);
       }
     };
