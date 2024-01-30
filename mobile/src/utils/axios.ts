@@ -82,7 +82,6 @@ async function requestInterceptor(config: InternalAxiosRequestConfig) {
 
         // Encode the signature in Base64 format
         const base64Signature = forge.util.encode64(signature);
-        // console.log("base64Signature", base64Signature);
         config.headers["x-signature"] = base64Signature;
       }
     }
