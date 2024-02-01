@@ -46,10 +46,6 @@ namespace Core.Infrastructure.Nexus.SigningService
 
             var response = await _httpClient.PostAsync($"CreateSigningPair?code={_settings.CreateSigningPairKey}", httpContent);
 
-
-            //var response = await _httpClient.PostAsJsonAsync
-            //    ($"CreateSigningPair?code={_settings.CreateSigningPairKey}", model, jsonSerializerOptions);
-
             var json = await response.Content.ReadAsStringAsync();
 
             if (!response.IsSuccessStatusCode)
@@ -85,9 +81,6 @@ namespace Core.Infrastructure.Nexus.SigningService
             var httpContent = new StringContent(jsonObj, Encoding.UTF8, "application/json");
 
             _logger.LogInformation("Posting model: {json}", jsonObj);
-
-            //var response = await _httpClient.PostAsJsonAsync
-            //    ($"CreateSignature?code={_settings.CreateSignatureKey}", model);
 
             var response = await _httpClient.PostAsync($"CreateSignature?code={_settings.CreateSignatureKey}", httpContent);
 
