@@ -5,6 +5,7 @@
 using Core.Domain.Exceptions;
 using Microsoft.Extensions.Logging;
 using System.Net.Http.Json;
+using System.Text;
 using System.Text.Json;
 
 namespace Core.Infrastructure.Nexus.SigningService
@@ -33,8 +34,17 @@ namespace Core.Infrastructure.Nexus.SigningService
             var crypto = MapBlockchainToCrypto(blockchain);
             var model = new CreateSigningPairRequest(LABELPARTNERCODE, crypto);
 
-            var response = await _httpClient.PostAsJsonAsync
-                ($"CreateSigningPair?code={_settings.CreateSigningPairKey}", model);
+            var jsonSerializerOptions = new JsonSerializerOptions(JsonSerializerOptions.Default);
+            jsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+
+            var jsonObj = Newtonsoft.Json.JsonConvert.SerializeObject(model);
+
+            // send json as json
+            var httpContent = new StringContent(jsonObj, Encoding.UTF8, "application/json");
+
+            _logger.LogInformation("Posting model: {json}", jsonObj);
+
+            var response = await _httpClient.PostAsync($"CreateSigningPair?code={_settings.CreateSigningPairKey}", httpContent);
 
             var json = await response.Content.ReadAsStringAsync();
 
@@ -61,8 +71,18 @@ namespace Core.Infrastructure.Nexus.SigningService
             var model = new CreateSignatureRequest
                 (LABELPARTNERCODE, crypto, new string[] { request.PublicKey }, request.TransactionEnvelope, _settings.StellarNetworkPassphrase);
 
-            var response = await _httpClient.PostAsJsonAsync
-                ($"CreateSignature?code={_settings.CreateSignatureKey}", model);
+
+            var jsonSerializerOptions = new JsonSerializerOptions(JsonSerializerOptions.Default);
+            jsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+
+            var jsonObj = Newtonsoft.Json.JsonConvert.SerializeObject(model);
+
+            // send json as json
+            var httpContent = new StringContent(jsonObj, Encoding.UTF8, "application/json");
+
+            _logger.LogInformation("Posting model: {json}", jsonObj);
+
+            var response = await _httpClient.PostAsync($"CreateSignature?code={_settings.CreateSignatureKey}", httpContent);
 
             var json = await response.Content.ReadAsStringAsync();
 
