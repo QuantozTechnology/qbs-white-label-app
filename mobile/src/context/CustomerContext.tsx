@@ -104,7 +104,8 @@ export function CustomerProvider({
     } catch (error) {
       const axiosError = error as AxiosError<APIError>;
 
-      if (axiosError.response?.status === 404) {
+      if (axiosError.response?.status === 404 ||
+        axiosError.response?.status === 401) {
         dispatch({
           type: CustomerStateActionType.UPDATE_STATE,
           state: CustomerStateType.CUSTOMER_REQUIRED,
