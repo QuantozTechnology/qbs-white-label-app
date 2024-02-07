@@ -3,7 +3,7 @@
 // of this distribution or at http://www.apache.org/licenses/LICENSE-2.0
 
 /* eslint-disable  @typescript-eslint/no-explicit-any */
-import { rest } from "msw";
+import { HttpResponse, http } from "msw";
 import { APIError, ApiErrorCode } from "../../api/generic/error.interface";
 import { mockRefresh } from "../../jest/jest.setup";
 import { fireEvent, render, screen, waitFor } from "../../jest/test-utils";
@@ -100,10 +100,10 @@ describe("BusinessRegistration", () => {
     };
 
     server.use(
-      rest.post(
+      http.post(
         `${backendApiUrl}/api/customers/merchant`,
-        (_req, rest, ctx) => {
-          return rest(ctx.status(400), ctx.json(mockedError));
+        _ => {
+          return HttpResponse.json(mockedError, { status: 400 });
         }
       )
     );
@@ -162,8 +162,8 @@ describe("BusinessRegistration", () => {
     };
 
     server.use(
-      rest.post(`${backendApiUrl}/api/accounts`, (_req, rest, ctx) => {
-        return rest(ctx.status(400), ctx.json(mockedError));
+      http.post(`${backendApiUrl}/api/accounts`, _ => {
+        return HttpResponse.json(mockedError, { status: 400 });
       })
     );
 
@@ -210,8 +210,8 @@ describe("BusinessRegistration", () => {
     };
 
     server.use(
-      rest.post(`${backendApiUrl}/api/accounts`, (_req, rest, ctx) => {
-        return rest(ctx.status(400), ctx.json(mockedError));
+      http.post(`${backendApiUrl}/api/accounts`, _ => {
+        return HttpResponse.json(mockedError, { status: 400 });
       })
     );
 

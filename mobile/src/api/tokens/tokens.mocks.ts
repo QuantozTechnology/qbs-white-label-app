@@ -2,7 +2,7 @@
 // under the Apache License, Version 2.0. See the NOTICE file at the root
 // of this distribution or at http://www.apache.org/licenses/LICENSE-2.0
 
-import { rest } from "msw";
+import { HttpResponse, http } from "msw";
 import { mockApiUrl } from "../../utils/axios";
 import { GenericApiResponse } from "../utils/api.interface";
 import { TokenDetails } from "./tokens.interface";
@@ -18,10 +18,7 @@ export const tokenDetailsDefaultMock: GenericApiResponse<TokenDetails> = {
 };
 
 export const tokenDetailsMocks = [
-  rest.get(`${mockApiUrl}/api/tokens/:tokenCode`, (_req, rest, ctx) => {
-    return rest(
-      ctx.status(200),
-      ctx.json<GenericApiResponse<TokenDetails>>(tokenDetailsDefaultMock)
-    );
+  http.get(`${mockApiUrl}/api/tokens/:tokenCode`, _ => {
+    return HttpResponse.json(tokenDetailsDefaultMock, { status: 200 });
   }),
 ];

@@ -2,7 +2,7 @@
 // under the Apache License, Version 2.0. See the NOTICE file at the root
 // of this distribution or at http://www.apache.org/licenses/LICENSE-2.0
 
-import { rest } from "msw";
+import { HttpResponse, http } from "msw";
 import { backendApiUrl } from "../../utils/axios";
 import { GenericApiResponse } from "../utils/api.interface";
 import { Device } from "./devices.interface";
@@ -14,24 +14,21 @@ export const devicesMockResponse: GenericApiResponse<Device> = {
 };
 
 export const devicesMocks = [
-  rest.post(`${backendApiUrl}/api/customers/devices`, (_req, rest, ctx) => {
-    return rest(
-      ctx.status(200),
-      ctx.json<typeof devicesMockResponse>(devicesMockResponse)
-    );
+  http.post(`${backendApiUrl}/api/customers/devices`, _ => {
+    return HttpResponse.json(devicesMockResponse, { status: 200 });
   }),
 ];
 
-export const deviceNotKnownApiResponse = rest.post(
+export const deviceNotKnownApiResponse = http.post(
   `${backendApiUrl}/api/customers/devices`,
-  (_req, res, ctx) => {
-    return res(ctx.status(409));
+  _ => {
+    return new Response(null, { status: 409 });
   }
 );
 
-export const devicesApiErrorResponse = rest.post(
+export const devicesApiErrorResponse = http.post(
   `${backendApiUrl}/api/customers/devices`,
-  (_req, res, ctx) => {
-    return res(ctx.status(400));
+  _ => {
+    return new Response(null, { status: 400 });
   }
 );
