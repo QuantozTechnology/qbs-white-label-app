@@ -2,7 +2,7 @@
 // under the Apache License, Version 2.0. See the NOTICE file at the root
 // of this distribution or at http://www.apache.org/licenses/LICENSE-2.0
 
-import { rest } from "msw";
+import { HttpResponse, http } from "msw";
 import { APIError, ApiErrorCode } from "../../api/generic/error.interface";
 import { fireEvent, render, screen } from "../../jest/test-utils";
 import { server } from "../../mocks/server";
@@ -105,10 +105,10 @@ describe("ReviewPhoto", () => {
     };
 
     server.use(
-      rest.post(
+      http.post(
         `${backendApiUrl}/api/customers/files/IdFront`,
-        (_req, rest, ctx) => {
-          return rest(ctx.status(400), ctx.json(savePhotoApiError));
+        _ => {
+          return HttpResponse.json(savePhotoApiError, { status: 400 });
         }
       )
     );

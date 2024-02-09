@@ -2,7 +2,7 @@
 // under the Apache License, Version 2.0. See the NOTICE file at the root
 // of this distribution or at http://www.apache.org/licenses/LICENSE-2.0
 
-import { rest } from "msw";
+import { HttpResponse, http } from "msw";
 import { Customer } from "../../api/customer/customer.interface";
 import { customerMocksDefaultResponse } from "../../api/customer/customer.mocks";
 import { APIError, ApiErrorCode } from "../../api/generic/error.interface";
@@ -10,6 +10,7 @@ import { Limits, LimitsDetails } from "../../api/limits/limits.interface";
 import { defaultLimitsMockResponse } from "../../api/limits/limits.mocks";
 import { GenericApiResponse } from "../../api/utils/api.interface";
 import {
+  act,
   fireEvent,
   render,
   screen,
@@ -72,8 +73,8 @@ describe("Withdraw screen", () => {
 
   it("shows the expected UI if bank account is defined", async () => {
     server.use(
-      rest.get(`${backendApiUrl}/api/customers`, (req, rest, ctx) => {
-        return rest(ctx.status(200), ctx.json(responseWithBankAccount));
+      http.get(`${backendApiUrl}/api/customers`, _ => {
+        return HttpResponse.json(responseWithBankAccount, { status: 200 });
       })
     );
 
@@ -97,8 +98,8 @@ describe("Withdraw screen", () => {
 
   it("shows error if limit API returns an error", async () => {
     server.use(
-      rest.get(`${backendApiUrl}/api/customers/limits`, (req, rest, ctx) => {
-        return rest(ctx.status(400));
+      http.get(`${backendApiUrl}/api/customers/limits`, _ => {
+        return new HttpResponse(null, { status: 400 });
       })
     );
 
@@ -121,8 +122,8 @@ describe("Withdraw screen", () => {
 
   it("shows error if balances API returns an error", async () => {
     server.use(
-      rest.get(`${backendApiUrl}/api/accounts/balances`, (req, rest, ctx) => {
-        return rest(ctx.status(400));
+      http.get(`${backendApiUrl}/api/accounts/balances`, _ => {
+        return new HttpResponse(null, { status: 400 });
       })
     );
 
@@ -159,8 +160,8 @@ describe("Withdraw screen", () => {
     };
 
     server.use(
-      rest.get(`${backendApiUrl}/api/customers/limits`, (_req, rest, ctx) => {
-        return rest(ctx.status(200), ctx.json(limitsReachedMock));
+      http.get(`${backendApiUrl}/api/customers/limits`, _ => {
+        return HttpResponse.json(limitsReachedMock, { status: 200 });
       })
     );
 
@@ -187,8 +188,8 @@ describe("Withdraw screen", () => {
 
   it("shows validation error if amount is not filled", async () => {
     server.use(
-      rest.get(`${backendApiUrl}/api/customers`, (req, rest, ctx) => {
-        return rest(ctx.status(200), ctx.json(responseWithBankAccount));
+      http.get(`${backendApiUrl}/api/customers`, _ => {
+        return HttpResponse.json(responseWithBankAccount, { status: 200 });
       })
     );
 
@@ -206,8 +207,8 @@ describe("Withdraw screen", () => {
 
   it("shows validation error if amount is 0 or lower", async () => {
     server.use(
-      rest.get(`${backendApiUrl}/api/customers`, (req, rest, ctx) => {
-        return rest(ctx.status(200), ctx.json(responseWithBankAccount));
+      http.get(`${backendApiUrl}/api/customers`, _ => {
+        return HttpResponse.json(responseWithBankAccount, { status: 200 });
       })
     );
 
@@ -226,8 +227,8 @@ describe("Withdraw screen", () => {
 
   it("shows validation error if amount is greater than balance", async () => {
     server.use(
-      rest.get(`${backendApiUrl}/api/customers`, (req, rest, ctx) => {
-        return rest(ctx.status(200), ctx.json(responseWithBankAccount));
+      http.get(`${backendApiUrl}/api/customers`, _ => {
+        return HttpResponse.json(responseWithBankAccount, { status: 200 });
       })
     );
 
@@ -246,8 +247,8 @@ describe("Withdraw screen", () => {
 
   it("shows validation error if amount is lower than min fee", async () => {
     server.use(
-      rest.get(`${backendApiUrl}/api/customers`, (req, rest, ctx) => {
-        return rest(ctx.status(200), ctx.json(responseWithBankAccount));
+      http.get(`${backendApiUrl}/api/customers`, _ => {
+        return HttpResponse.json(responseWithBankAccount, { status: 200 });
       })
     );
 
@@ -270,8 +271,8 @@ describe("Withdraw screen", () => {
 
   it("successfully creates a withdraw request", async () => {
     server.use(
-      rest.get(`${backendApiUrl}/api/customers`, (req, rest, ctx) => {
-        return rest(ctx.status(200), ctx.json(responseWithBankAccount));
+      http.get(`${backendApiUrl}/api/customers`, _ => {
+        return HttpResponse.json(responseWithBankAccount, { status: 200 });
       })
     );
 
@@ -310,16 +311,16 @@ describe("Withdraw screen", () => {
     };
 
     server.use(
-      rest.get(`${backendApiUrl}/api/customers`, (req, rest, ctx) => {
-        return rest(ctx.status(200), ctx.json(responseWithBankAccount));
+      http.get(`${backendApiUrl}/api/customers`, _ => {
+        return HttpResponse.json(responseWithBankAccount, { status: 200 });
       })
     );
 
     server.use(
-      rest.post(
+      http.post(
         `${backendApiUrl}/api/transactions/withdraws`,
-        (_req, rest, ctx) => {
-          return rest(ctx.status(400), ctx.json(apiError));
+        _ => {
+          return HttpResponse.json(apiError, { status: 400 });
         }
       )
     );
@@ -330,7 +331,9 @@ describe("Withdraw screen", () => {
     const withdrawButton = await screen.findByLabelText("withdraw button");
     const amount = screen.getByLabelText("amount");
 
-    fireEvent(amount, "onChangeText", "10");
+    act(() => {
+      fireEvent(amount, "onChangeText", "10");
+    });
 
     await screen.findByLabelText("total amount");
     await waitFor(() => expect(withdrawButton).toBeEnabled());
@@ -351,8 +354,8 @@ describe("Withdraw screen", () => {
     });
 
     server.use(
-      rest.get(`${backendApiUrl}/api/customers`, (req, rest, ctx) => {
-        return rest(ctx.status(200), ctx.json(responseWithBankAccount));
+      http.get(`${backendApiUrl}/api/customers`, _ => {
+        return HttpResponse.json(responseWithBankAccount, { status: 200 });
       })
     );
 

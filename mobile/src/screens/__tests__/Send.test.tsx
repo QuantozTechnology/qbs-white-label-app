@@ -2,7 +2,7 @@
 // under the Apache License, Version 2.0. See the NOTICE file at the root
 // of this distribution or at http://www.apache.org/licenses/LICENSE-2.0
 
-import { rest } from "msw";
+import { HttpResponse, http } from "msw";
 import { APIError, ApiErrorCode } from "../../api/generic/error.interface";
 import { fireEvent, render, screen, within } from "../../jest/test-utils";
 import { server } from "../../mocks/server";
@@ -66,8 +66,8 @@ describe("Send", () => {
     };
 
     server.use(
-      rest.get(`${backendApiUrl}/api/accounts/balances`, (req, rest, ctx) => {
-        return rest(ctx.status(400), ctx.json(balancesApiError));
+      http.get(`${backendApiUrl}/api/accounts/balances`, _ => {
+        return HttpResponse.json(balancesApiError, { status: 400 });
       })
     );
 
@@ -218,10 +218,10 @@ describe("Send", () => {
     };
 
     server.use(
-      rest.post(
+      http.post(
         `${backendApiUrl}/api/transactions/payments/pay/account`,
-        (req, rest, ctx) => {
-          return rest(ctx.status(400), ctx.json(apiError));
+        _=> {
+          return HttpResponse.json(apiError, { status: 400 });
         }
       )
     );

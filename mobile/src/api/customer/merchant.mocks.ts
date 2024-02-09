@@ -2,11 +2,11 @@
 // under the Apache License, Version 2.0. See the NOTICE file at the root
 // of this distribution or at http://www.apache.org/licenses/LICENSE-2.0
 
-import { rest } from "msw";
+import { http } from "msw";
 import { backendApiUrl } from "../../utils/axios";
 
 export const merchantMocks = [
-  rest.post(`${backendApiUrl}/api/customers/merchant`, (_req, rest, ctx) => {
-    return rest(ctx.status(201));
+  http.post(`${backendApiUrl}/api/customers/merchant`, _ => {
+    return new Response(null, { status: 201 });
   }),
 ];
