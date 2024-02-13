@@ -3,7 +3,7 @@
 // of this distribution or at http://www.apache.org/licenses/LICENSE-2.0
 
 import { useState, useEffect } from "react";
-import * as forge from "node-forge";
+import * as ed from "@noble/ed25519";
 import * as SecureStore from "expo-secure-store";
 import { verifyDevice } from "../../api/customer/devices";
 import { isAxiosError } from "axios";
@@ -14,10 +14,12 @@ export function useDeviceVerification() {
   const [deviceConflict, setDeviceConflict] = useState(false);
 
   const generateKeys = () => {
-    const keypair = forge.pki.rsa.generateKeyPair({ bits: 2048 });
-    const pubKey = forge.pki.publicKeyToPem(keypair.publicKey);
-    const privKey = forge.pki.privateKeyToPem(keypair.privateKey);
-    return { pubKey, privKey };
+    const privKey = ed.utils.randomPrivateKey();
+    const pubKey = ed.getPublicKey(privKey);
+
+    const privKeyBase64 = Buffer.from(privKey).toString("base64");
+    const pubKeyBase64 = Buffer.from(pubKey).toString("base64");
+    return { pubKey: pubKeyBase64, privKey: privKeyBase64 };
   };
 
   const storeKeys = async (
