@@ -9,6 +9,8 @@ import { AuthService } from "../auth/authService";
 import * as SecureStore from "expo-secure-store";
 import * as ed from "@noble/ed25519";
 import { sha512 } from "@noble/hashes/sha512";
+import { fromByteArray, btoa, toByteArray } from "react-native-quick-base64";
+import { Buffer } from "buffer";
 
 ed.etc.sha512Sync = (...m) => sha512(ed.etc.concatBytes(...m));
 
@@ -75,18 +77,19 @@ async function requestInterceptor(config: InternalAxiosRequestConfig) {
 
         const jsonPayload = JSON.stringify(payload);
         // base64 encode payload
-        const base64Payload = Buffer.from(jsonPayload).toString("base64");
+        const base64Payload = btoa(jsonPayload); // Buffer.from(jsonPayload).toString("base64");
 
         config.headers["x-payload"] = base64Payload;
 
         // const buff = forge.util.createBuffer(signature).getBytes();
-        const privKey = Buffer.from(privKeyFromStore, "base64");
-        const privKeyHex = privKey.toString("hex");
-        const messageBytes = Buffer.from(jsonPayload, "utf-8");
-        const hash = ed.sign(Buffer.from(messageBytes), privKeyHex);
+        const privKey = toByteArray(privKeyFromStore); // Buffer.from(privKeyFromStore, "base64");
+        const privKeyHex = ed.etc.bytesToHex(privKey); // privKey.toString("hex");
+        const utfDecodedPayload = Buffer.from(jsonPayload, "utf-8");
+
+        const hash = ed.sign(utfDecodedPayload, privKeyHex);
 
         // Encode the signature in Base64 format
-        const base64Signature = Buffer.from(hash).toString("base64");
+        const base64Signature = fromByteArray(hash); // Buffer.from(hash).toString("base64");
         config.headers["x-signature"] = base64Signature;
       }
     }

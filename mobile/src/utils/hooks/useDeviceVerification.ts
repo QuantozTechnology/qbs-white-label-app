@@ -4,9 +4,17 @@
 
 import { useState, useEffect } from "react";
 import * as ed from "@noble/ed25519";
+import "react-native-get-random-values";
 import * as SecureStore from "expo-secure-store";
 import { verifyDevice } from "../../api/customer/devices";
 import { isAxiosError } from "axios";
+import { sha512 } from "@noble/hashes/sha512";
+import { fromByteArray } from "react-native-quick-base64";
+
+ed.etc.sha512Sync = (...m) => sha512(ed.etc.concatBytes(...m));
+
+// tslint:disable-next-line: 2722
+ed.etc.sha512Async = (...m) => Promise.resolve(ed.etc.sha512Sync(...m));
 
 export function useDeviceVerification() {
   const [error, setError] = useState<Error | null>(null);
@@ -17,8 +25,8 @@ export function useDeviceVerification() {
     const privKey = ed.utils.randomPrivateKey();
     const pubKey = ed.getPublicKey(privKey);
 
-    const privKeyBase64 = Buffer.from(privKey).toString("base64");
-    const pubKeyBase64 = Buffer.from(pubKey).toString("base64");
+    const privKeyBase64 = fromByteArray(privKey); //Buffer.from(privKey).toString("base64");
+    const pubKeyBase64 = fromByteArray(pubKey); //Buffer.from(pubKey).toString("base64");
     return { pubKey: pubKeyBase64, privKey: privKeyBase64 };
   };
 

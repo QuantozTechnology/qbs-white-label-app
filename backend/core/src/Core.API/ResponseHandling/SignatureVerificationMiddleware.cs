@@ -5,8 +5,8 @@
 using Core.Domain.Exceptions;
 using Core.Presentation.Models;
 using Newtonsoft.Json.Linq;
+using NSec.Cryptography;
 using System.Net;
-using System.Security.Cryptography;
 using System.Text;
 using static Core.Domain.Constants;
 
@@ -67,7 +67,6 @@ namespace Core.API.ResponseHandling
                 JObject payloadJson = JObject.Parse(payloadString);
 
                 byte[] publicKeyBytes = Convert.FromBase64String(publicKeyHeader);
-                var publicKey = Encoding.UTF8.GetString(publicKeyBytes);
 
                 // Get the current Unix UTC timestamp (rounded to 30 seconds)
                 long currentTimestamp = (long)(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1))).TotalSeconds;
@@ -99,7 +98,7 @@ namespace Core.API.ResponseHandling
 
                 if (isCurrentTime || isWithin30Seconds)
                 {
-                    if (VerifySignature(publicKey, payloadBytes, signatureBytes))
+                    if (VerifySignature(publicKeyBytes, payloadBytes, signatureBytes))
                     {
                         await _next(context); // Signature is valid, continue with the request
                     }
@@ -140,22 +139,14 @@ namespace Core.API.ResponseHandling
             await httpResponse.WriteAsync(json);
         }
 
-        public static bool VerifySignature(string publicKey, byte[] payload, byte[] signature)
+        public static bool VerifySignature(byte[] publicKey, byte[] payload, byte[] signature)
         {
             try
             {
-                using (RSA rsa = RSA.Create())
-                {
-                    // Import the public key (assuming it's in PEM format)
-                    rsa.ImportFromPem(publicKey);
-
-                    // Verify the signature using the SHA256 algorithm and PKCS1 padding
-                    var isValidSignature = rsa.VerifyData(payload, signature, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
-
-                    return isValidSignature;
-                }
+                var pubKeyImport = PublicKey.Import(SignatureAlgorithm.Ed25519, publicKey, KeyBlobFormat.RawPublicKey);
+                return SignatureAlgorithm.Ed25519.Verify(pubKeyImport, payload, signature);
             }
-            catch (CryptographicException)
+            catch
             {
                 // Signature verification failed
                 return false;
