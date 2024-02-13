@@ -77,20 +77,25 @@ async function requestInterceptor(config: InternalAxiosRequestConfig) {
 
         const jsonPayload = JSON.stringify(payload);
         // base64 encode payload
-        const base64Payload = btoa(jsonPayload); // Buffer.from(jsonPayload).toString("base64");
+        const base64Payload = btoa(jsonPayload);
 
         config.headers["x-payload"] = base64Payload;
 
-        // const buff = forge.util.createBuffer(signature).getBytes();
-        const privKey = toByteArray(privKeyFromStore); // Buffer.from(privKeyFromStore, "base64");
-        const privKeyHex = ed.etc.bytesToHex(privKey); // privKey.toString("hex");
+        const privKey = toByteArray(privKeyFromStore);
+        const privKeyHex = ed.etc.bytesToHex(privKey);
+
+        console.log("privKey", privKeyHex);
+        console.log("jsonPayload", jsonPayload);
+
         const utfDecodedPayload = Buffer.from(jsonPayload, "utf-8");
 
         const hash = ed.sign(utfDecodedPayload, privKeyHex);
 
         // Encode the signature in Base64 format
-        const base64Signature = fromByteArray(hash); // Buffer.from(hash).toString("base64");
+        const base64Signature = fromByteArray(hash);
         config.headers["x-signature"] = base64Signature;
+
+        console.log("headers", config.headers);
       }
     }
   }
