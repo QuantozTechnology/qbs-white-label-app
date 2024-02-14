@@ -9,7 +9,7 @@ import { AuthService } from "../auth/authService";
 import * as SecureStore from "expo-secure-store";
 import * as ed from "@noble/ed25519";
 import { sha512 } from "@noble/hashes/sha512";
-import { fromByteArray, btoa, toByteArray } from "react-native-quick-base64";
+import { fromByteArray, toByteArray } from "react-native-quick-base64";
 import { Buffer } from "buffer";
 
 ed.etc.sha512Sync = (...m) => sha512(ed.etc.concatBytes(...m));
@@ -61,32 +61,21 @@ async function requestInterceptor(config: InternalAxiosRequestConfig) {
       if (pubKeyFromStore !== null && privKeyFromStore != null) {
         config.headers["x-public-key"] = pubKeyFromStore;
 
-        const timestampInSeconds = Math.floor(Date.now() / 1000); // Convert current time to Unix timestamp in seconds
+        const timestampInSeconds = Math.floor(Date.now() / 1000).toString(); // Convert current time to Unix timestamp in seconds
 
-        const payload: {
-          timestamp: number;
-          postPayload?: unknown;
-        } = {
-          timestamp: timestampInSeconds,
-        };
+        config.headers["x-timestamp"] = timestampInSeconds;
+
+        const bytesToSign = Buffer.from(timestampInSeconds, "utf-8");
 
         // hash POST payload if available
-        if (config.method === "post") {
-          payload.postPayload = config.data;
+        if (config.data) {
+          bytesToSign.write(config.data);
         }
-
-        const jsonPayload = JSON.stringify(payload);
-        // base64 encode payload
-        const base64Payload = btoa(jsonPayload);
-
-        config.headers["x-payload"] = base64Payload;
 
         const privKey = toByteArray(privKeyFromStore);
         const privKeyHex = ed.etc.bytesToHex(privKey);
 
-        const utfDecodedPayload = Buffer.from(jsonPayload, "utf-8");
-
-        const hash = ed.sign(utfDecodedPayload, privKeyHex);
+        const hash = ed.sign(bytesToSign, privKeyHex);
 
         // Encode the signature in Base64 format
         const base64Signature = fromByteArray(hash);

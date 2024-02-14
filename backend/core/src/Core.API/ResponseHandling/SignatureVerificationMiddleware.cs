@@ -4,11 +4,9 @@
 
 using Core.Domain.Exceptions;
 using Core.Presentation.Models;
-using Newtonsoft.Json.Linq;
 using NSec.Cryptography;
 using System.Net;
 using System.Text;
-using static Core.Domain.Constants;
 
 namespace Core.API.ResponseHandling
 {
@@ -31,20 +29,10 @@ namespace Core.API.ResponseHandling
             {
                 // Retrieve headers from the request
                 string? signatureHeader = context.Request.Headers["x-signature"];
-                string? payloadHeader = context.Request.Headers["x-payload"];
                 string? publicKeyHeader = context.Request.Headers["x-public-key"];
+                string? timestampHeader = context.Request.Headers["x-timestamp"];
 
-                // Retrieve method from the request
-                var method = context.Request.Method;
-
-                if (string.IsNullOrWhiteSpace(payloadHeader))
-                {
-                    _logger.LogError("Missing payload header");
-                    var customErrors = new CustomErrors(new CustomError("Forbidden", "Missing Header", "x-payload"));
-                    await WriteCustomErrors(context.Response, customErrors, (int)HttpStatusCode.Forbidden);
-                    return;
-                }
-
+                // Make sure the headers are present
                 if (string.IsNullOrWhiteSpace(signatureHeader))
                 {
                     _logger.LogError("Missing signature header");
@@ -61,58 +49,40 @@ namespace Core.API.ResponseHandling
                     return;
                 }
 
-                byte[] payloadBytes = Convert.FromBase64String(payloadHeader);
-                var payloadString = Encoding.UTF8.GetString(payloadBytes);
-
-                JObject payloadJson = JObject.Parse(payloadString);
-
-                byte[] publicKeyBytes = Convert.FromBase64String(publicKeyHeader);
-
-                // Get the current Unix UTC timestamp (rounded to 30 seconds)
-                long currentTimestamp = (long)(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1))).TotalSeconds;
-                currentTimestamp = (currentTimestamp / 30) * 30; // Round to the nearest 30 seconds
-
-                // Decode the signature header from Base64
-                byte[]? signatureBytes = Convert.FromBase64String(signatureHeader);
-
-                long timestamp = 0;
-
-                // Check if the "timestamp" property is present
-                if (payloadJson.TryGetValue(SignaturePayload.Timestamp, out var timestampToken))
+                if (string.IsNullOrWhiteSpace(timestampHeader)
+                    || !long.TryParse(timestampHeader, out var timestampHeaderLong))
                 {
-                    // Extract the timestamp value
-                    timestamp = (long)timestampToken;
-                }
-                else
-                {
-                    _logger.LogError("Missing timestamp in header");
-                    var customErrors = new CustomErrors(new CustomError("Forbidden", "Missing Header", "timestamp"));
+                    _logger.LogError("Missing timestamp header");
+                    var customErrors = new CustomErrors(new CustomError("Forbidden", "Missing Header", "x-timestamp"));
                     await WriteCustomErrors(context.Response, customErrors, (int)HttpStatusCode.Forbidden);
                     return;
                 }
 
-                bool isCurrentTime = timestamp == currentTimestamp;
-
-                long allowedDifference = 30; // 30 seconds
-                bool isWithin30Seconds = Math.Abs(currentTimestamp - timestamp) <= allowedDifference;
-
-                if (isCurrentTime || isWithin30Seconds)
-                {
-                    if (VerifySignature(publicKeyBytes, payloadBytes, signatureBytes))
-                    {
-                        await _next(context); // Signature is valid, continue with the request
-                    }
-                    else
-                    {
-                        _logger.LogError("Invalid signature");
-                        var customErrors = new CustomErrors(new CustomError("Forbidden", "Invalid signature", "x-signature"));
-                        await WriteCustomErrors(context.Response, customErrors, (int)HttpStatusCode.Forbidden);
-                    }
-                }
-                else
+                // Check if the timestamp is within the allowed time
+                if (!IsWithinAllowedTime(timestampHeaderLong))
                 {
                     _logger.LogError("Timestamp outdated");
                     var customErrors = new CustomErrors(new CustomError("Forbidden", "Invalid timestamp", "timestamp"));
+                    await WriteCustomErrors(context.Response, customErrors, (int)HttpStatusCode.Forbidden);
+                }
+
+                var payloadSigningStream = await GetPayloadStream(context, timestampHeader);
+
+                // Parse the public key
+                var publicKeyBytes = Convert.FromBase64String(publicKeyHeader);
+
+                // Decode the signature header from Base64
+                var signatureBytes = Convert.FromBase64String(signatureHeader);
+
+                if (VerifySignature(publicKeyBytes, payloadSigningStream.ToArray(), signatureBytes))
+                {
+                    // Signature is valid, continue with the request
+                    await _next(context);
+                }
+                else
+                {
+                    _logger.LogError("Invalid signature");
+                    var customErrors = new CustomErrors(new CustomError("Forbidden", "Invalid signature", "x-signature"));
                     await WriteCustomErrors(context.Response, customErrors, (int)HttpStatusCode.Forbidden);
                 }
             }
@@ -127,6 +97,29 @@ namespace Core.API.ResponseHandling
                 var customErrors = new CustomErrors(new CustomError("Forbidden", ex.Message, ex.Source!));
                 await WriteCustomErrors(context.Response, customErrors, (int)HttpStatusCode.Forbidden);
             }
+        }
+
+        private static async Task<MemoryStream> GetPayloadStream(HttpContext context, string? timestampHeader)
+        {
+            // Set-up the payload stream to verify the signature
+            var payloadSigningStream = new MemoryStream();
+
+            // Copy the timestamp to the payload stream
+            await payloadSigningStream.WriteAsync(Encoding.UTF8.GetBytes(timestampHeader));
+            // Copy the request body to the payload stream
+            await context.Request.Body.CopyToAsync(payloadSigningStream);
+
+            // Reset the stream position to the beginning
+            context.Request.Body.Position = 0;
+            return payloadSigningStream;
+        }
+
+        private static bool IsWithinAllowedTime(long timestampHeaderLong)
+        {
+            var suppliedDateTimec = DateTimeOffset.FromUnixTimeSeconds(timestampHeaderLong);
+            var dateDiff = DateTimeOffset.UtcNow - suppliedDateTimec;
+            long allowedDifference = 30; // 30 seconds
+            return Math.Abs(dateDiff.TotalSeconds) <= allowedDifference;
         }
 
         private static async Task WriteCustomErrors(HttpResponse httpResponse, CustomErrors customErrors, int statusCode)
