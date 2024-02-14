@@ -4,7 +4,7 @@
 
 import BalancesList from "../BalancesList";
 import { render, screen } from "../../jest/test-utils";
-import { HttpResponse, http } from "msw";
+import { rest } from "msw";
 import { server } from "../../mocks/server";
 import { backendApiUrl } from "../../utils/axios";
 import { APIError, ApiErrorCode } from "../../api/generic/error.interface";
@@ -31,8 +31,8 @@ describe("BalancesList", () => {
     };
 
     server.use(
-      http.get(`${backendApiUrl}/api/accounts/balances`, _ => {
-        return HttpResponse.json(apiError, { status: 400 });
+      rest.get(`${backendApiUrl}/api/accounts/balances`, (_req, rest, ctx) => {
+        return rest(ctx.status(400), ctx.json(apiError));
       })
     );
     render(

@@ -18,7 +18,7 @@ export default {
 
   moduleFileExtensions: ["ts", "tsx", "js", "jsx"],
   preset: "jest-expo",
-  setupFiles: ["./src/jest/jest.mockSetup.js", "dotenv/config", './jest.polyfills.js'],
+  setupFiles: ["./src/jest/jest.mockSetup.js", "dotenv/config"],
 
   // The test environment that will be used for testing
   setupFilesAfterEnv: [
@@ -26,12 +26,8 @@ export default {
     "./src/jest/jest.setup.js",
   ],
 
-  testEnvironmentOptions: {
-    customExportConditions: [''],
-  },
-
   testEnvironment: "jsdom",
   transformIgnorePatterns: [
-    "node_modules/(?!((jest-)?react-native|@react-native(-community)?)|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|@unimodules/.*|unimodules|sentry-expo|native-base|react-native-svg|axios|@sentry/.*|sentry-expo)",
+    "node_modules/(?!((jest-)?react-native|@react-native(-community)?)|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|@unimodules/.*|unimodules|sentry-expo|native-base|react-native-svg|axios|@sentry/.*|sentry-expo|@noble/ed25519*)",
   ],
 };

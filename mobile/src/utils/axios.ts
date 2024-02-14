@@ -7,7 +7,12 @@ import Constants from "expo-constants";
 import { authStorageService } from "../auth/authStorageService";
 import { AuthService } from "../auth/authService";
 import * as SecureStore from "expo-secure-store";
-import forge from "node-forge";
+import * as ed from "@noble/ed25519";
+import { sha512 } from "@noble/hashes/sha512";
+import { fromByteArray, btoa, toByteArray } from "react-native-quick-base64";
+import { Buffer } from "buffer";
+
+ed.etc.sha512Sync = (...m) => sha512(ed.etc.concatBytes(...m));
 
 export const backendApiUrl = Constants.expoConfig?.extra?.API_URL;
 
@@ -54,7 +59,7 @@ async function requestInterceptor(config: InternalAxiosRequestConfig) {
       config.headers["Authorization"] = `Bearer ${accessToken}`;
 
       if (pubKeyFromStore !== null && privKeyFromStore != null) {
-        config.headers["x-public-key"] = forge.util.encode64(pubKeyFromStore);
+        config.headers["x-public-key"] = pubKeyFromStore;
 
         const timestampInSeconds = Math.floor(Date.now() / 1000); // Convert current time to Unix timestamp in seconds
 
@@ -70,18 +75,21 @@ async function requestInterceptor(config: InternalAxiosRequestConfig) {
           payload.postPayload = config.data;
         }
 
-        config.headers["x-payload"] = forge.util.encode64(
-          JSON.stringify(payload)
-        );
+        const jsonPayload = JSON.stringify(payload);
+        // base64 encode payload
+        const base64Payload = btoa(jsonPayload);
 
-        // create hash and sign it
-        const privateKey = forge.pki.privateKeyFromPem(privKeyFromStore);
-        const md = forge.md.sha256.create();
-        md.update(JSON.stringify(payload), "utf8");
-        const signature = privateKey.sign(md);
+        config.headers["x-payload"] = base64Payload;
+
+        const privKey = toByteArray(privKeyFromStore);
+        const privKeyHex = ed.etc.bytesToHex(privKey);
+
+        const utfDecodedPayload = Buffer.from(jsonPayload, "utf-8");
+
+        const hash = ed.sign(utfDecodedPayload, privKeyHex);
 
         // Encode the signature in Base64 format
-        const base64Signature = forge.util.encode64(signature);
+        const base64Signature = fromByteArray(hash);
         config.headers["x-signature"] = base64Signature;
       }
     }

@@ -110,7 +110,7 @@ export const AuthService = (): IAsyncAuthService => {
     const jwtIdToken = await storage.getIdToken();
 
     if (!jwtIdToken) {
-      return error("An error occured while logging you out");
+      return error("An error occurred while logging you out");
     }
 
     await auth.endSession({ jwtIdToken });
@@ -159,7 +159,7 @@ export const AuthService = (): IAsyncAuthService => {
     const jwtIdToken = await storage.getIdToken();
 
     if (!jwtIdToken) {
-      return error("An error occured getting the user session");
+      return error("An error occurred getting the user session");
     }
 
     const idToken = decode<IdToken>(jwtIdToken);

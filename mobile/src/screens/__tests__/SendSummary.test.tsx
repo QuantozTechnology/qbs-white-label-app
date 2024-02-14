@@ -3,7 +3,7 @@
 // of this distribution or at http://www.apache.org/licenses/LICENSE-2.0
 
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { HttpResponse, http } from "msw";
+import { rest } from "msw";
 import { APIError, ApiErrorCode } from "../../api/generic/error.interface";
 import { PaymentRequestResponse } from "../../api/paymentrequest/paymentRequest.interface";
 import { paymentRequestMocksDefaultResponse } from "../../api/paymentrequest/paymentRequest.mocks";
@@ -103,10 +103,10 @@ describe("SendSummary", () => {
       false;
 
     server.use(
-      http.get(
+      rest.get(
         `${backendApiUrl}/api/paymentrequests/:code`,
-        _ => {
-          return HttpResponse.json<PaymentRequestResponse>(cannotChangeAmountResponse, { status: 200 });
+        (req, rest, ctx) => {
+          return rest(ctx.status(200), ctx.json(cannotChangeAmountResponse));
         }
       )
     );
@@ -133,10 +133,10 @@ describe("SendSummary", () => {
     highAmount.value.options.payerCanChangeRequestedAmount = false;
 
     server.use(
-      http.get(
+      rest.get(
         `${backendApiUrl}/api/paymentrequests/:code`,
-        _ => {
-          return HttpResponse.json(highAmount, { status: 200 });
+        (req, rest, ctx) => {
+          return rest(ctx.status(200), ctx.json(highAmount));
         }
       )
     );
@@ -181,10 +181,10 @@ describe("SendSummary", () => {
     tokenError.value.options.payerCanChangeRequestedAmount = false;
 
     server.use(
-      http.get(
+      rest.get(
         `${backendApiUrl}/api/paymentrequests/:code`,
-        _ => {
-          return HttpResponse.json<PaymentRequestResponse>(tokenError, { status: 200 });
+        (req, rest, ctx) => {
+          return rest(ctx.status(200), ctx.json(tokenError));
         }
       )
     );
@@ -215,10 +215,10 @@ describe("SendSummary", () => {
     highAmount.value.requestedAmount = 10000;
 
     server.use(
-      http.get(
+      rest.get(
         `${backendApiUrl}/api/paymentrequests/:code`,
-        _ => {
-          return HttpResponse.json<PaymentRequestResponse>(highAmount, { status: 200 });
+        (req, rest, ctx) => {
+          return rest(ctx.status(200), ctx.json(highAmount));
         }
       )
     );
@@ -262,10 +262,10 @@ describe("SendSummary", () => {
     tokenError.value.tokenCode = "TEST";
 
     server.use(
-      http.get(
+      rest.get(
         `${backendApiUrl}/api/paymentrequests/:code`,
-        _ => {
-          return HttpResponse.json<PaymentRequestResponse>(tokenError, { status: 200 });
+        (req, rest, ctx) => {
+          return rest(ctx.status(200), ctx.json(tokenError));
         }
       )
     );
@@ -291,10 +291,10 @@ describe("SendSummary", () => {
     });
 
     server.use(
-      http.get(
+      rest.get(
         `${backendApiUrl}/api/paymentrequests/:code`,
-        _ => {
-          return new HttpResponse(null, { status: 400 });
+        (req, rest, ctx) => {
+          return rest(ctx.status(400));
         }
       )
     );
@@ -319,8 +319,8 @@ describe("SendSummary", () => {
     });
 
     server.use(
-      http.get(`${backendApiUrl}/api/accounts/balances`, _ => {
-        return new HttpResponse(null, { status: 400 });
+      rest.get(`${backendApiUrl}/api/accounts/balances`, (req, rest, ctx) => {
+        return rest(ctx.status(400));
       })
     );
 
@@ -382,10 +382,10 @@ describe("SendSummary", () => {
     };
 
     server.use(
-      http.post(
+      rest.post(
         `${backendApiUrl}/api/transactions/payments/pay/paymentrequest`,
-        _ => {
-          return HttpResponse.json(balancesApiError, { status: 400 });
+        (_req, rest, ctx) => {
+          return rest(ctx.status(400), ctx.json(balancesApiError));
         }
       )
     );
