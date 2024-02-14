@@ -6,7 +6,7 @@
 // under the Apache License, Version 2.0. See the NOTICE file at the root
 // of this distribution or at http://www.apache.org/licenses/LICENSE-2.0
 
-import { rest } from "msw";
+import { HttpResponse, http } from "msw";
 import { genericApiError } from "../../api/generic/error.interface";
 import { fireEvent, render, screen, within } from "../../jest/test-utils";
 import { server } from "../../mocks/server";
@@ -50,8 +50,8 @@ describe("TokenDetails", () => {
 
   it("shows an error when the API call for token details fails", async () => {
     server.use(
-      rest.get(`${mockApiUrl}/api/tokens/:tokenCode`, (_req, rest, ctx) => {
-        return rest(ctx.status(400), ctx.json(genericApiError));
+      http.get(`${mockApiUrl}/api/tokens/:tokenCode`, _ => {
+        return HttpResponse.json(genericApiError, { status: 400 });
       })
     );
 
