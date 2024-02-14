@@ -207,7 +207,7 @@ export default function ConfirmDevice({ navigation }: ConfirmDeviceProps) {
 
   async function handleSupportPress() {
     const emailRecipient = defaultConfig.supportEmail;
-    const emailSubject = "Support request - Quantoz Blockchain Solutions";
+    const emailSubject = "Support request - Quantoz Blockchain Services";
     const emailBody = `Please provide a detailed description of the issue you are experiencing. Be sure to leave the information below as it is.
     
     ---------------------
