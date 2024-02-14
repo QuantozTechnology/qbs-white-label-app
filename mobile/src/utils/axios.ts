@@ -84,9 +84,6 @@ async function requestInterceptor(config: InternalAxiosRequestConfig) {
         const privKey = toByteArray(privKeyFromStore);
         const privKeyHex = ed.etc.bytesToHex(privKey);
 
-        console.log("privKey", privKeyHex);
-        console.log("jsonPayload", jsonPayload);
-
         const utfDecodedPayload = Buffer.from(jsonPayload, "utf-8");
 
         const hash = ed.sign(utfDecodedPayload, privKeyHex);
@@ -94,8 +91,6 @@ async function requestInterceptor(config: InternalAxiosRequestConfig) {
         // Encode the signature in Base64 format
         const base64Signature = fromByteArray(hash);
         config.headers["x-signature"] = base64Signature;
-
-        console.log("headers", config.headers);
       }
     }
   }
