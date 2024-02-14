@@ -3,7 +3,7 @@
 // of this distribution or at http://www.apache.org/licenses/LICENSE-2.0
 
 /* eslint-disable  @typescript-eslint/no-explicit-any */
-import { HttpResponse, http } from "msw";
+import { rest } from "msw";
 import { APIError, ApiErrorCode } from "../../api/generic/error.interface";
 import { fireEvent, render, screen, waitFor } from "../../jest/test-utils";
 import { server } from "../../mocks/server";
@@ -100,8 +100,8 @@ describe("ConsumerRegistration", () => {
     };
 
     server.use(
-      http.post(`${backendApiUrl}/api/accounts`, _ => {
-        return HttpResponse.json(mockedError, { status: 400 });
+      rest.post(`${backendApiUrl}/api/accounts`, (_req, rest, ctx) => {
+        return rest(ctx.status(400), ctx.json(mockedError));
       })
     );
 
@@ -147,8 +147,8 @@ describe("ConsumerRegistration", () => {
     };
 
     server.use(
-      http.post(`${backendApiUrl}/api/accounts`, _ => {
-        return HttpResponse.json(mockedError, { status: 400 });
+      rest.post(`${backendApiUrl}/api/accounts`, (_req, rest, ctx) => {
+        return rest(ctx.status(400), ctx.json(mockedError));
       })
     );
 

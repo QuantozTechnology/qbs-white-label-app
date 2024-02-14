@@ -2,7 +2,7 @@
 // under the Apache License, Version 2.0. See the NOTICE file at the root
 // of this distribution or at http://www.apache.org/licenses/LICENSE-2.0
 
-import { http } from "msw";
+import { rest } from "msw";
 import { render, screen, within } from "../../jest/test-utils";
 import { server } from "../../mocks/server";
 import { backendApiUrl } from "../../utils/axios";
@@ -26,10 +26,10 @@ describe("WithdrawFees", () => {
   });
   it("should display error message when status is error", async () => {
     server.use(
-      http.get(
+      rest.get(
         `${backendApiUrl}/api/transactions/withdraws/fees`,
-        _ => {
-          return new Response(null, { status: 400 });
+        (_req, rest, ctx) => {
+          return rest(ctx.status(400));
         }
       )
     );

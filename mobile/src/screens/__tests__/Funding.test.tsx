@@ -2,7 +2,7 @@
 // under the Apache License, Version 2.0. See the NOTICE file at the root
 // of this distribution or at http://www.apache.org/licenses/LICENSE-2.0
 
-import { HttpResponse, http } from "msw";
+import { rest } from "msw";
 import { APIError, ApiErrorCode } from "../../api/generic/error.interface";
 import { mockClipboardCopy } from "../../jest/jest.setup";
 import { fireEvent, render, screen, within } from "../../jest/test-utils";
@@ -79,8 +79,8 @@ describe("Funding", () => {
     };
 
     server.use(
-      http.get(`${backendApiUrl}/api/accounts/balances`, _ => {
-        return HttpResponse.json(balancesApiError, { status: 400 });
+      rest.get(`${backendApiUrl}/api/accounts/balances`, (req, rest, ctx) => {
+        return rest(ctx.status(400), ctx.json(balancesApiError));
       })
     );
 
@@ -109,8 +109,8 @@ describe("Funding", () => {
     };
 
     server.use(
-      http.get(`${backendApiUrl}/api/customers/limits`, _ => {
-        return HttpResponse.json(limitsApiError, { status: 400 });
+      rest.get(`${backendApiUrl}/api/customers/limits`, (req, rest, ctx) => {
+        return rest(ctx.status(400), ctx.json(limitsApiError));
       })
     );
 
@@ -147,8 +147,8 @@ describe("Funding", () => {
     mockReachedLimits.value[0].funding.used.monthly = "500";
 
     server.use(
-      http.get(`${backendApiUrl}/api/customers/limits`, _ => {
-        return HttpResponse.json(mockReachedLimits, { status: 200 });
+      rest.get(`${backendApiUrl}/api/customers/limits`, (_req, rest, ctx) => {
+        return rest(ctx.status(200), ctx.json(mockReachedLimits));
       })
     );
 

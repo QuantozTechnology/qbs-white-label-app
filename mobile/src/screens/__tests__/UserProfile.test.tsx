@@ -2,7 +2,7 @@
 // under the Apache License, Version 2.0. See the NOTICE file at the root
 // of this distribution or at http://www.apache.org/licenses/LICENSE-2.0
 
-import { HttpResponse, http } from "msw";
+import { rest } from "msw";
 import { fireEvent, render, screen, within } from "../../jest/test-utils";
 import { server } from "../../mocks/server";
 import { backendApiUrl } from "../../utils/axios";
@@ -51,11 +51,16 @@ describe("UserProfile screen", () => {
 
   it("shows bank info if bank account is not null", async () => {
     server.use(
-      http.get(`${backendApiUrl}/api/customers`, _ => {
-        return HttpResponse.json({value: {
-          ...customerMocksDefaultResponse.value,
-          bankAccountNumber: "NL123456",
-        }}, { status: 200 });
+      rest.get(`${backendApiUrl}/api/customers`, (_req, rest, ctx) => {
+        return rest(
+          ctx.status(200),
+          ctx.json({
+            value: {
+              ...customerMocksDefaultResponse.value,
+              bankAccountNumber: "NL123456",
+            },
+          })
+        );
       })
     );
 

@@ -5,7 +5,7 @@
 import { fireEvent, render, screen } from "../../jest/test-utils";
 import CustomerLimitsProgress from "../CustomerLimitsProgress";
 import { server } from "../../mocks/server";
-import { HttpResponse, http } from "msw";
+import { rest } from "msw";
 import { backendApiUrl } from "../../utils/axios";
 import { GenericApiResponse } from "../../api/utils/api.interface";
 import { Limits } from "../../api/limits/limits.interface";
@@ -32,8 +32,8 @@ describe("Customer limits progress", () => {
 
   it("shows error if callback API fails", async () => {
     server.use(
-      http.get(`${backendApiUrl}/api/customers/limits`, _ => {
-        return new HttpResponse(null, { status: 400 });
+      rest.get(`${backendApiUrl}/api/customers/limits`, (_req, rest, ctx) => {
+        return rest(ctx.status(400));
       })
     );
 
@@ -74,8 +74,8 @@ describe("Customer limits progress", () => {
     };
 
     server.use(
-      http.get(`${backendApiUrl}/api/customers/limits`, _ => {
-        return HttpResponse.json(limitsReachedResponse, { status: 200 });
+      rest.get(`${backendApiUrl}/api/customers/limits`, (_req, rest, ctx) => {
+        return rest(ctx.status(200), ctx.json(limitsReachedResponse));
       })
     );
     render(

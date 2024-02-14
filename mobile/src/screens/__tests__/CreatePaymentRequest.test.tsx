@@ -2,7 +2,7 @@
 // under the Apache License, Version 2.0. See the NOTICE file at the root
 // of this distribution or at http://www.apache.org/licenses/LICENSE-2.0
 
-import { HttpResponse, http } from "msw";
+import { rest } from "msw";
 import {
   fireEvent,
   render,
@@ -64,8 +64,8 @@ describe("Create payment request", () => {
     };
 
     server.use(
-      http.get(`${backendApiUrl}/api/accounts/balances`, _ => {
-        return HttpResponse.json(tokensApiError, { status: 400 });
+      rest.get(`${backendApiUrl}/api/accounts/balances`, (req, rest, ctx) => {
+        return rest(ctx.status(400), ctx.json(tokensApiError));
       })
     );
 
@@ -146,8 +146,8 @@ describe("Create payment request", () => {
     };
 
     server.use(
-      http.post(`${backendApiUrl}/api/paymentrequests`, _ => {
-        return HttpResponse.json(apiError, { status: 500 });
+      rest.post(`${backendApiUrl}/api/paymentrequests`, (req, rest, ctx) => {
+        return rest(ctx.status(500), ctx.json(apiError));
       })
     );
 
