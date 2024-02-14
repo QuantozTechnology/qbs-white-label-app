@@ -2,7 +2,7 @@
 // under the Apache License, Version 2.0. See the NOTICE file at the root
 // of this distribution or at http://www.apache.org/licenses/LICENSE-2.0
 
-import { HttpResponse, http } from "msw";
+import { rest } from "msw";
 import { backendApiUrl } from "../../utils/axios";
 import { GenericApiResponse } from "../utils/api.interface";
 import { Customer } from "./customer.interface";
@@ -23,17 +23,20 @@ export const customerMocksDefaultResponse: GenericApiResponse<Customer> = {
       Phone: "+31625498562",
       IdBack: "https://example.com/id-back",
       IdFront: "https://example.com/id-front",
-      Selfie: "https://example.com/selfie"
+      Selfie: "https://example.com/selfie",
     },
     isBusiness: false,
   },
 };
 
 export const customerMocks = [
-  http.get(`${backendApiUrl}/api/customers`, _ => {
-    return HttpResponse.json<GenericApiResponse<Customer>>(customerMocksDefaultResponse, { status: 200 });
+  rest.get(`${backendApiUrl}/api/customers`, (_req, rest, ctx) => {
+    return rest(
+      ctx.status(200),
+      ctx.json<GenericApiResponse<Customer>>(customerMocksDefaultResponse)
+    );
   }),
-  http.post(`${backendApiUrl}/api/customers`, _ => {
-    return new Response(null, { status: 201 });
+  rest.post(`${backendApiUrl}/api/customers`, (_req, rest, ctx) => {
+    return rest(ctx.status(201));
   }),
 ];

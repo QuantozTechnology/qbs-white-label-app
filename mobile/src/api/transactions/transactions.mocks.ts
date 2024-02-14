@@ -2,7 +2,7 @@
 // under the Apache License, Version 2.0. See the NOTICE file at the root
 // of this distribution or at http://www.apache.org/licenses/LICENSE-2.0
 
-import { HttpResponse, http } from "msw";
+import { rest } from "msw";
 import { backendApiUrl } from "../../utils/axios";
 import { GenericApiResponse } from "../utils/api.interface";
 import { Transaction, TransactionType } from "./transactions.interface";
@@ -79,13 +79,14 @@ export const defaultTransactionsResponseMock: GenericApiResponse<
 };
 
 export const transactionMocks = [
-  http.get(`${backendApiUrl}/api/transactions`, _ => {
-    return HttpResponse.json<GenericApiResponse<Transaction[]>>(defaultTransactionsResponseMock,
-      {
-        status: 200,
-        headers: {
-          "x-pagination": '{"TotalCount":5,"PageSize":10,"CurrentPage":1,"PreviousPage":null,"NextPage":null,"TotalPages":1}'
-        }
-      });
+  rest.get(`${backendApiUrl}/api/transactions`, (req, rest, ctx) => {
+    return rest(
+      ctx.status(200),
+      ctx.set(
+        "x-pagination",
+        '{"TotalCount":5,"PageSize":10,"CurrentPage":1,"PreviousPage":null,"NextPage":null,"TotalPages":1}'
+      ),
+      ctx.json(defaultTransactionsResponseMock)
+    );
   }),
 ];

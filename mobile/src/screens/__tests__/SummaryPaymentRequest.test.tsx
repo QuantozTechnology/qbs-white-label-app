@@ -2,7 +2,7 @@
 // under the Apache License, Version 2.0. See the NOTICE file at the root
 // of this distribution or at http://www.apache.org/licenses/LICENSE-2.0
 
-import { HttpResponse, http } from "msw";
+import { rest } from "msw";
 import { PaymentRequestResponse } from "../../api/paymentrequest/paymentRequest.interface";
 import { paymentRequestMocksDefaultResponse } from "../../api/paymentrequest/paymentRequest.mocks";
 import { render, screen, within } from "../../jest/test-utils";
@@ -74,10 +74,13 @@ describe("Summary payment request", () => {
     };
 
     server.use(
-      http.get(
+      rest.get(
         `${backendApiUrl}/api/paymentrequests/:code`,
-        _ => {
-          return HttpResponse.json<PaymentRequestResponse>(noMessageResponse, { status: 200 });
+        (_req, rest, ctx) => {
+          return rest(
+            ctx.status(200),
+            ctx.json<PaymentRequestResponse>(noMessageResponse)
+          );
         }
       )
     );
@@ -107,10 +110,13 @@ describe("Summary payment request", () => {
     };
 
     server.use(
-      http.get(
+      rest.get(
         `${backendApiUrl}/api/paymentrequests/:code`,
-        _ => {
-          return HttpResponse.json<PaymentRequestResponse>(amountCanBeChangedResponse, { status: 200 });
+        (_req, rest, ctx) => {
+          return rest(
+            ctx.status(200),
+            ctx.json<PaymentRequestResponse>(amountCanBeChangedResponse)
+          );
         }
       )
     );
