@@ -3,10 +3,12 @@
 // of this distribution or at http://www.apache.org/licenses/LICENSE-2.0
 
 using Core.API.ResponseHandling;
+using Core.Domain;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.TestHost;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using NSec.Cryptography;
 using System.Net;
@@ -64,13 +66,19 @@ namespace Core.APITests.ResponseHandlingTests.SignatureVerificationMiddlewareTes
         public record MessageObject(string Message);
 
         [TestMethod]
-        public async Task MiddlewareTest_ReturnsNotFoundForRequest()
+        public async Task VerifySignatureMiddleware_Successful_HttpProcessing()
         {
             using var host = await new HostBuilder()
                 .ConfigureWebHost(webBuilder =>
                 {
                     webBuilder
                         .UseTestServer()
+                        .ConfigureServices(services =>
+                        {
+                            services.AddSingleton<IDateTimeProvider>(
+                                new StaticDateTimeProvider(
+                                    DateTimeOffset.FromUnixTimeSeconds(1577836800)));
+                        })
                         .Configure(app =>
                         {
                             app.UseMiddleware<SignatureVerificationMiddleware>();
@@ -101,6 +109,52 @@ namespace Core.APITests.ResponseHandlingTests.SignatureVerificationMiddlewareTes
 
             var responseString = await response.Content.ReadAsStringAsync();
             Assert.AreEqual("Hello World HELLO!", responseString);
+        }
+
+        [TestMethod]
+        public async Task VerifySignatureMiddleware_Failed()
+        {
+            using var host = await new HostBuilder()
+                .ConfigureWebHost(webBuilder =>
+                {
+                    webBuilder
+                        .UseTestServer()
+                        .ConfigureServices(services =>
+                        {
+                            services.AddSingleton<IDateTimeProvider>(
+                                new StaticDateTimeProvider(
+                                    DateTimeOffset.FromUnixTimeSeconds(1577836800)));
+                        })
+                        .Configure(app =>
+                        {
+                            app.UseMiddleware<SignatureVerificationMiddleware>();
+
+                            app.Run(async context =>
+                            {
+                                var msg = await context.Request.ReadFromJsonAsync<MessageObject>();
+                                await context.Response.WriteAsync($"Hello World {msg.Message}!");
+                            });
+                        });
+                })
+                .StartAsync();
+
+            var client = host.GetTestClient();
+
+            // create get request
+            var request = new HttpRequestMessage(HttpMethod.Post, "/");
+            request.Content = new StringContent("{\"message\":\"HELLO\"}");
+            request.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+            request.Headers.Add("x-timestamp", "1577836801");
+            request.Headers.Add("x-signature", "ksnz8fzvQerq3uTgYYisKqLu/tZJWcYQYPW4UAl62FREqm6T9PDGiAIjwiePL6SC4jE7X59r8llhUQqgQKQ1DQ==");
+            request.Headers.Add("x-public-key", "gwZ+LyQ+VLaIsWeSq3QFh+WaZHNgl07pXul++BsezoY=");
+
+            // send request
+            var response = await client.SendAsync(request);
+
+            Assert.AreEqual(HttpStatusCode.Forbidden, response.StatusCode);
+
+            var responseString = await response.Content.ReadAsStringAsync();
+            Assert.AreEqual("{\"Errors\":[{\"Code\":\"Forbidden\",\"Message\":\"Invalid signature\",\"Target\":\"x-signature\"}]}", responseString);
         }
     }
 }

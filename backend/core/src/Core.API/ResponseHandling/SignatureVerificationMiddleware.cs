@@ -2,6 +2,7 @@
 // under the Apache License, Version 2.0. See the NOTICE file at the root
 // of this distribution or at http://www.apache.org/licenses/LICENSE-2.0
 
+using Core.Domain;
 using Core.Domain.Exceptions;
 using Core.Presentation.Models;
 using NSec.Cryptography;
@@ -13,88 +14,78 @@ namespace Core.API.ResponseHandling
     public class SignatureVerificationMiddleware
     {
         private readonly RequestDelegate _next;
+        private readonly IDateTimeProvider _dateTimeProvider;
         private readonly ILogger<SignatureVerificationMiddleware> _logger;
 
         public SignatureVerificationMiddleware(
             RequestDelegate next,
+            IDateTimeProvider dateTimeProvider,
             ILogger<SignatureVerificationMiddleware> logger)
         {
             _next = next;
+            this._dateTimeProvider = dateTimeProvider;
             _logger = logger;
         }
 
         public async Task Invoke(HttpContext context)
         {
-            try
+            // Retrieve headers from the request
+            string? signatureHeader = context.Request.Headers["x-signature"];
+            string? publicKeyHeader = context.Request.Headers["x-public-key"];
+            string? timestampHeader = context.Request.Headers["x-timestamp"];
+
+            // Make sure the headers are present
+            if (string.IsNullOrWhiteSpace(signatureHeader))
             {
-                // Retrieve headers from the request
-                string? signatureHeader = context.Request.Headers["x-signature"];
-                string? publicKeyHeader = context.Request.Headers["x-public-key"];
-                string? timestampHeader = context.Request.Headers["x-timestamp"];
-
-                // Make sure the headers are present
-                if (string.IsNullOrWhiteSpace(signatureHeader))
-                {
-                    _logger.LogError("Missing signature header");
-                    var customErrors = new CustomErrors(new CustomError("Forbidden", "Missing Header", "x-signature"));
-                    await WriteCustomErrors(context.Response, customErrors, (int)HttpStatusCode.Forbidden);
-                    return;
-                }
-
-                if (string.IsNullOrWhiteSpace(publicKeyHeader))
-                {
-                    _logger.LogError("Missing publicKey header");
-                    var customErrors = new CustomErrors(new CustomError("Forbidden", "Missing Header", "x-public-key"));
-                    await WriteCustomErrors(context.Response, customErrors, (int)HttpStatusCode.Forbidden);
-                    return;
-                }
-
-                if (string.IsNullOrWhiteSpace(timestampHeader)
-                    || !long.TryParse(timestampHeader, out var timestampHeaderLong))
-                {
-                    _logger.LogError("Missing timestamp header");
-                    var customErrors = new CustomErrors(new CustomError("Forbidden", "Missing Header", "x-timestamp"));
-                    await WriteCustomErrors(context.Response, customErrors, (int)HttpStatusCode.Forbidden);
-                    return;
-                }
-
-                // Check if the timestamp is within the allowed time
-                if (!IsWithinAllowedTime(timestampHeaderLong))
-                {
-                    _logger.LogError("Timestamp outdated");
-                    var customErrors = new CustomErrors(new CustomError("Forbidden", "Invalid timestamp", "timestamp"));
-                    await WriteCustomErrors(context.Response, customErrors, (int)HttpStatusCode.Forbidden);
-                }
-
-                var payloadSigningStream = await GetPayloadStream(context, timestampHeader);
-
-                // Parse the public key
-                var publicKeyBytes = Convert.FromBase64String(publicKeyHeader);
-
-                // Decode the signature header from Base64
-                var signatureBytes = Convert.FromBase64String(signatureHeader);
-
-                if (VerifySignature(publicKeyBytes, payloadSigningStream.ToArray(), signatureBytes))
-                {
-                    // Signature is valid, continue with the request
-                    await _next(context);
-                }
-                else
-                {
-                    _logger.LogError("Invalid signature");
-                    var customErrors = new CustomErrors(new CustomError("Forbidden", "Invalid signature", "x-signature"));
-                    await WriteCustomErrors(context.Response, customErrors, (int)HttpStatusCode.Forbidden);
-                }
+                _logger.LogError("Missing signature header");
+                var customErrors = new CustomErrors(new CustomError("Forbidden", "Missing Header", "x-signature"));
+                await WriteCustomErrors(context.Response, customErrors, (int)HttpStatusCode.Forbidden);
+                return;
             }
-            catch (CustomErrorsException ex)
+
+            if (string.IsNullOrWhiteSpace(publicKeyHeader))
             {
-                _logger.LogError(ex, "Unknown exception thrown: {message}", ex.Message);
-                throw;
+                _logger.LogError("Missing publicKey header");
+                var customErrors = new CustomErrors(new CustomError("Forbidden", "Missing Header", "x-public-key"));
+                await WriteCustomErrors(context.Response, customErrors, (int)HttpStatusCode.Forbidden);
+                return;
             }
-            catch (Exception ex)
+
+            if (string.IsNullOrWhiteSpace(timestampHeader)
+                || !long.TryParse(timestampHeader, out var timestampHeaderLong))
             {
-                _logger.LogError(ex, "Unknown exception thrown: {message}", ex.Message);
-                var customErrors = new CustomErrors(new CustomError("Forbidden", ex.Message, ex.Source!));
+                _logger.LogError("Missing timestamp header");
+                var customErrors = new CustomErrors(new CustomError("Forbidden", "Missing Header", "x-timestamp"));
+                await WriteCustomErrors(context.Response, customErrors, (int)HttpStatusCode.Forbidden);
+                return;
+            }
+
+            // Check if the timestamp is within the allowed time
+            if (!IsWithinAllowedTime(timestampHeaderLong))
+            {
+                _logger.LogError("Timestamp outdated");
+                var customErrors = new CustomErrors(new CustomError("Forbidden", "Invalid timestamp", "timestamp"));
+                await WriteCustomErrors(context.Response, customErrors, (int)HttpStatusCode.Forbidden);
+                return;
+            }
+
+            var payloadSigningStream = await GetPayloadStream(context, timestampHeader);
+
+            // Parse the public key
+            var publicKeyBytes = Convert.FromBase64String(publicKeyHeader);
+
+            // Decode the signature header from Base64
+            var signatureBytes = Convert.FromBase64String(signatureHeader);
+
+            if (VerifySignature(publicKeyBytes, payloadSigningStream.ToArray(), signatureBytes))
+            {
+                // Signature is valid, continue with the request
+                await _next(context);
+            }
+            else
+            {
+                _logger.LogError("Invalid signature");
+                var customErrors = new CustomErrors(new CustomError("Forbidden", "Invalid signature", "x-signature"));
                 await WriteCustomErrors(context.Response, customErrors, (int)HttpStatusCode.Forbidden);
             }
         }
@@ -119,10 +110,10 @@ namespace Core.API.ResponseHandling
             return payloadSigningStream;
         }
 
-        private static bool IsWithinAllowedTime(long timestampHeaderLong)
+        private bool IsWithinAllowedTime(long timestampHeaderLong)
         {
             var suppliedDateTimec = DateTimeOffset.FromUnixTimeSeconds(timestampHeaderLong);
-            var dateDiff = DateTimeOffset.UtcNow - suppliedDateTimec;
+            var dateDiff = _dateTimeProvider.UtcNow - suppliedDateTimec;
             long allowedDifference = 30; // 30 seconds
             return Math.Abs(dateDiff.TotalSeconds) <= allowedDifference;
         }
