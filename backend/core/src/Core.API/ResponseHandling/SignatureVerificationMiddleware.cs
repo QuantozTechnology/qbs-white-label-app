@@ -99,18 +99,23 @@ namespace Core.API.ResponseHandling
             }
         }
 
-        private static async Task<MemoryStream> GetPayloadStream(HttpContext context, string? timestampHeader)
+        private static async Task<MemoryStream> GetPayloadStream(HttpContext context, string timestampHeader)
         {
+            // Leave the body open so the next middleware can read it.
+            context.Request.EnableBuffering();
+
             // Set-up the payload stream to verify the signature
             var payloadSigningStream = new MemoryStream();
 
             // Copy the timestamp to the payload stream
             await payloadSigningStream.WriteAsync(Encoding.UTF8.GetBytes(timestampHeader));
+
             // Copy the request body to the payload stream
             await context.Request.Body.CopyToAsync(payloadSigningStream);
 
-            // Reset the stream position to the beginning
+            // Reset the request body stream position so the next middleware can read it
             context.Request.Body.Position = 0;
+
             return payloadSigningStream;
         }
 

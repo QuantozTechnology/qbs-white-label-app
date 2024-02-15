@@ -4,9 +4,13 @@
 
 import * as ed from "@noble/ed25519";
 import { sha512 } from "@noble/hashes/sha512";
+import { getSignatureHeaders } from "../axios";
+import { Buffer } from "buffer";
 
 ed.etc.sha512Sync = (...m) => sha512(ed.etc.concatBytes(...m));
 //ed.etc.sha512Async = (...m) => Promise.resolve(ed.etc.sha512Sync(...m));
+
+jest.useFakeTimers().setSystemTime(new Date("2020-01-01T00:00:00Z"));
 
 describe("signMessage noble", () => {
   it("message is deterministic", async () => {
@@ -38,4 +42,18 @@ describe("signMessage noble", () => {
       "N+iGXaCIwZO/jQa2az6VTiwgr/vJsQ7sp3IsOx+79ujgK3YsY0PJerZVLLxT2YIgHcDD+cfGluY+ouzk0F+hBA=="
     );
   });
+});
+
+describe("send signature to server", () => {
+  it("message is deterministic", async () => {
+    const privKey = "bi3SJ0gfnWXpL3vkJIdgFetU5ZgmIGCYrLxEL9Nx2rQ=";
+
+    const data = { message: "HELLO" };
+    const sigData = getSignatureHeaders(data, privKey);
+
+    expect(sigData.signature).toEqual(
+      "ksnz8fzvQerq3uTgYYisKqLu/tZJWcYQYPW4UAl62FREqm6T9PDGiAIjwiePL6SC4jE7X59r8llhUQqgQKQ1DQ=="
+    );
+    expect(sigData.timestamp).toEqual("1577836800");
+  }, 10000);
 });

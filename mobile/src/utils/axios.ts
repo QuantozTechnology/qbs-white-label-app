@@ -59,32 +59,37 @@ async function requestInterceptor(config: InternalAxiosRequestConfig) {
       config.headers["Authorization"] = `Bearer ${accessToken}`;
 
       if (pubKeyFromStore !== null && privKeyFromStore != null) {
+        const sigData = getSignatureHeaders(config.data, privKeyFromStore);
         config.headers["x-public-key"] = pubKeyFromStore;
-
-        const timestampInSeconds = Math.floor(Date.now() / 1000).toString(); // Convert current time to Unix timestamp in seconds
-
-        config.headers["x-timestamp"] = timestampInSeconds;
-
-        const bytesToSign = Buffer.from(timestampInSeconds, "utf-8");
-
-        // hash POST payload if available
-        if (config.data) {
-          bytesToSign.write(config.data);
-        }
-
-        const privKey = toByteArray(privKeyFromStore);
-        const privKeyHex = ed.etc.bytesToHex(privKey);
-
-        const hash = ed.sign(bytesToSign, privKeyHex);
-
-        // Encode the signature in Base64 format
-        const base64Signature = fromByteArray(hash);
-        config.headers["x-signature"] = base64Signature;
+        config.headers["x-timestamp"] = sigData.timestamp;
+        config.headers["x-signature"] = sigData.signature;
       }
     }
   }
 
   return config;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function getSignatureHeaders(data: any, privKeyFromStore: string) {
+  const timestampInSeconds = Math.floor(Date.now() / 1000).toString(); // Convert current time to Unix timestamp in seconds
+  const dataToSign = data
+    ? timestampInSeconds + JSON.stringify(data)
+    : timestampInSeconds;
+  const bytesToSign = Buffer.from(dataToSign, "utf-8");
+
+  const privKey = toByteArray(privKeyFromStore);
+  const privKeyHex = ed.etc.bytesToHex(privKey);
+
+  const hash = ed.sign(bytesToSign, privKeyHex);
+
+  // Encode the signature in Base64 format
+  const base64Signature = fromByteArray(hash);
+
+  return {
+    timestamp: timestampInSeconds,
+    signature: base64Signature,
+  };
 }
 
 async function responseInterceptor(response: AxiosResponse) {

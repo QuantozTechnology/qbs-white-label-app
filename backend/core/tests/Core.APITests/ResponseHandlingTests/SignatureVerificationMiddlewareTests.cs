@@ -3,13 +3,19 @@
 // of this distribution or at http://www.apache.org/licenses/LICENSE-2.0
 
 using Core.API.ResponseHandling;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.TestHost;
+using Microsoft.Extensions.Hosting;
 using NSec.Cryptography;
-using System.Security.Cryptography;
+using System.Net;
+using System.Net.Http.Headers;
 using System.Text;
 
 namespace Core.APITests.ResponseHandlingTests.SignatureVerificationMiddlewareTests
 {
-    [TestClass()]
+    [TestClass]
     public class SignatureVerificationMiddlewareTests
     {
         [TestMethod]
@@ -53,6 +59,48 @@ namespace Core.APITests.ResponseHandlingTests.SignatureVerificationMiddlewareTes
 
             // Assert
             Assert.IsFalse(result);
+        }
+
+        public record MessageObject(string Message);
+
+        [TestMethod]
+        public async Task MiddlewareTest_ReturnsNotFoundForRequest()
+        {
+            using var host = await new HostBuilder()
+                .ConfigureWebHost(webBuilder =>
+                {
+                    webBuilder
+                        .UseTestServer()
+                        .Configure(app =>
+                        {
+                            app.UseMiddleware<SignatureVerificationMiddleware>();
+
+                            app.Run(async context =>
+                            {
+                                var msg = await context.Request.ReadFromJsonAsync<MessageObject>();
+                                await context.Response.WriteAsync($"Hello World {msg.Message}!");
+                            });
+                        });
+                })
+                .StartAsync();
+
+            var client = host.GetTestClient();
+
+            // create get request
+            var request = new HttpRequestMessage(HttpMethod.Post, "/");
+            request.Content = new StringContent("{\"message\":\"HELLO\"}");
+            request.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+            request.Headers.Add("x-timestamp", "1577836800");
+            request.Headers.Add("x-signature", "ksnz8fzvQerq3uTgYYisKqLu/tZJWcYQYPW4UAl62FREqm6T9PDGiAIjwiePL6SC4jE7X59r8llhUQqgQKQ1DQ==");
+            request.Headers.Add("x-public-key", "gwZ+LyQ+VLaIsWeSq3QFh+WaZHNgl07pXul++BsezoY=");
+
+            // send request
+            var response = await client.SendAsync(request);
+
+            Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+
+            var responseString = await response.Content.ReadAsStringAsync();
+            Assert.AreEqual("Hello World HELLO!", responseString);
         }
     }
 }
