@@ -11,11 +11,15 @@ using System.Text;
 
 namespace Core.API.ResponseHandling
 {
-    public enum SignatureAlgorithmHeader
-    {
-        ED25519
-    }
-
+    /// <summary>
+    /// Middleware to verify the signature of incoming requests.
+    /// It reads the x-signature, x-algorithm, x-public-key and x-timestamp headers from the request.
+    /// Using the supported algorithm it verifies the signature of the request.
+    ///
+    /// A 30 second time difference is allowed between the timestamp in the request and the server time.
+    ///
+    /// Checking if the public-key is valid is not done in this middleware.
+    /// </summary>
     public class SignatureVerificationMiddleware
     {
         private readonly RequestDelegate _next;
@@ -32,6 +36,11 @@ namespace Core.API.ResponseHandling
             _logger = logger;
         }
 
+        public enum SignatureAlgorithmHeader
+        {
+            ED25519
+        }
+
         public async Task Invoke(HttpContext context)
         {
             // Retrieve headers from the request
@@ -41,6 +50,14 @@ namespace Core.API.ResponseHandling
             string? timestampHeader = context.Request.Headers["x-timestamp"];
 
             // Make sure the headers are present
+            if(!Enum.TryParse<SignatureAlgorithmHeader>(algorithmHeader, ignoreCase: true, out var algorithm))
+            {
+                _logger.LogError("Invalid algorithm header");
+                var customErrors = new CustomErrors(new CustomError("Forbidden", "Invalid Header", "x-algorithm"));
+                await WriteCustomErrors(context.Response, customErrors, (int)HttpStatusCode.Forbidden);
+                return;
+            }
+
             if (string.IsNullOrWhiteSpace(signatureHeader))
             {
                 _logger.LogError("Missing signature header");
@@ -66,22 +83,16 @@ namespace Core.API.ResponseHandling
                 return;
             }
 
-            if(!Enum.TryParse<SignatureAlgorithmHeader>(algorithmHeader, ignoreCase: true, out var algorithm))
-            {
-                _logger.LogError("Invalid algorithm header");
-                var customErrors = new CustomErrors(new CustomError("Forbidden", "Invalid Header", "x-algorithm"));
-                await WriteCustomErrors(context.Response, customErrors, (int)HttpStatusCode.Forbidden);
-                return;
-            }
-
             // Check if the timestamp is within the allowed time
             if (!IsWithinAllowedTime(timestampHeaderLong))
             {
                 _logger.LogError("Timestamp outdated");
-                var customErrors = new CustomErrors(new CustomError("Forbidden", "Invalid timestamp", "timestamp"));
+                var customErrors = new CustomErrors(new CustomError("Forbidden", "Invalid timestamp", "x-timestamp"));
                 await WriteCustomErrors(context.Response, customErrors, (int)HttpStatusCode.Forbidden);
                 return;
             }
+
+            // TODO: Check if the public key is valid according to algorithm
 
             var payloadSigningStream = await GetPayloadStream(context, timestampHeader);
 

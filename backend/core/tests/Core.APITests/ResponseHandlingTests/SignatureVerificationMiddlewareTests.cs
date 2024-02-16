@@ -18,10 +18,43 @@ using System.Text;
 namespace Core.APITests.ResponseHandlingTests.SignatureVerificationMiddlewareTests;
 
 [TestClass]
-public class SignatureVerificationMiddlewareTests
+public sealed class SignatureVerificationMiddlewareTests : IDisposable
 {
+    IHost host = default!;
+    HttpClient client = default!;
+
+    [TestInitialize]
+    public async Task Init()
+    {
+        host = await new HostBuilder()
+            .ConfigureWebHost(webBuilder =>
+            {
+                webBuilder
+                    .UseTestServer()
+                    .ConfigureServices(services =>
+                    {
+                        services.AddSingleton<IDateTimeProvider>(
+                            new StaticDateTimeProvider(
+                                DateTimeOffset.FromUnixTimeSeconds(1577836800)));
+                    })
+                    .Configure(app =>
+                    {
+                        app.ConfigureSignatureVerificationMiddleware();
+
+                        app.Run(async context =>
+                        {
+                            var msg = await context.Request.ReadFromJsonAsync<MessageObject>();
+                            await context.Response.WriteAsync($"Hello World {msg.Message}!");
+                        });
+                    });
+            })
+            .StartAsync();
+
+        client = host.GetTestClient();
+    }
+
     [TestMethod]
-    public void VerifySignature_ValidSignature_ReturnsTrue()
+    public void VerifySignature_ValidSignature()
     {
         var publicKeyB64 = "gwZ+LyQ+VLaIsWeSq3QFh+WaZHNgl07pXul++BsezoY=";
         var publicKey = Convert.FromBase64String(publicKeyB64);
@@ -41,7 +74,7 @@ public class SignatureVerificationMiddlewareTests
     }
 
     [TestMethod]
-    public void VerifySignature_InvalidSignature_ReturnsFalse()
+    public void VerifySignature_InvalidSignature()
     {
         var publicKeyB64 = "gwZ+LyQ+VLaIsWeSq3QFh+WaZHNgl07pXul++BsezoY=";
         var publicKey = Convert.FromBase64String(publicKeyB64);
@@ -66,38 +99,13 @@ public class SignatureVerificationMiddlewareTests
     public record MessageObject(string Message);
 
     [TestMethod]
-    public async Task VerifySignatureMiddleware_Successful_HttpProcessing()
+    public async Task VerifySignatureMiddleware_ValidSignature()
     {
-        using var host = await new HostBuilder()
-            .ConfigureWebHost(webBuilder =>
-            {
-                webBuilder
-                    .UseTestServer()
-                    .ConfigureServices(services =>
-                    {
-                        services.AddSingleton<IDateTimeProvider>(
-                            new StaticDateTimeProvider(
-                                DateTimeOffset.FromUnixTimeSeconds(1577836800)));
-                    })
-                    .Configure(app =>
-                    {
-                        app.UseMiddleware<SignatureVerificationMiddleware>();
-
-                        app.Run(async context =>
-                        {
-                            var msg = await context.Request.ReadFromJsonAsync<MessageObject>();
-                            await context.Response.WriteAsync($"Hello World {msg.Message}!");
-                        });
-                    });
-            })
-            .StartAsync();
-
-        var client = host.GetTestClient();
-
         // create get request
         var request = new HttpRequestMessage(HttpMethod.Post, "/");
         request.Content = new StringContent("{\"message\":\"HELLO\"}");
         request.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+        request.Headers.Add("x-algorithm", "ED25519");
         request.Headers.Add("x-timestamp", "1577836800");
         request.Headers.Add("x-signature", "ksnz8fzvQerq3uTgYYisKqLu/tZJWcYQYPW4UAl62FREqm6T9PDGiAIjwiePL6SC4jE7X59r8llhUQqgQKQ1DQ==");
         request.Headers.Add("x-public-key", "gwZ+LyQ+VLaIsWeSq3QFh+WaZHNgl07pXul++BsezoY=");
@@ -112,38 +120,13 @@ public class SignatureVerificationMiddlewareTests
     }
 
     [TestMethod]
-    public async Task VerifySignatureMiddleware_Failed()
+    public async Task VerifySignatureMiddleware_InvalidSignature()
     {
-        using var host = await new HostBuilder()
-            .ConfigureWebHost(webBuilder =>
-            {
-                webBuilder
-                    .UseTestServer()
-                    .ConfigureServices(services =>
-                    {
-                        services.AddSingleton<IDateTimeProvider>(
-                            new StaticDateTimeProvider(
-                                DateTimeOffset.FromUnixTimeSeconds(1577836800)));
-                    })
-                    .Configure(app =>
-                    {
-                        app.UseMiddleware<SignatureVerificationMiddleware>();
-
-                        app.Run(async context =>
-                        {
-                            var msg = await context.Request.ReadFromJsonAsync<MessageObject>();
-                            await context.Response.WriteAsync($"Hello World {msg.Message}!");
-                        });
-                    });
-            })
-            .StartAsync();
-
-        var client = host.GetTestClient();
-
         // create get request
         var request = new HttpRequestMessage(HttpMethod.Post, "/");
         request.Content = new StringContent("{\"message\":\"HELLO\"}");
         request.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+        request.Headers.Add("x-algorithm", "ED25519");
         request.Headers.Add("x-timestamp", "1577836801");
         request.Headers.Add("x-signature", "ksnz8fzvQerq3uTgYYisKqLu/tZJWcYQYPW4UAl62FREqm6T9PDGiAIjwiePL6SC4jE7X59r8llhUQqgQKQ1DQ==");
         request.Headers.Add("x-public-key", "gwZ+LyQ+VLaIsWeSq3QFh+WaZHNgl07pXul++BsezoY=");
@@ -154,6 +137,32 @@ public class SignatureVerificationMiddlewareTests
         Assert.AreEqual(HttpStatusCode.Forbidden, response.StatusCode);
 
         var responseString = await response.Content.ReadAsStringAsync();
-        Assert.AreEqual("{\"Errors\":[{\"Code\":\"Forbidden\",\"Message\":\"Invalid signature\",\"Target\":\"x-signature\"}]}", responseString);
+        Assert.AreEqual("""{"Errors":[{"Code":"Forbidden","Message":"Invalid signature","Target":"x-signature"}]}""", responseString);
+    }
+
+    [TestMethod]
+    public async Task VerifySignatureMiddleware_InvalidAlgorithm()
+    {
+        // create get request
+        var request = new HttpRequestMessage(HttpMethod.Post, "/");
+        request.Content = new StringContent("{\"message\":\"HELLO\"}");
+        request.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+        request.Headers.Add("x-algorithm", "RSA");
+        request.Headers.Add("x-timestamp", "1577836801");
+        request.Headers.Add("x-signature", "ksnz8fzvQerq3uTgYYisKqLu/tZJWcYQYPW4UAl62FREqm6T9PDGiAIjwiePL6SC4jE7X59r8llhUQqgQKQ1DQ==");
+        request.Headers.Add("x-public-key", "gwZ+LyQ+VLaIsWeSq3QFh+WaZHNgl07pXul++BsezoY=");
+
+        // send request
+        var response = await client.SendAsync(request);
+
+        Assert.AreEqual(HttpStatusCode.Forbidden, response.StatusCode);
+
+        var responseString = await response.Content.ReadAsStringAsync();
+        Assert.AreEqual("""{"Errors":[{"Code":"Forbidden","Message":"Invalid Header","Target":"x-algorithm"}]}""", responseString);
+    }
+
+    public void Dispose()
+    {
+        host.Dispose();
     }
 }
