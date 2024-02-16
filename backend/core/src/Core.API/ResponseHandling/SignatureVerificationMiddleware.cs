@@ -23,7 +23,7 @@ namespace Core.API.ResponseHandling
             ILogger<SignatureVerificationMiddleware> logger)
         {
             _next = next;
-            this._dateTimeProvider = dateTimeProvider;
+            _dateTimeProvider = dateTimeProvider;
             _logger = logger;
         }
 
@@ -31,6 +31,7 @@ namespace Core.API.ResponseHandling
         {
             // Retrieve headers from the request
             string? signatureHeader = context.Request.Headers["x-signature"];
+            string? algorithmHeader = context.Request.Headers["x-algorithm"];
             string? publicKeyHeader = context.Request.Headers["x-public-key"];
             string? timestampHeader = context.Request.Headers["x-timestamp"];
 
@@ -112,8 +113,8 @@ namespace Core.API.ResponseHandling
 
         private bool IsWithinAllowedTime(long timestampHeaderLong)
         {
-            var suppliedDateTimec = DateTimeOffset.FromUnixTimeSeconds(timestampHeaderLong);
-            var dateDiff = _dateTimeProvider.UtcNow - suppliedDateTimec;
+            var suppliedDateTime = DateTimeOffset.FromUnixTimeSeconds(timestampHeaderLong);
+            var dateDiff = _dateTimeProvider.UtcNow - suppliedDateTime;
             long allowedDifference = 30; // 30 seconds
             return Math.Abs(dateDiff.TotalSeconds) <= allowedDifference;
         }

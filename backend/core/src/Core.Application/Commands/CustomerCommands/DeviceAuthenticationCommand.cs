@@ -44,18 +44,23 @@ namespace Core.Application.Commands.CustomerCommands
 
             var customerDevice = await _customerDeviceRepository.GetAsync(request.CustomerCode, cancellationToken);
 
+            // If the customer does not exist, create a new customer device
             if (customerDevice is null)
             {
                 // Customer does not exist, create a new customer device
-                otpKey = CreateNewCustomerDevice(request);
+                otpKey = await CreateNewCustomerDevice(request);
             }
+            // If the OTPCode is not empty, verify and process the OTPCode
             else if (!string.IsNullOrWhiteSpace(request.OTPCode))
             {
-                otpKey = VerifyAndProcessOTPCode(request, customerDevice);
+                otpKey = await VerifyAndProcessOTPCode(request, customerDevice);
             }
+            // if the OTPCode is empty and the customer has a public key, then the customer is already verified
             else if (string.IsNullOrWhiteSpace(request.OTPCode) && !CustomerHasPublicKey(customerDevice, request.PublicKey))
             {
-                throw new CustomErrorsException(DomainErrorCode.ExistingKeyError.ToString(), request.CustomerCode, "Verfication needed.");
+                // Customer has a public key but no OTPCode, throw an error
+                // This should start the OTP validation process client-side
+                throw new CustomErrorsException(DomainErrorCode.ExistingKeyError.ToString(), request.CustomerCode, "Verification needed.");
             }
 
             await _unitOfWork.SaveChangesAsync(cancellationToken);
@@ -63,7 +68,7 @@ namespace Core.Application.Commands.CustomerCommands
             return new DeviceAuthentication { OTPKey = otpKey };
         }
 
-        private string VerifyAndProcessOTPCode(DeviceAuthenticationCommand request, CustomerOTPKeyStore customerDevice)
+        private async Task<string> VerifyAndProcessOTPCode(DeviceAuthenticationCommand request, CustomerOTPKeyStore customerDevice)
         {
             string otpKey = customerDevice.OTPKey;
 
@@ -81,7 +86,7 @@ namespace Core.Application.Commands.CustomerCommands
             if (string.IsNullOrWhiteSpace(customerDevice.OTPKey))
             {
                 // Generate a new OTPKey if none exists
-                otpKey = _otpGenerator.GenerateNewOTPKey().Result;
+                otpKey = await _otpGenerator.GenerateNewOTPKey();
                 customerDevice.OTPKey = otpKey;
             }
 
@@ -90,9 +95,9 @@ namespace Core.Application.Commands.CustomerCommands
             return otpKey;
         }
 
-        private string CreateNewCustomerDevice(DeviceAuthenticationCommand request)
+        private async Task<string> CreateNewCustomerDevice(DeviceAuthenticationCommand request)
         {
-            string otpKey = _otpGenerator.GenerateNewOTPKey().Result;
+            string otpKey = await _otpGenerator.GenerateNewOTPKey();
 
             // Create a new customer OTP key store and associated device
             var newDevice = CustomerOTPKeyStore.New(request.CustomerCode, otpKey, request.PublicKey);
