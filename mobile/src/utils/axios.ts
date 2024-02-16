@@ -63,6 +63,7 @@ async function requestInterceptor(config: InternalAxiosRequestConfig) {
         config.headers["x-public-key"] = pubKeyFromStore;
         config.headers["x-timestamp"] = sigData.timestamp;
         config.headers["x-signature"] = sigData.signature;
+        config.headers["x-algorithm"] = "ED25519";
       }
     }
   }

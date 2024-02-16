@@ -11,6 +11,11 @@ using System.Text;
 
 namespace Core.API.ResponseHandling
 {
+    public enum SignatureAlgorithmHeader
+    {
+        ED25519
+    }
+
     public class SignatureVerificationMiddleware
     {
         private readonly RequestDelegate _next;
@@ -57,6 +62,14 @@ namespace Core.API.ResponseHandling
             {
                 _logger.LogError("Missing timestamp header");
                 var customErrors = new CustomErrors(new CustomError("Forbidden", "Missing Header", "x-timestamp"));
+                await WriteCustomErrors(context.Response, customErrors, (int)HttpStatusCode.Forbidden);
+                return;
+            }
+
+            if(!Enum.TryParse<SignatureAlgorithmHeader>(algorithmHeader, ignoreCase: true, out var algorithm))
+            {
+                _logger.LogError("Invalid algorithm header");
+                var customErrors = new CustomErrors(new CustomError("Forbidden", "Invalid Header", "x-algorithm"));
                 await WriteCustomErrors(context.Response, customErrors, (int)HttpStatusCode.Forbidden);
                 return;
             }
