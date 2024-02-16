@@ -2,13 +2,12 @@
 // under the Apache License, Version 2.0. See the NOTICE file at the root
 // of this distribution or at http://www.apache.org/licenses/LICENSE-2.0
 
-﻿using Core.API.ResponseHandling;
+using Core.API.ResponseHandling;
 using Core.Domain;
 using Core.Domain.Exceptions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System.Net;
 
@@ -33,10 +32,7 @@ public class ExceptionMiddlewareTests
                     {
                         app.ConfigureCustomExceptionMiddleware();
 
-                        app.Run(context =>
-                        {
-                            throw new CustomErrorsException(DomainErrorCode.ExistingKeyError.ToString(), "TEST", "Verification needed.");
-                        });
+                        app.Run(context => throw new CustomErrorsException(DomainErrorCode.ExistingKeyError.ToString(), "TEST", "Verification needed."));
                     });
             })
             .StartAsync();
