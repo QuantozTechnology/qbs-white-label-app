@@ -18,7 +18,7 @@ namespace Core.API.DependencyInjection
             services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ComplianceBehaviour<,>));
 
             services.AddValidatorsFromAssembly(Application.AssemblyReference.Assembly);
-            services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(ApplicationInjection).Assembly));
+            services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(Application.AssemblyReference.Assembly));
 
             services.AddSingleton<IDateTimeProvider, SystemDateTimeProvider>();
 
