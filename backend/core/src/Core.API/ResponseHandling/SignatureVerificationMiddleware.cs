@@ -2,7 +2,6 @@
 // under the Apache License, Version 2.0. See the NOTICE file at the root
 // of this distribution or at http://www.apache.org/licenses/LICENSE-2.0
 
-using Core.Domain;
 using Core.Domain.Exceptions;
 using Core.Presentation.Models;
 using NSec.Cryptography;
@@ -23,16 +22,16 @@ namespace Core.API.ResponseHandling
     public class SignatureVerificationMiddleware
     {
         private readonly RequestDelegate _next;
-        private readonly IDateTimeProvider _dateTimeProvider;
+        private readonly TimeProvider _timeProvider;
         private readonly ILogger<SignatureVerificationMiddleware> _logger;
 
         public SignatureVerificationMiddleware(
             RequestDelegate next,
-            IDateTimeProvider dateTimeProvider,
+            TimeProvider timeProvider,
             ILogger<SignatureVerificationMiddleware> logger)
         {
             _next = next;
-            _dateTimeProvider = dateTimeProvider;
+            _timeProvider = timeProvider;
             _logger = logger;
         }
 
@@ -138,7 +137,7 @@ namespace Core.API.ResponseHandling
         private bool IsWithinAllowedTime(long timestampHeaderLong)
         {
             var suppliedDateTime = DateTimeOffset.FromUnixTimeSeconds(timestampHeaderLong);
-            var dateDiff = _dateTimeProvider.UtcNow - suppliedDateTime;
+            var dateDiff = _timeProvider.GetUtcNow() - suppliedDateTime;
             long allowedDifference = 30; // 30 seconds
             return Math.Abs(dateDiff.TotalSeconds) <= allowedDifference;
         }
