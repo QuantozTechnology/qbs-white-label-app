@@ -1,8 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net7.0</TargetFrameworks>
-      
+    <TargetFrameworks>net8.0</TargetFrameworks>
+
     <!--
     We have some culture-aware methods like string parsing.
     This can cause some issues translating string to Stellar units.
@@ -16,9 +16,9 @@
     <PackageReference Include="Algorand" Version="0.2.1" />
     <PackageReference Include="dotnetstandard-bip32" Version="1.0.0" />
     <PackageReference Include="dotnetstandard-bip39" Version="1.0.2" />
-    <PackageReference Include="NBitcoin" Version="7.0.8" />
-    <PackageReference Include="SecurityCodeScan.VS2019" Version="5.6.3" PrivateAssets="all" />
-    <PackageReference Include="stellar-dotnet-sdk" Version="8.0.6" />
+    <PackageReference Include="NBitcoin" Version="7.0.34" />
+    <PackageReference Include="SecurityCodeScan.VS2019" Version="5.6.7" PrivateAssets="all" />
+    <PackageReference Include="stellar-dotnet-sdk" Version="9.1.1" />
   </ItemGroup>
 
 </Project>

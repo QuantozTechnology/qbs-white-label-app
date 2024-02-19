@@ -2,6 +2,7 @@
 // under the Apache License, Version 2.0. See the NOTICE file at the root
 // of this distribution or at http://www.apache.org/licenses/LICENSE-2.0
 
+using Asp.Versioning;
 using Core.Application.Queries.CustomerQueries;
 using Core.Presentation.Models;
 using Core.Presentation.Models.Requests.CustomerRequests;

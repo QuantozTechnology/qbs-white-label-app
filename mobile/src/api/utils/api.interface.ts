@@ -3,5 +3,5 @@
 // of this distribution or at http://www.apache.org/licenses/LICENSE-2.0
 
 export interface GenericApiResponse<T> {
-  value: T;
+  value?: T;
 }

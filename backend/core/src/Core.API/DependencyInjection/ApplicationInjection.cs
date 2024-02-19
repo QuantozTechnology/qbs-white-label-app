@@ -3,6 +3,7 @@
 // of this distribution or at http://www.apache.org/licenses/LICENSE-2.0
 
 using Core.Application.Pipelines;
+using Core.Domain;
 using FluentValidation;
 using MediatR;
 
@@ -17,7 +18,9 @@ namespace Core.API.DependencyInjection
             services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ComplianceBehaviour<,>));
 
             services.AddValidatorsFromAssembly(Application.AssemblyReference.Assembly);
-            services.AddMediatR(Application.AssemblyReference.Assembly);
+            services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(ApplicationInjection).Assembly));
+
+            services.AddSingleton<IDateTimeProvider, SystemDateTimeProvider>();
 
             return services;
         }

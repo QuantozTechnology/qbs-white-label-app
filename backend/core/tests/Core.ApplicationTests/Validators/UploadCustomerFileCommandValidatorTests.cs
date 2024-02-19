@@ -6,6 +6,7 @@ using Core.Application.Commands.CustomerCommands;
 using Core.Application.Validators.Commands.CustomerValidators;
 using Core.Domain;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Primitives;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Text;
 
@@ -26,7 +27,7 @@ namespace Core.ApplicationTests.Validators
             if (fileType != null)
             {
                 var stream = new MemoryStream(Encoding.UTF8.GetBytes("dummy file content"));
-                file = new MockFormFile(stream, 0, "file.png",  "file.png", "file.png");
+                file = new MockFormFile(stream, 0, "file.png", "file.png", "file.png");
             }
 
             var command = new UploadCustomerFileCommand
@@ -65,39 +66,39 @@ namespace Core.ApplicationTests.Validators
     }
 
     public class MockFormFile : IFormFile
-    {
-        private readonly Stream stream;
-
-        public MockFormFile(Stream stream, long length, string contentDisposition, string name, string fileName)
         {
-            this.stream = stream;
-            Length = length;
-            ContentDisposition = contentDisposition;
-            Name = name;
-            FileName = fileName;
-            ContentType = null;
-        }
+            private readonly Stream stream;
 
-        public string ContentType { get; set; }
-        public string ContentDisposition { get; set; }
-        public IHeaderDictionary Headers => new HeaderDictionary();
-        public long Length { get; }
-        public string Name { get; }
-        public string FileName { get; }
+            public MockFormFile(Stream stream, long length, string contentDisposition, string name, string fileName)
+            {
+                this.stream = stream;
+                Length = length;
+                ContentDisposition = contentDisposition;
+                Name = name;
+                FileName = fileName;
+                ContentType = null;
+            }
 
-        public void CopyTo(Stream target)
-        {
-            stream.CopyTo(target);
-        }
+            public string ContentType { get; set; }
+            public string ContentDisposition { get; set; }
+            public IHeaderDictionary Headers => (IHeaderDictionary)new Dictionary<string, StringValues>();
+            public long Length { get; }
+            public string Name { get; }
+            public string FileName { get; }
 
-        public Task CopyToAsync(Stream target, CancellationToken cancellationToken = default)
-        {
-            return stream.CopyToAsync(target, cancellationToken);
-        }
+            public void CopyTo(Stream target)
+            {
+                stream.CopyTo(target);
+            }
 
-        public Stream OpenReadStream()
-        {
-            return stream;
+            public Task CopyToAsync(Stream target, CancellationToken cancellationToken = default)
+            {
+                return stream.CopyToAsync(target, cancellationToken);
+            }
+
+            public Stream OpenReadStream()
+            {
+                return stream;
+            }
         }
-    }
 }

@@ -40,9 +40,8 @@ describe("Create payment request", () => {
     const sharePersonalInfoCheckbox = screen.getByLabelText(
       "share name with the payer"
     );
-    const expirationDateSelect = await screen.findByLabelText(
-      "expiration date"
-    );
+    const expirationDateSelect =
+      await screen.findByLabelText("expiration date");
 
     expect(balanceList).toBeTruthy();
     expect(amount.props.value).toBe("");

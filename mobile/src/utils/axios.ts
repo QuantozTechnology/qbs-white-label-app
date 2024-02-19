@@ -7,7 +7,12 @@ import Constants from "expo-constants";
 import { authStorageService } from "../auth/authStorageService";
 import { AuthService } from "../auth/authService";
 import * as SecureStore from "expo-secure-store";
-import forge from "node-forge";
+import * as ed from "@noble/ed25519";
+import { sha512 } from "@noble/hashes/sha512";
+import { fromByteArray, toByteArray } from "react-native-quick-base64";
+import { Buffer } from "buffer";
+
+ed.etc.sha512Sync = (...m) => sha512(ed.etc.concatBytes(...m));
 
 export const backendApiUrl = Constants.expoConfig?.extra?.API_URL;
 
@@ -54,40 +59,40 @@ async function requestInterceptor(config: InternalAxiosRequestConfig) {
       config.headers["Authorization"] = `Bearer ${accessToken}`;
 
       if (pubKeyFromStore !== null && privKeyFromStore != null) {
-        config.headers["x-public-key"] = forge.util.encode64(pubKeyFromStore);
-
-        const timestampInSeconds = Math.floor(Date.now() / 1000); // Convert current time to Unix timestamp in seconds
-
-        const payload: {
-          timestamp: number;
-          postPayload?: unknown;
-        } = {
-          timestamp: timestampInSeconds,
-        };
-
-        // hash POST payload if available
-        if (config.method === "post") {
-          payload.postPayload = config.data;
-        }
-
-        config.headers["x-payload"] = forge.util.encode64(
-          JSON.stringify(payload)
-        );
-
-        // create hash and sign it
-        const privateKey = forge.pki.privateKeyFromPem(privKeyFromStore);
-        const md = forge.md.sha256.create();
-        md.update(JSON.stringify(payload), "utf8");
-        const signature = privateKey.sign(md);
-
-        // Encode the signature in Base64 format
-        const base64Signature = forge.util.encode64(signature);
-        config.headers["x-signature"] = base64Signature;
+        const sigData = getSignatureHeaders(new Date(), config.data, privKeyFromStore);
+        config.headers["x-public-key"] = pubKeyFromStore;
+        config.headers["x-timestamp"] = sigData.timestamp;
+        config.headers["x-signature"] = sigData.signature;
+        config.headers["x-algorithm"] = "ED25519";
       }
     }
   }
 
   return config;
+}
+
+// the date is supplied as a parameter to allow for testing
+// there were various issues with trying to mock it directly
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function getSignatureHeaders(date: Date, data: any, privKeyFromStore: string) {
+  const timestampInSeconds = Math.floor(date.getTime() / 1000).toString(); // Convert current time to Unix timestamp in seconds
+  const dataToSign = data
+    ? timestampInSeconds + JSON.stringify(data)
+    : timestampInSeconds;
+  const bytesToSign = Buffer.from(dataToSign, "utf-8");
+
+  const privKey = toByteArray(privKeyFromStore);
+  const privKeyHex = ed.etc.bytesToHex(privKey);
+
+  const hash = ed.sign(bytesToSign, privKeyHex);
+
+  // Encode the signature in Base64 format
+  const base64Signature = fromByteArray(hash);
+
+  return {
+    timestamp: timestampInSeconds,
+    signature: base64Signature,
+  };
 }
 
 async function responseInterceptor(response: AxiosResponse) {

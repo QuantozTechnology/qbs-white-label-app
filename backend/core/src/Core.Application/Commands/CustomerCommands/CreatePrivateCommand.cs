@@ -42,7 +42,7 @@ namespace Core.Application.Commands.CustomerCommands
             _customerRepository = customerRepository;
         }
 
-        public async Task<Unit> Handle(CreatePrivateCommand request, CancellationToken cancellationToken)
+        public async Task Handle(CreatePrivateCommand request, CancellationToken cancellationToken)
         {
             var trustlevels = _compliance.GetTrustlevelsForPrivateCustomer();
 
@@ -81,8 +81,6 @@ namespace Core.Application.Commands.CustomerCommands
             }
 
             await _customerRepository.CreateAsync(customer, request.IP);
-
-            return Unit.Value;
         }
     }
 }

@@ -148,6 +148,11 @@ export type ExchangeRequest = {
   issuer: string;
 };
 
+export type KeyPair = {
+  pubKey: string;
+  privKey: string;
+};
+
 export type TokenResponse =
   | AuthError
   | (Success & {

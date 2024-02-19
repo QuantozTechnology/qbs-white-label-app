@@ -8,7 +8,7 @@ using MediatR;
 
 namespace Core.Application.Commands
 {
-    public class CreateWithdrawCommand : IWithComplianceCheckCommand<Unit>
+    public class CreateWithdrawCommand : IWithComplianceCheckCommand
     {
         public required string CustomerCode { get; set; }
 
@@ -36,7 +36,7 @@ namespace Core.Application.Commands
             _customerRepository = customerRepository;
         }
 
-        public async Task<Unit> Handle(CreateWithdrawCommand request, CancellationToken cancellationToken)
+        public async Task Handle(CreateWithdrawCommand request, CancellationToken cancellationToken)
         {
             var customer = await _customerRepository.GetAsync(request.CustomerCode, cancellationToken);
             var account = await _accountRepository.GetByCustomerCodeAsync(request.CustomerCode, cancellationToken);
@@ -44,8 +44,6 @@ namespace Core.Application.Commands
             var withdraw = customer.NewWithdraw(account, request.TokenCode, request.Amount, request.Memo);
 
             await _transactionRepository.CreateWithdrawAsync(withdraw, request.IP, cancellationToken);
-
-            return Unit.Value;
         }
     }
 }

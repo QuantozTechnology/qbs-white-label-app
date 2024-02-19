@@ -197,9 +197,8 @@ describe("ConsumerRegistration", () => {
 
     fireEvent(firstName, "onChangeText", "");
     fireEvent(createAccountButton, "onPress");
-    const firstNameErrorEmptyString = await screen.findByLabelText(
-      "first name error"
-    );
+    const firstNameErrorEmptyString =
+      await screen.findByLabelText("first name error");
 
     expect(firstNameErrorEmptyString).toHaveTextContent(
       /^First name must be longer than 1 character$/
@@ -222,9 +221,8 @@ describe("ConsumerRegistration", () => {
 
     fireEvent(lastName, "onChangeText", "");
     fireEvent(createAccountButton, "onPress");
-    const lastNameErrorEmptyString = await screen.findByLabelText(
-      "last name error"
-    );
+    const lastNameErrorEmptyString =
+      await screen.findByLabelText("last name error");
 
     expect(lastNameErrorEmptyString).toHaveTextContent(
       /^Last name must be longer than 1 character$/

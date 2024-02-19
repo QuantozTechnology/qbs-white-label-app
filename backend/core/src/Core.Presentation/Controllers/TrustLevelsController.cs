@@ -2,11 +2,11 @@
 // under the Apache License, Version 2.0. See the NOTICE file at the root
 // of this distribution or at http://www.apache.org/licenses/LICENSE-2.0
 
+using Asp.Versioning;
 using Core.Application.Queries;
 using Core.Presentation.Models;
 using Core.Presentation.Models.Responses.CustomerResponses;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Identity.Web.Resource;
 

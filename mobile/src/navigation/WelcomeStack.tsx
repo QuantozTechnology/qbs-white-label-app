@@ -1,9 +1,8 @@
 // Copyright 2023 Quantoz Technology B.V. and contributors. Licensed
 // under the Apache License, Version 2.0. See the NOTICE file at the root
 // of this distribution or at http://www.apache.org/licenses/LICENSE-2.0
-
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Feedback from "../screens/Feedback";
 import { ImageIdentifier } from "../utils/images";
 import AppBottomTabNavigator from "./AppBottomTab";
@@ -36,7 +35,6 @@ export type WelcomeStackParamList = {
 
 type FeedbackButtonProps = {
   caption: string;
-  // TODO make it more strict, only existing screens in navigator(s) allowed?
   destinationScreen?: string;
   callback?: () => void;
 };
@@ -60,16 +58,15 @@ export type CustomerStatus = {
 export default function WelcomeStackNavigator() {
   const auth = useAuth();
   const customerContext = useCustomerState();
-  const {
-    error: deviceVerificationError,
-    isLoading: isVerifyingDevice,
-    deviceConflict,
-  } = useDeviceVerification();
-  const {
-    hasScreenLockMechanism,
-    isLoading: isCheckingScreenLockMechanism,
-    error: screenLockMechanismError,
-  } = useDeviceHasScreenLock();
+  // We must perform verification in order to display related loading screens.
+  // First, biometrics, then verifyDevice, and finally screenLock.
+  const [currentOperation, setCurrentOperation] =
+    useState("checkingBiometrics");
+  // By using shouldVerify, we can run useDeviceVerification and useDeviceHasScreenLock manually and have more control over them.
+  const [shouldVerifyDevice, setShouldVerifyDevice] = useState(false);
+  const [shouldCheckScreenLockMechanism, setShouldCheckScreenLockMechanism] =
+    useState(false);
+
   const {
     isBiometricCheckPassed,
     triggerRetry,
@@ -77,9 +74,80 @@ export default function WelcomeStackNavigator() {
     isLoading: isCheckingBiometric,
   } = useBiometricValidation();
 
+  const {
+    error: deviceVerificationError,
+    isLoading: isVerifyingDevice,
+    deviceConflict,
+  } = useDeviceVerification(shouldVerifyDevice);
+
+  const {
+    hasScreenLockMechanism,
+    error: screenLockMechanismError,
+    isLoading: isCheckingScreenLockMechanism,
+  } = useDeviceHasScreenLock(shouldCheckScreenLockMechanism);
+
   const { data: customer } = useCustomer({
     enabled: auth?.userSession !== null,
   });
+
+  useEffect(() => {
+    (async () => {
+      switch (currentOperation) {
+        case "verifyingDevice":
+          setShouldVerifyDevice(true);
+          break;
+
+        case "checkingScreenLock":
+          if (
+            (hasScreenLockMechanism || screenLockMechanismError) &&
+            !isCheckingScreenLockMechanism
+          ) {
+            setCurrentOperation("done");
+          }
+          break;
+      }
+    })();
+  }, [currentOperation]);
+
+  useEffect(() => {
+    if (!isCheckingBiometric && isBiometricCheckPassed) {
+      setCurrentOperation("verifyingDevice");
+    } else {
+      if (biometricCheckError) {
+        setCurrentOperation("done");
+      }
+    }
+  }, [isCheckingBiometric]);
+
+  useEffect(() => {
+    if (isBiometricCheckPassed) {
+      setCurrentOperation("verifyingDevice");
+    }
+  }, [isBiometricCheckPassed]);
+
+  useEffect(() => {
+    if (isBiometricCheckPassed && shouldVerifyDevice) {
+      if (!isVerifyingDevice && (deviceConflict || deviceVerificationError)) {
+        setCurrentOperation("done");
+      } else {
+        if (!isVerifyingDevice) {
+          setShouldCheckScreenLockMechanism(true);
+          setCurrentOperation("checkingScreenLock");
+        }
+      }
+    }
+  }, [isVerifyingDevice]);
+
+  useEffect(() => {
+    if (
+      isBiometricCheckPassed &&
+      shouldVerifyDevice &&
+      shouldCheckScreenLockMechanism &&
+      hasScreenLockMechanism
+    ) {
+      setCurrentOperation("done");
+    }
+  }, [isCheckingScreenLockMechanism]);
 
   useEffect(() => {
     WebBrowser.warmUpAsync();
@@ -89,8 +157,93 @@ export default function WelcomeStackNavigator() {
     };
   }, []);
 
+  if (currentOperation !== "done") {
+    let message = "Loading...";
+    switch (currentOperation) {
+      case "checkingBiometrics":
+        message = "Checking biometric security...";
+        break;
+      case "verifyingDevice":
+        message = "Verifying device, it could take up to 1 minute...";
+        break;
+      case "checkingScreenLock":
+        message = "Checking screen lock mechanism...";
+        break;
+    }
+    return <FullScreenLoadingSpinner message={message} />;
+  }
+
   if (auth?.isLoading) {
     return <FullScreenLoadingSpinner />;
+  }
+
+  if (currentOperation === "done") {
+    if (biometricCheckError) {
+      return (
+        <WelcomeStack.Navigator>
+          {showGenericErrorScreen(
+            "Cannot verify your biometric security. Please try again later"
+          )}
+        </WelcomeStack.Navigator>
+      );
+    }
+
+    if (!isBiometricCheckPassed) {
+      return (
+        <FullScreenMessage
+          title="Biometric check error"
+          message="Please try again"
+          actionButton={{
+            label: "Try again",
+            callback: triggerRetry,
+          }}
+        />
+      );
+    }
+
+    if (deviceVerificationError) {
+      return (
+        <WelcomeStack.Navigator>
+          {showGenericErrorScreen(
+            "Cannot securely verify your device. Please try again later"
+          )}
+        </WelcomeStack.Navigator>
+      );
+    }
+
+    if (deviceConflict) {
+      return (
+        <WelcomeStack.Navigator>
+          {showConfirmDeviceScreens()}
+        </WelcomeStack.Navigator>
+      );
+    }
+
+    if (screenLockMechanismError) {
+      return (
+        <WelcomeStack.Navigator>
+          {showGenericErrorScreen(
+            "Cannot verify if your device has a screen lock mechanism. Please try again later"
+          )}
+        </WelcomeStack.Navigator>
+      );
+    }
+
+    if (!hasScreenLockMechanism) {
+      return (
+        <WelcomeStack.Navigator>
+          <WelcomeStack.Screen
+            name="Feedback"
+            component={Feedback}
+            initialParams={{
+              title: "Security issue",
+              description: `Your device has no security measures set up (pin, passcode or fingerprint/faceID).
+  Please enable one of these to be able to use the app.`,
+            }}
+          />
+        </WelcomeStack.Navigator>
+      );
+    }
   }
 
   // if no user session exists, show sign in screen
@@ -100,100 +253,6 @@ export default function WelcomeStackNavigator() {
         screenOptions={{ headerShown: false, gestureEnabled: false }}
       >
         <WelcomeStack.Screen name="SignIn" component={SignIn} />
-      </WelcomeStack.Navigator>
-    );
-  }
-
-  if (screenLockMechanismError) {
-    return (
-      <WelcomeStack.Navigator>
-        {showGenericErrorScreen(
-          "Cannot verify if your device has a screen lock mechanism. Please try again later"
-        )}
-      </WelcomeStack.Navigator>
-    );
-  }
-
-  if (isCheckingScreenLockMechanism) {
-    return (
-      <FullScreenLoadingSpinner
-        message="Checking screen lock mechanism..."
-        showLoginAgainButton={false}
-      />
-    );
-  }
-
-  if (!hasScreenLockMechanism) {
-    return (
-      <WelcomeStack.Navigator>
-        <WelcomeStack.Screen
-          name="Feedback"
-          component={Feedback}
-          initialParams={{
-            title: "Security issue",
-            description: `Your device has no security measures set up (pin, passcode or fingerprint/faceID).
-Please enable one of these to be able to use the app.`,
-          }}
-        />
-      </WelcomeStack.Navigator>
-    );
-  }
-
-  if (biometricCheckError) {
-    return (
-      <WelcomeStack.Navigator>
-        {showGenericErrorScreen(
-          "Cannot verify your biometric security. Please try again later"
-        )}
-      </WelcomeStack.Navigator>
-    );
-  }
-
-  if (isCheckingBiometric) {
-    return (
-      <FullScreenLoadingSpinner
-        message="Checking biometric security..."
-        showLoginAgainButton={false}
-      />
-    );
-  }
-
-  if (!isBiometricCheckPassed) {
-    return (
-      <FullScreenMessage
-        title="Biometric check error"
-        message="Please try again"
-        actionButton={{
-          label: "Try again",
-          callback: triggerRetry,
-        }}
-      />
-    );
-  }
-
-  if (deviceVerificationError) {
-    return (
-      <WelcomeStack.Navigator>
-        {showGenericErrorScreen(
-          "Cannot securely verify your device. Please try again later"
-        )}
-      </WelcomeStack.Navigator>
-    );
-  }
-
-  if (isVerifyingDevice) {
-    return (
-      <FullScreenLoadingSpinner
-        message="Verifying device, it could take up to 1 minute..."
-        showLoginAgainButton={false}
-      />
-    );
-  }
-
-  if (deviceConflict) {
-    return (
-      <WelcomeStack.Navigator>
-        {showConfirmDeviceScreens()}
       </WelcomeStack.Navigator>
     );
   }
@@ -235,7 +294,7 @@ Please enable one of these to be able to use the app.`,
           component={Feedback}
           initialParams={{
             title: "Account under review",
-            description: customer?.data.value.isBusiness
+            description: customer?.data?.value?.isBusiness
               ? "Your business account is being reviewed by our compliance team. You will be notified when you'll be able to access it."
               : "Our operators are checking your account details. We will let you know when you can access it.",
             illustration: ImageIdentifier.Find,
@@ -261,7 +320,6 @@ Please enable one of these to be able to use the app.`,
           initialParams={{
             title: "Login error",
             description: "Sorry for the inconvenience, please try again later",
-
             illustration: ImageIdentifier.Find,
           }}
         />

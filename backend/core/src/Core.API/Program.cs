@@ -47,6 +47,8 @@ app.UseAuthentication();
 app.UseRouting();
 app.UseAuthorization();
 
+app.UseMiddleware<PublicKeyLinkedMiddleware>();
+
 app.MapControllers();
 
 
