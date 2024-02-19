@@ -32,7 +32,7 @@ namespace Core.Application.Commands.CustomerCommands
             _fileStorage = fileStorage;
         }
 
-        public async Task<Unit> Handle(UploadCustomerFileCommand request, CancellationToken cancellationToken)
+        public async Task Handle(UploadCustomerFileCommand request, CancellationToken cancellationToken)
         {
             var fileType = Enum.Parse<FileType>(request.FileType, true);
 
@@ -51,8 +51,6 @@ namespace Core.Application.Commands.CustomerCommands
             customer.UploadedFile(fileType, path);
 
             await _customerRepository.UpdateAsync(customer, cancellationToken);
-
-            return Unit.Value;
         }
 
         private byte[] ConvertFormFileToBytes(IFormFile file)

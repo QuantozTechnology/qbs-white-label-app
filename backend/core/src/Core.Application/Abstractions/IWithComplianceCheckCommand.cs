@@ -6,7 +6,7 @@ using MediatR;
 
 namespace Core.Application.Abstractions
 {
-    public interface IWithComplianceCheckCommand<TResponse> : IRequest<TResponse>
+    public interface IWithComplianceCheckCommand : IRequest
     {
         public string CustomerCode { get; set; }
 

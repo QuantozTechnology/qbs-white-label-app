@@ -28,7 +28,7 @@ namespace Core.Application.Commands
             _accountRepository = accountRepository;
         }
 
-        public async Task<Unit> Handle(CreateAccountCommand request, CancellationToken cancellationToken)
+        public async Task Handle(CreateAccountCommand request, CancellationToken cancellationToken)
         {
             var hasAccount = await _accountRepository.HasAccountAsync(request.CustomerCode, cancellationToken);
 
@@ -40,8 +40,6 @@ namespace Core.Application.Commands
             var account = Account.NewAccount(request.CustomerCode);
 
             await _accountRepository.CreateAsync(account, cancellationToken);
-
-            return Unit.Value;
         }
     }
 }

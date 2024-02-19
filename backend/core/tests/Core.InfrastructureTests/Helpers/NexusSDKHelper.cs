@@ -24,7 +24,7 @@ namespace Core.InfrastructureTests.Helpers
 
         public static CustomerResponse PrivateCustomer(string customerCode)
         {
-            return new CustomerResponse(customerCode, "PTrusted", "EUR", "test@test.com", "ACTIVE", "TestBankAccount", false, new Dictionary<string, string>());
+            return new CustomerResponse(customerCode, "PTrusted", "EUR", null, "test@test.com", "ACTIVE", "TestBankAccount", false, new Dictionary<string, string>());
         }
 
         public static IDictionary<string, string> AccountQuery(string customerCode)

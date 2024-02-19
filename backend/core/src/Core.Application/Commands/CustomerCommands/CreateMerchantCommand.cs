@@ -38,7 +38,7 @@ namespace Core.Application.Commands.CustomerCommands
             _customerRepository = customerRepository;
         }
 
-        public async Task<Unit> Handle(CreateMerchantCommand request, CancellationToken cancellationToken)
+        public async Task Handle(CreateMerchantCommand request, CancellationToken cancellationToken)
         {
             var trustlevels = _compliance.GetTrustlevelsForMerchantCustomer();
             var properties = new MerchantCustomerProperties()
@@ -74,8 +74,6 @@ namespace Core.Application.Commands.CustomerCommands
             }
 
             await _customerRepository.CreateAsync(merchant, request.IP, cancellationToken);
-
-            return Unit.Value;
         }
     }
 }
