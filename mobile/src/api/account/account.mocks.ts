@@ -2,24 +2,21 @@
 // under the Apache License, Version 2.0. See the NOTICE file at the root
 // of this distribution or at http://www.apache.org/licenses/LICENSE-2.0
 
-import { rest } from "msw";
+import { http, HttpResponse } from "msw";
 import { backendApiUrl } from "../../utils/axios";
 import { GenericApiResponse } from "../utils/api.interface";
 import { Account } from "./account.interface";
 
 export const accountsMocks = [
-  rest.post(`${backendApiUrl}/api/accounts`, (_req, rest, ctx) => {
-    return rest(ctx.status(201));
+  http.post(`${backendApiUrl}/api/accounts`, _ => {
+    return new Response(null, { status: 201 })
   }),
-  rest.get(`${backendApiUrl}/api/accounts`, (_req, rest, ctx) => {
-    return rest(
-      ctx.status(200),
-      ctx.json<GenericApiResponse<Account>>({
-        value: {
-          accountCode: "test-account-code",
-          publicAddress: "test-public-key",
-        },
-      })
-    );
+  http.get(`${backendApiUrl}/api/accounts`, _ => {
+    return HttpResponse.json<GenericApiResponse<Account>>({
+      value: {
+        accountCode: "test-account-code",
+        publicAddress: "test-public-key",
+      }
+    }, { status: 200 })
   }),
 ];

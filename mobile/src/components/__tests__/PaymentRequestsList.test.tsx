@@ -2,7 +2,7 @@
 // under the Apache License, Version 2.0. See the NOTICE file at the root
 // of this distribution or at http://www.apache.org/licenses/LICENSE-2.0
 
-import { rest } from "msw";
+import { HttpResponse, http } from "msw";
 import { genericApiError } from "../../api/generic/error.interface";
 import { render, screen, within } from "../../jest/test-utils";
 import { server } from "../../mocks/server";
@@ -30,8 +30,8 @@ describe("PaymentRequestDetails", () => {
 
   it("shows API error message if payment requests cannot be loaded", async () => {
     server.use(
-      rest.get(`${backendApiUrl}/api/paymentrequests`, (req, rest, ctx) => {
-        return rest(ctx.status(400), ctx.json(genericApiError));
+      http.get(`${backendApiUrl}/api/paymentrequests`, _ => {
+        return HttpResponse.json(genericApiError, { status: 400 });
       })
     );
 
@@ -47,17 +47,13 @@ describe("PaymentRequestDetails", () => {
 
   it("shows empty records message if there are no payment requests", async () => {
     server.use(
-      rest.get(`${backendApiUrl}/api/paymentrequests`, (req, rest, ctx) => {
-        return rest(
-          ctx.status(200),
-          ctx.set(
-            "x-pagination",
-            '{"TotalCount":5,"PageSize":10,"CurrentPage":1,"PreviousPage":null,"NextPage":null,"TotalPages":1}'
-          ),
-          ctx.json({
-            value: [],
-          })
-        );
+      http.get(`${backendApiUrl}/api/paymentrequests`, _ => {
+        return HttpResponse.json(
+          { value: [] },
+          {
+            status: 200,
+            headers: { "x-pagination": '{"TotalCount":5,"PageSize":10,"CurrentPage":1,"PreviousPage":null,"NextPage":null,"TotalPages":1}' }
+          });
       })
     );
 

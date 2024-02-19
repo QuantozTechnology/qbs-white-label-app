@@ -18,7 +18,7 @@ export default {
 
   moduleFileExtensions: ["ts", "tsx", "js", "jsx"],
   preset: "jest-expo",
-  setupFiles: ["./src/jest/jest.mockSetup.js", "dotenv/config"],
+  setupFiles: ["./src/jest/jest.mockSetup.js", "dotenv/config", './jest.polyfills.js'],
 
   // The test environment that will be used for testing
   setupFilesAfterEnv: [
