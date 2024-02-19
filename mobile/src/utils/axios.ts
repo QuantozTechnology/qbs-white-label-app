@@ -59,7 +59,7 @@ async function requestInterceptor(config: InternalAxiosRequestConfig) {
       config.headers["Authorization"] = `Bearer ${accessToken}`;
 
       if (pubKeyFromStore !== null && privKeyFromStore != null) {
-        const sigData = getSignatureHeaders(config.data, privKeyFromStore);
+        const sigData = getSignatureHeaders(new Date(), config.data, privKeyFromStore);
         config.headers["x-public-key"] = pubKeyFromStore;
         config.headers["x-timestamp"] = sigData.timestamp;
         config.headers["x-signature"] = sigData.signature;
@@ -71,9 +71,11 @@ async function requestInterceptor(config: InternalAxiosRequestConfig) {
   return config;
 }
 
+// the date is supplied as a parameter to allow for testing
+// there were various issues with trying to mock it directly
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function getSignatureHeaders(data: any, privKeyFromStore: string) {
-  const timestampInSeconds = Math.floor(Date.now() / 1000).toString(); // Convert current time to Unix timestamp in seconds
+export function getSignatureHeaders(date: Date, data: any, privKeyFromStore: string) {
+  const timestampInSeconds = Math.floor(date.getTime() / 1000).toString(); // Convert current time to Unix timestamp in seconds
   const dataToSign = data
     ? timestampInSeconds + JSON.stringify(data)
     : timestampInSeconds;
