@@ -36,7 +36,7 @@ namespace Core.API.ResponseHandling
             _logger = logger;
         }
 
-        public enum SignatureAlgorithmHeader
+        private enum SignatureAlgorithmHeader
         {
             ED25519
         }
@@ -50,7 +50,7 @@ namespace Core.API.ResponseHandling
             string? timestampHeader = context.Request.Headers["x-timestamp"];
 
             // Make sure the headers are present
-            if(!Enum.TryParse<SignatureAlgorithmHeader>(algorithmHeader, ignoreCase: true, out var algorithm))
+            if (!Enum.TryParse<SignatureAlgorithmHeader>(algorithmHeader, ignoreCase: true, out _))
             {
                 _logger.LogError("Invalid algorithm header");
                 var customErrors = new CustomErrors(new CustomError("Forbidden", "Invalid Header", "x-algorithm"));
@@ -143,7 +143,8 @@ namespace Core.API.ResponseHandling
             return Math.Abs(dateDiff.TotalSeconds) <= allowedDifference;
         }
 
-        private static async Task WriteCustomErrors(HttpResponse httpResponse, CustomErrors customErrors, int statusCode)
+        private static async Task WriteCustomErrors(HttpResponse httpResponse, CustomErrors customErrors,
+            int statusCode)
         {
             httpResponse.StatusCode = statusCode;
             httpResponse.ContentType = "application/json";
