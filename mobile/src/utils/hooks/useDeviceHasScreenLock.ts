@@ -5,12 +5,12 @@
 import { useState, useEffect } from "react";
 import * as LocalAuthentication from "expo-local-authentication";
 
-export const useDeviceHasScreenLock = () => {
+export const useDeviceHasScreenLock = (shouldCheck: boolean) => {
   const [hasScreenLockMechanism, setHasScreenLockMechanism] = useState<
     boolean | null
   >(null);
   const [error, setError] = useState<{ message: string } | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     const checkDeviceSecurityLevel = async () => {
@@ -26,8 +26,9 @@ export const useDeviceHasScreenLock = () => {
         setIsLoading(false);
       }
     };
-
-    checkDeviceSecurityLevel();
-  }, []);
+    if (shouldCheck) {
+      checkDeviceSecurityLevel();
+    }
+  }, [shouldCheck]);
   return { hasScreenLockMechanism, error, isLoading };
 };
