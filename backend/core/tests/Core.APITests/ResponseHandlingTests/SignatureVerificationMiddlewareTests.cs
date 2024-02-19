@@ -3,56 +3,166 @@
 // of this distribution or at http://www.apache.org/licenses/LICENSE-2.0
 
 using Core.API.ResponseHandling;
+using Core.Domain;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.TestHost;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using NSec.Cryptography;
-using System.Security.Cryptography;
+using System.Net;
+using System.Net.Http.Headers;
 using System.Text;
 
-namespace Core.APITests.ResponseHandlingTests.SignatureVerificationMiddlewareTests
+namespace Core.APITests.ResponseHandlingTests.SignatureVerificationMiddlewareTests;
+
+[TestClass]
+public sealed class SignatureVerificationMiddlewareTests : IDisposable
 {
-    [TestClass()]
-    public class SignatureVerificationMiddlewareTests
+    IHost host = default!;
+    HttpClient client = default!;
+
+    [TestInitialize]
+    public async Task Init()
     {
-        [TestMethod]
-        public void VerifySignature_ValidSignature_ReturnsTrue()
-        {
-            var publicKeyB64 = "gwZ+LyQ+VLaIsWeSq3QFh+WaZHNgl07pXul++BsezoY=";
-            var publicKey = Convert.FromBase64String(publicKeyB64);
-            var privateKeyB64 = "bi3SJ0gfnWXpL3vkJIdgFetU5ZgmIGCYrLxEL9Nx2rQ=";
-            var privateKey = Convert.FromBase64String(privateKeyB64);
-            var payload = Encoding.UTF8.GetBytes("{\"timestamp\": 1700136384437}");
+        host = await new HostBuilder()
+            .ConfigureWebHost(webBuilder =>
+            {
+                webBuilder
+                    .UseTestServer()
+                    .ConfigureServices(services =>
+                    {
+                        services.AddSingleton<IDateTimeProvider>(
+                            new StaticDateTimeProvider(
+                                DateTimeOffset.FromUnixTimeSeconds(1577836800)));
+                    })
+                    .Configure(app =>
+                    {
+                        app.ConfigureSignatureVerificationMiddleware();
 
-            var key = Key.Import(SignatureAlgorithm.Ed25519, privateKey, KeyBlobFormat.RawPrivateKey);
+                        app.Run(async context =>
+                        {
+                            var msg = await context.Request.ReadFromJsonAsync<MessageObject>();
+                            await context.Response.WriteAsync($"Hello World {msg.Message}!");
+                        });
+                    });
+            })
+            .StartAsync();
 
-            var signature = SignatureAlgorithm.Ed25519.Sign(key, payload);
+        client = host.GetTestClient();
+    }
 
-            // Act
-            bool result = SignatureVerificationMiddleware.VerifySignature(publicKey, payload, signature);
+    [TestMethod]
+    public void VerifySignature_ValidSignature()
+    {
+        var publicKeyB64 = "gwZ+LyQ+VLaIsWeSq3QFh+WaZHNgl07pXul++BsezoY=";
+        var publicKey = Convert.FromBase64String(publicKeyB64);
+        var privateKeyB64 = "bi3SJ0gfnWXpL3vkJIdgFetU5ZgmIGCYrLxEL9Nx2rQ=";
+        var privateKey = Convert.FromBase64String(privateKeyB64);
+        var payload = Encoding.UTF8.GetBytes("{\"timestamp\": 1700136384437}");
 
-            // Assert
-            Assert.IsTrue(result);
-        }
+        var key = Key.Import(SignatureAlgorithm.Ed25519, privateKey, KeyBlobFormat.RawPrivateKey);
 
-        [TestMethod]
-        public void VerifySignature_InvalidSignature_ReturnsFalse()
-        {
-            var publicKeyB64 = "gwZ+LyQ+VLaIsWeSq3QFh+WaZHNgl07pXul++BsezoY=";
-            var publicKey = Convert.FromBase64String(publicKeyB64);
-            var privateKeyB64 = "bi3SJ0gfnWXpL3vkJIdgFetU5ZgmIGCYrLxEL9Nx2rQ=";
-            var privateKey = Convert.FromBase64String(privateKeyB64);
-            var payload = Encoding.UTF8.GetBytes("{\"timestamp\": 1700136384437}");
+        var signature = SignatureAlgorithm.Ed25519.Sign(key, payload);
 
-            var key = Key.Import(SignatureAlgorithm.Ed25519, privateKey, KeyBlobFormat.RawPrivateKey);
+        // Act
+        bool result = SignatureVerificationMiddleware.VerifySignature(publicKey, payload, signature);
 
-            var validSignature = SignatureAlgorithm.Ed25519.Sign(key, payload);
+        // Assert
+        Assert.IsTrue(result);
+    }
 
-            // Modifying the payload to create an invalid signature
-            byte[] modifiedPayload = Encoding.UTF8.GetBytes("{\"timestamp\": 17001363844}");
+    [TestMethod]
+    public void VerifySignature_InvalidSignature()
+    {
+        var publicKeyB64 = "gwZ+LyQ+VLaIsWeSq3QFh+WaZHNgl07pXul++BsezoY=";
+        var publicKey = Convert.FromBase64String(publicKeyB64);
+        var privateKeyB64 = "bi3SJ0gfnWXpL3vkJIdgFetU5ZgmIGCYrLxEL9Nx2rQ=";
+        var privateKey = Convert.FromBase64String(privateKeyB64);
+        var payload = Encoding.UTF8.GetBytes("{\"timestamp\": 1700136384437}");
 
-            // Act
-            bool result = SignatureVerificationMiddleware.VerifySignature(publicKey, modifiedPayload, validSignature);
+        var key = Key.Import(SignatureAlgorithm.Ed25519, privateKey, KeyBlobFormat.RawPrivateKey);
 
-            // Assert
-            Assert.IsFalse(result);
-        }
+        var validSignature = SignatureAlgorithm.Ed25519.Sign(key, payload);
+
+        // Modifying the payload to create an invalid signature
+        byte[] modifiedPayload = Encoding.UTF8.GetBytes("{\"timestamp\": 17001363844}");
+
+        // Act
+        bool result = SignatureVerificationMiddleware.VerifySignature(publicKey, modifiedPayload, validSignature);
+
+        // Assert
+        Assert.IsFalse(result);
+    }
+
+    public record MessageObject(string Message);
+
+    [TestMethod]
+    public async Task VerifySignatureMiddleware_ValidSignature()
+    {
+        // create get request
+        var request = new HttpRequestMessage(HttpMethod.Post, "/");
+        request.Content = new StringContent("{\"message\":\"HELLO\"}");
+        request.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+        request.Headers.Add("x-algorithm", "ED25519");
+        request.Headers.Add("x-timestamp", "1577836800");
+        request.Headers.Add("x-signature", "ksnz8fzvQerq3uTgYYisKqLu/tZJWcYQYPW4UAl62FREqm6T9PDGiAIjwiePL6SC4jE7X59r8llhUQqgQKQ1DQ==");
+        request.Headers.Add("x-public-key", "gwZ+LyQ+VLaIsWeSq3QFh+WaZHNgl07pXul++BsezoY=");
+
+        // send request
+        var response = await client.SendAsync(request);
+
+        Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+
+        var responseString = await response.Content.ReadAsStringAsync();
+        Assert.AreEqual("Hello World HELLO!", responseString);
+    }
+
+    [TestMethod]
+    public async Task VerifySignatureMiddleware_InvalidSignature()
+    {
+        // create get request
+        var request = new HttpRequestMessage(HttpMethod.Post, "/");
+        request.Content = new StringContent("{\"message\":\"HELLO\"}");
+        request.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+        request.Headers.Add("x-algorithm", "ED25519");
+        request.Headers.Add("x-timestamp", "1577836801");
+        request.Headers.Add("x-signature", "ksnz8fzvQerq3uTgYYisKqLu/tZJWcYQYPW4UAl62FREqm6T9PDGiAIjwiePL6SC4jE7X59r8llhUQqgQKQ1DQ==");
+        request.Headers.Add("x-public-key", "gwZ+LyQ+VLaIsWeSq3QFh+WaZHNgl07pXul++BsezoY=");
+
+        // send request
+        var response = await client.SendAsync(request);
+
+        Assert.AreEqual(HttpStatusCode.Forbidden, response.StatusCode);
+
+        var responseString = await response.Content.ReadAsStringAsync();
+        Assert.AreEqual("""{"Errors":[{"Code":"Forbidden","Message":"Invalid signature","Target":"x-signature"}]}""", responseString);
+    }
+
+    [TestMethod]
+    public async Task VerifySignatureMiddleware_InvalidAlgorithm()
+    {
+        // create get request
+        var request = new HttpRequestMessage(HttpMethod.Post, "/");
+        request.Content = new StringContent("{\"message\":\"HELLO\"}");
+        request.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+        request.Headers.Add("x-algorithm", "RSA");
+        request.Headers.Add("x-timestamp", "1577836801");
+        request.Headers.Add("x-signature", "ksnz8fzvQerq3uTgYYisKqLu/tZJWcYQYPW4UAl62FREqm6T9PDGiAIjwiePL6SC4jE7X59r8llhUQqgQKQ1DQ==");
+        request.Headers.Add("x-public-key", "gwZ+LyQ+VLaIsWeSq3QFh+WaZHNgl07pXul++BsezoY=");
+
+        // send request
+        var response = await client.SendAsync(request);
+
+        Assert.AreEqual(HttpStatusCode.Forbidden, response.StatusCode);
+
+        var responseString = await response.Content.ReadAsStringAsync();
+        Assert.AreEqual("""{"Errors":[{"Code":"Forbidden","Message":"Invalid Header","Target":"x-algorithm"}]}""", responseString);
+    }
+
+    public void Dispose()
+    {
+        host.Dispose();
     }
 }
