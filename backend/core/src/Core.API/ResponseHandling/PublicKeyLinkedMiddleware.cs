@@ -2,10 +2,12 @@
 // under the Apache License, Version 2.0. See the NOTICE file at the root
 // of this distribution or at http://www.apache.org/licenses/LICENSE-2.0
 
-﻿using Core.Domain.Repositories;
 using System.Net;
 using System.Security.Claims;
 using System.Security.Principal;
+using Core.Domain.Exceptions;
+using Core.Domain.Repositories;
+using Core.Presentation.Models;
 
 namespace Core.API.ResponseHandling;
 
@@ -17,13 +19,16 @@ public class PublicKeyLinkedMiddleware
 {
     private readonly ICustomerDeviceRepository _customerDeviceRepository;
     private readonly RequestDelegate _next;
+    private readonly ILogger<PublicKeyLinkedMiddleware> _logger;
 
     public PublicKeyLinkedMiddleware(
         ICustomerDeviceRepository customerDeviceRepository,
-        RequestDelegate next)
+        RequestDelegate next,
+        ILogger<PublicKeyLinkedMiddleware> logger)
     {
         _customerDeviceRepository = customerDeviceRepository;
         _next = next;
+        _logger = logger;
     }
 
     public async Task Invoke(HttpContext context)
@@ -41,10 +46,9 @@ public class PublicKeyLinkedMiddleware
             if (customerDevices is null
                 || customerDevices.PublicKeys.All(keys => keys.PublicKey != pubKey))
             {
-                // TODO: make this a custom error
-
-                context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
-                await context.Response.WriteAsync("Public key not linked to user");
+                _logger.LogError("Public key not linked to user");
+                var customErrors = new CustomErrors(new CustomError("Forbidden", "Unknown public-key", "x-public-key"));
+                await WriteCustomErrors(context.Response, customErrors, (int)HttpStatusCode.Forbidden);
                 return;
             }
         }
@@ -82,5 +86,15 @@ public class PublicKeyLinkedMiddleware
 
         return context.Request.Path.StartsWithSegments("/health")
                || excludeList.Contains(endpointName);
+    }
+
+    private static async Task WriteCustomErrors(HttpResponse httpResponse, CustomErrors customErrors, int statusCode)
+    {
+        httpResponse.StatusCode = statusCode;
+        httpResponse.ContentType = "application/json";
+
+        var response = CustomErrorsResponse.FromCustomErrors(customErrors);
+        var json = System.Text.Json.JsonSerializer.Serialize(response);
+        await httpResponse.WriteAsync(json);
     }
 }

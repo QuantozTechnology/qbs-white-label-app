@@ -87,7 +87,7 @@ public class PublicKeyLinkedMiddlewareTests : IDisposable
         var response = await client.GetAsync("/verify");
 
         var responseString = await response.Content.ReadAsStringAsync();
-        Assert.AreEqual("Public key not linked to user",
+        Assert.AreEqual("""{"Errors":[{"Code":"Forbidden","Message":"Unknown public-key","Target":"x-public-key"}]}""",
             responseString);
         Assert.AreEqual(HttpStatusCode.Forbidden, response.StatusCode);
     }
@@ -100,7 +100,7 @@ public class PublicKeyLinkedMiddlewareTests : IDisposable
         var response = await client.GetAsync("/verify");
 
         var responseString = await response.Content.ReadAsStringAsync();
-        Assert.AreEqual("Public key not linked to user",
+        Assert.AreEqual("""{"Errors":[{"Code":"Forbidden","Message":"Unknown public-key","Target":"x-public-key"}]}""",
             responseString);
         Assert.AreEqual(HttpStatusCode.Forbidden, response.StatusCode);
     }
