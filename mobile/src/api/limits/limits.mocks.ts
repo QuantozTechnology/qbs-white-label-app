@@ -2,7 +2,7 @@
 // under the Apache License, Version 2.0. See the NOTICE file at the root
 // of this distribution or at http://www.apache.org/licenses/LICENSE-2.0
 
-import { rest } from "msw";
+import { HttpResponse, http } from "msw";
 import { backendApiUrl } from "../../utils/axios";
 import { GenericApiResponse } from "../utils/api.interface";
 import { Limits } from "./limits.interface";
@@ -32,7 +32,7 @@ export const defaultLimitsMockResponse: GenericApiResponse<Limits[]> = {
 };
 
 export const limitsMocks = [
-  rest.get(`${backendApiUrl}/api/customers/limits`, (_req, rest, ctx) => {
-    return rest(ctx.status(200), ctx.json(defaultLimitsMockResponse));
+  http.get(`${backendApiUrl}/api/customers/limits`, _ => {
+    return HttpResponse.json(defaultLimitsMockResponse, { status: 200 });
   }),
 ];
