@@ -20,7 +20,7 @@ namespace Core.API.DependencyInjection
             services.AddValidatorsFromAssembly(Application.AssemblyReference.Assembly);
             services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(Application.AssemblyReference.Assembly));
 
-            services.AddSingleton<IDateTimeProvider, SystemDateTimeProvider>();
+            services.AddSingleton(TimeProvider.System);
 
             return services;
         }

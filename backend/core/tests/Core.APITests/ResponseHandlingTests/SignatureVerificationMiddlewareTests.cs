@@ -3,13 +3,13 @@
 // of this distribution or at http://www.apache.org/licenses/LICENSE-2.0
 
 using Core.API.ResponseHandling;
-using Core.Domain;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Time.Testing;
 using NSec.Cryptography;
 using System.Net;
 using System.Net.Http.Headers;
@@ -33,8 +33,8 @@ public sealed class SignatureVerificationMiddlewareTests : IDisposable
                     .UseTestServer()
                     .ConfigureServices(services =>
                     {
-                        services.AddSingleton<IDateTimeProvider>(
-                            new StaticDateTimeProvider(
+                        services.AddSingleton<TimeProvider>(
+                            new FakeTimeProvider(
                                 DateTimeOffset.FromUnixTimeSeconds(1577836800)));
                     })
                     .Configure(app =>
