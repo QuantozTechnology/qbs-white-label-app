@@ -2,33 +2,33 @@
 // under the Apache License, Version 2.0. See the NOTICE file at the root
 // of this distribution or at http://www.apache.org/licenses/LICENSE-2.0
 
-import { rest } from "msw";
+import { HttpResponse, http } from "msw";
 import { backendApiUrl } from "../../utils/axios";
 import { GenericApiResponse } from "../utils/api.interface";
-import { IWithdrawFees } from "./withdraw.interface";
+import { WithdrawResponse } from "./withdraw.interface";
 
-export const defaultWithdrawFeeResponse: GenericApiResponse<IWithdrawFees> = {
+export const defaultWithdrawFeeResponse: WithdrawResponse = {
   value: {
-    executedFiat: 10,
-    fees: {
-      bankFeeFiat: 1,
-      serviceFeeFiat: 1,
+      requestedFiat: 12,
+      fees: {
+        bankFeeFiat: 1,
+        serviceFeeFiat: 1,
+      },
+      executedFiat: 10
     },
-    requestedFiat: 12,
-  },
 };
 
 export const withdrawMocks = [
-  rest.post(
+  http.post(
     `${backendApiUrl}/api/transactions/withdraws`,
-    (_req, rest, ctx) => {
-      return rest(ctx.status(201));
+    _ => {
+      return new Response(null, { status: 201 });
     }
   ),
-  rest.get(
+  http.get(
     `${backendApiUrl}/api/transactions/withdraws/fees`,
-    (_req, rest, ctx) => {
-      return rest(ctx.status(200), ctx.json(defaultWithdrawFeeResponse));
+    _ => {
+      return HttpResponse.json(defaultWithdrawFeeResponse, { status: 200 });
     }
   ),
 ];

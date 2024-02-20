@@ -2,7 +2,7 @@
 // under the Apache License, Version 2.0. See the NOTICE file at the root
 // of this distribution or at http://www.apache.org/licenses/LICENSE-2.0
 
-import { rest } from "msw";
+import { HttpResponse, http } from "msw";
 import { Customer } from "../../api/customer/customer.interface";
 import { customerMocksDefaultResponse } from "../../api/customer/customer.mocks";
 import { genericApiError } from "../../api/generic/error.interface";
@@ -39,8 +39,10 @@ describe("Security centre overview", () => {
 
   it("shows full screen error if customer API returns error", async () => {
     server.use(
-      rest.get(`${backendApiUrl}/api/customers`, (_req, rest, ctx) => {
-        return rest(ctx.status(400), ctx.json({ ...genericApiError }));
+      http.get(`${backendApiUrl}/api/customers`, _ => {
+        return HttpResponse.json({
+          ...genericApiError,
+        }, { status: 400 });
       })
     );
 
@@ -60,8 +62,8 @@ describe("Security centre overview", () => {
 
   it("shows full screen error if label partner limits API returns error", async () => {
     server.use(
-      rest.get(`${backendApiUrl}/api/trustlevels`, (_req, rest, ctx) => {
-        return rest(ctx.status(400));
+      http.get(`${backendApiUrl}/api/trustlevels`, _ => {
+        return new HttpResponse(null, { status: 400 });
       })
     );
 
@@ -81,14 +83,11 @@ describe("Security centre overview", () => {
 
   it("hides description and changes behavior of onPress if customer is a business", async () => {
     server.use(
-      rest.get(`${backendApiUrl}/api/customers`, (_req, rest, ctx) => {
-        return rest(
-          ctx.status(200),
-          ctx.json<GenericApiResponse<Customer>>({
-            ...customerMocksDefaultResponse,
-            value: { ...customerMocksDefaultResponse.value, isBusiness: true },
-          })
-        );
+      http.get(`${backendApiUrl}/api/customers`, _ => {
+        return HttpResponse.json<GenericApiResponse<Customer>>({
+          ...customerMocksDefaultResponse,
+          value: { ...customerMocksDefaultResponse.value, isBusiness: true },
+        }, { status: 200 });
       })
     );
 

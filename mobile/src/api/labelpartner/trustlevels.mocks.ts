@@ -2,7 +2,7 @@
 // under the Apache License, Version 2.0. See the NOTICE file at the root
 // of this distribution or at http://www.apache.org/licenses/LICENSE-2.0
 
-import { rest } from "msw";
+import { HttpResponse, http } from "msw";
 import { backendApiUrl } from "../../utils/axios";
 import { GenericApiResponse } from "../utils/api.interface";
 import { Tiers } from "./trustlevels.interface";
@@ -49,7 +49,7 @@ const defaultTrustlevelsResponse: GenericApiResponse<Tiers> = {
 };
 
 export const trustlevelsMocks = [
-  rest.get(`${backendApiUrl}/api/trustlevels`, (_req, rest, ctx) => {
-    return rest(ctx.status(200), ctx.json(defaultTrustlevelsResponse));
+  http.get(`${backendApiUrl}/api/trustlevels`, _ => {
+    return HttpResponse.json(defaultTrustlevelsResponse, { status: 200 });
   }),
 ];

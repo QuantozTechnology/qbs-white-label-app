@@ -2,14 +2,14 @@
 // under the Apache License, Version 2.0. See the NOTICE file at the root
 // of this distribution or at http://www.apache.org/licenses/LICENSE-2.0
 
-import { rest } from "msw";
+import { http } from "msw";
 import { backendApiUrl } from "../../utils/axios";
 
 export const filesMocks = [
-  rest.post(
+  http.post(
     `${backendApiUrl}/api/customers/files/IdFront`,
-    (req, rest, ctx) => {
-      return rest(ctx.status(201));
+      _ => {
+      return new Response(null, { status: 201 });
     }
   ),
 ];
