@@ -6,28 +6,6 @@ using System.Collections;
 
 namespace Core.Domain
 {
-    public interface IDateTimeProvider
-    {
-        public DateTimeOffset UtcNow { get; }
-    }
-
-    public class StaticDateTimeProvider : IDateTimeProvider
-    {
-        private readonly DateTimeOffset dateTimeOffset;
-
-        public StaticDateTimeProvider(DateTimeOffset dateTimeOffset)
-        {
-            this.dateTimeOffset = dateTimeOffset;
-        }
-
-        public DateTimeOffset UtcNow => dateTimeOffset;
-    }
-
-    public class SystemDateTimeProvider : IDateTimeProvider
-    {
-        public DateTimeOffset UtcNow => DateTimeOffset.UtcNow;
-    }
-
     // https://dvoituron.com/2020/01/22/UnitTest-DateTime/
     public class DateTimeProvider
     {
