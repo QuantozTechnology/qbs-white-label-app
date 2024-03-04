@@ -22,8 +22,8 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.19.6" />
-    <PackageReference Include="Quantoz.Nexus.Sdk.Shared" Version="1.4.0" />
-    <PackageReference Include="Quantoz.Nexus.Sdk.Token" Version="1.4.0" />
+    <PackageReference Include="Quantoz.Nexus.Sdk.Shared" Version="1.7.0" />
+    <PackageReference Include="Quantoz.Nexus.Sdk.Token" Version="1.7.0" />
     <PackageReference Include="Quartz.Extensions.DependencyInjection" Version="3.8.1" />
     <PackageReference Include="Quartz.Extensions.Hosting" Version="3.8.1" />
     <PackageReference Include="ReHackt.Extensions.Options.Validation" Version="8.0.2" />

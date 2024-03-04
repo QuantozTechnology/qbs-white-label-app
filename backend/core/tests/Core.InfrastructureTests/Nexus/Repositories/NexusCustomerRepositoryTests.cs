@@ -45,7 +45,7 @@ namespace Core.InfrastructureTests.Nexus.Repositories
 
             await repo.CreateAsync(customer);
 
-            var expected = new CustomerRequest
+            var expected = new CreateCustomerRequest
             {
                 CustomerCode = "TestCustomer",
                 CurrencyCode = "EUR",
@@ -92,7 +92,7 @@ namespace Core.InfrastructureTests.Nexus.Repositories
             var repo = new NexusCustomerRepository(server.Object, DefaultOptions.TokenOptions);
             await repo.CreateAsync(customer);
 
-            var expected = new CustomerRequest
+            var expected = new CreateCustomerRequest
             {
                 CustomerCode = "TestCustomer",
                 CurrencyCode = "EUR",

@@ -9,6 +9,7 @@ using Core.Domain.Repositories;
 using Core.Infrastructure.Nexus;
 using Microsoft.Extensions.Logging;
 using Quartz;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace Core.Infrastructure.Jobs
 {
@@ -59,12 +60,17 @@ namespace Core.Infrastructure.Jobs
                         throw new CustomErrorsException("MailService", "TokenPaymentCode", "An error occured while sending mail.");
                     }
 
-                    var transactions = await _transactionRepository.GetByCodeAsync(mail.References.TokenPaymentCode, context.CancellationToken);
+                    var query = new Dictionary<string, string>
+                    {
+                        { "customerCode", customerCode }
+                    };
+
+                    var transactions = await _transactionRepository.GetAsync(query, 1, 1, context.CancellationToken);
 
                     Transaction? transaction = null;
                     if (transactions != null && transactions.Items.Any())
                     {
-                        transaction = transactions.Items.FirstOrDefault();
+                        transaction = transactions.Items.FirstOrDefault(t => t.TransactionCode == mail.References.TokenPaymentCode);
                     }
 
                     try

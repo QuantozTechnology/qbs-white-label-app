@@ -109,14 +109,22 @@ namespace Core.Infrastructure.Nexus.Repositories
             };
         }
 
-        public async Task<Paged<Transaction>> GetByCodeAsync(string code, CancellationToken cancellationToken = default)
+        public async Task<Paged<Transaction>> GetAsync(Dictionary<string, string> parameters, int page, int pageSize, CancellationToken cancellationToken = default)
         {
-            int page = 1; // default value
-            int pageSize = 10; // default value
+            var query = new Dictionary<string, string>
+            {
+                { "page", page.ToString() },
+                { "limit", pageSize.ToString() },
+            };
 
-            var response = await _tokenServer.Operations.Get(code);
+            foreach (var item in parameters)
+            {
+                query[item.Key] = item.Value;
+            }
 
-            var operations = response.Records;
+            var response = await _tokenServer.Operations.Get(query);
+
+            var operations = response.Records.Where(t => t.Status == "SubmissionCompleted");
 
             var items = new List<Transaction>();
 
