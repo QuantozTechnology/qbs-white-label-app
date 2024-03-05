@@ -18,6 +18,7 @@ import axios from "axios";
 import * as Linking from "expo-linking";
 import { decode } from "./utils";
 import Constants from "expo-constants";
+import * as SecureStore from "expo-secure-store";
 
 const appScheme = Array.isArray(Constants.expoConfig?.scheme)
   ? Constants.expoConfig?.scheme[0]
@@ -225,11 +226,13 @@ export const azureAuthProvider = (): IAsyncAuthProvider => {
       }
 
       if (request.nonce) {
-        if (!validIdToken(request.nonce, result.idToken, request.issuer)) {
+        if (validIdToken(request.nonce, result.idToken, request.issuer)) {
+          const idToken = decode<IdToken>(result.idToken);
+          await SecureStore.setItemAsync("oid", idToken.oid);
+        } else {
           return error(AuthErrorEnum.EX_INVALID_ID_TOKEN);
         }
       }
-
       return {
         type: "success",
         jwtAccessToken: result.accessToken,
@@ -297,12 +300,16 @@ export const azureAuthProvider = (): IAsyncAuthProvider => {
 
       if (request.nonce) {
         if (
-          !validIdToken(
+          validIdToken(
             request.nonce,
             result.idToken,
             Constants.expoConfig?.extra?.AUTH_AZURE_B2C_LOGIN_ISSUER
           )
         ) {
+          // store result.idToken.oid in expo secure store
+          const idToken = decode<IdToken>(result.idToken);
+          await SecureStore.setItemAsync("oid", idToken.oid);
+        } else {
           return error(AuthErrorEnum.REFRESH_INVALID_ID_TOKEN);
         }
       }
@@ -340,7 +347,7 @@ function validIdToken(nonce: string, jwtIdToken: string, issuer: string) {
   const idToken = decode<IdToken>(jwtIdToken);
   return (
     idToken.nonce === nonce &&
-    idToken.iss === issuer &&
+    idToken.iss.toLowerCase() === issuer.toLowerCase() &&
     idToken.aud === Constants.expoConfig?.extra?.AUTH_AZURE_B2C_CLIENT_ID
   );
 }
