@@ -6,11 +6,17 @@
 import { useQuery } from "@tanstack/react-query";
 import { paymentsApi } from "../../utils/axios";
 import { ICreateCustomer } from "./customer.interface";
+import * as SecureStore from "expo-secure-store";
+import { isNil } from "lodash";
 
 export async function getCustomer(): Promise<any> {
-  // Since API response is inconsistent, we are not able to specify the exact type
-  const response = await paymentsApi.get("/api/customers");
-  return response;
+  const oid = await SecureStore.getItemAsync("oid");
+  const publicKey = await SecureStore.getItemAsync(oid + "_publicKey");
+  if (!isNil(oid) && !isNil(publicKey)) {
+    // Since API response is inconsistent, we are not able to specify the exact type
+    const response = await paymentsApi.get("/api/customers");
+    return response;
+  }
 }
 
 export function useCustomer(options?: any) {
