@@ -11,6 +11,7 @@ import * as ed from "@noble/ed25519";
 import { sha512 } from "@noble/hashes/sha512";
 import { fromByteArray, toByteArray } from "react-native-quick-base64";
 import { Buffer } from "buffer";
+import { isNil } from "lodash";
 
 ed.etc.sha512Sync = (...m) => sha512(ed.etc.concatBytes(...m));
 
@@ -46,35 +47,53 @@ mockPaymentsApi.interceptors.response.use(
 );
 
 async function requestInterceptor(config: InternalAxiosRequestConfig) {
+  const oid = await SecureStore.getItemAsync("oid");
   const storage = authStorageService();
-  const accessToken = await storage.getAccessToken();
-  const authorizationHeader =
-    paymentsApi.defaults.headers.common["Authorization"];
-
-  const pubKeyFromStore = await SecureStore.getItemAsync("publicKey");
-  const privKeyFromStore = await SecureStore.getItemAsync("privateKey");
-
-  if (accessToken !== null || authorizationHeader == null) {
-    if (config.headers) {
-      config.headers["Authorization"] = `Bearer ${accessToken}`;
-
-      if (pubKeyFromStore !== null && privKeyFromStore != null) {
-        const sigData = getSignatureHeaders(new Date(), config.data, privKeyFromStore);
-        config.headers["x-public-key"] = pubKeyFromStore;
-        config.headers["x-timestamp"] = sigData.timestamp;
-        config.headers["x-signature"] = sigData.signature;
-        config.headers["x-algorithm"] = "ED25519";
-      }
+  let accessToken = await storage.getAccessToken();
+  if (isNil(accessToken)) {
+    // refresh token
+    const result = await AuthService().refresh();
+    if (result.type !== "error") {
+      accessToken = await authStorageService().getAccessToken();
     }
   }
 
+  const deviceRegistered = await SecureStore.getItemAsync(
+    oid + "_deviceRegistered"
+  );
+  const pubKeyFromStore = await SecureStore.getItemAsync(oid + "_publicKey");
+  const privKeyFromStore = await SecureStore.getItemAsync(oid + "_privateKey");
+  if (
+    !isNil(accessToken) &&
+    !isNil(pubKeyFromStore) &&
+    !isNil(privKeyFromStore) &&
+    !isNil(deviceRegistered)
+  ) {
+    if (config.headers) {
+      config.headers["Authorization"] = `Bearer ${accessToken}`;
+    }
+
+    const sigData = getSignatureHeaders(
+      new Date(),
+      config.data,
+      privKeyFromStore
+    );
+    config.headers["x-public-key"] = pubKeyFromStore;
+    config.headers["x-timestamp"] = sigData.timestamp;
+    config.headers["x-signature"] = sigData.signature;
+    config.headers["x-algorithm"] = "ED25519";
+  }
   return config;
 }
 
 // the date is supplied as a parameter to allow for testing
 // there were various issues with trying to mock it directly
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function getSignatureHeaders(date: Date, data: any, privKeyFromStore: string) {
+export function getSignatureHeaders(
+  date: Date,
+  data: unknown,
+  privKeyFromStore: string
+) {
   const timestampInSeconds = Math.floor(date.getTime() / 1000).toString(); // Convert current time to Unix timestamp in seconds
   const dataToSign = data
     ? timestampInSeconds + JSON.stringify(data)
@@ -103,13 +122,40 @@ async function responseInterceptor(response: AxiosResponse) {
 async function responseInterceptorError(error: any) {
   const originalRequest = error.config;
 
-  if (error.response.status === 401) {
-    const result = await AuthService().refresh();
-    if (result.type === "error") {
-      await AuthService().logout();
-    }
-    return paymentsApi(originalRequest);
-  } else {
+  // Check if we've already tried to retry the request
+  if (!originalRequest._retryCount) originalRequest._retryCount = 0;
+  if (originalRequest._retryCount > 2) {
+    // Stop retrying after 3 attempts
     return Promise.reject(error);
   }
+
+  if (error.response.status === 401) {
+    originalRequest._retryCount += 1; // Increment the retry count
+
+    try {
+      // Attempt to refresh the token
+      const result = await AuthService().refresh();
+      if (result.type === "error") {
+        // If refreshing fails, logout and reject the promise
+        await AuthService().logout();
+        return Promise.reject(error);
+      }
+
+      // fetch the new token
+      const newToken = await authStorageService().getAccessToken();
+
+      // Update the authorization header with the new token
+      originalRequest.headers["Authorization"] = `Bearer ${newToken}`;
+
+      // Retry the original request with the updated token
+      return paymentsApi(originalRequest);
+    } catch (refreshError) {
+      // If there's an error refreshing the token, log out and reject the promise
+      await AuthService().logout();
+      return Promise.reject(error);
+    }
+  }
+
+  // For all other errors, just reject the promise
+  return Promise.reject(error);
 }
