@@ -22,6 +22,9 @@ import { useBiometricValidation } from "../utils/hooks/useBiometricValidation";
 import { useDeviceHasScreenLock } from "../utils/hooks/useDeviceHasScreenLock";
 import CustomNavigationHeader from "../components/CustomNavigationHeader";
 import ConfirmDevice from "../screens/ConfirmDevice";
+import * as SecureStore from "expo-secure-store";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { isNil } from "lodash";
 
 export type WelcomeStackParamList = {
   Home: undefined;
@@ -57,6 +60,9 @@ export type CustomerStatus = {
 
 export default function WelcomeStackNavigator() {
   const auth = useAuth();
+  const { data: customer } = useCustomer({
+    enabled: auth?.userSession !== null,
+  });
   const customerContext = useCustomerState();
   // We must perform verification in order to display related loading screens.
   // First, biometrics, then verifyDevice, and finally screenLock.
@@ -66,6 +72,7 @@ export default function WelcomeStackNavigator() {
   const [shouldVerifyDevice, setShouldVerifyDevice] = useState(false);
   const [shouldCheckScreenLockMechanism, setShouldCheckScreenLockMechanism] =
     useState(false);
+  const [oid, setOid] = useState<string | null>(null);
 
   const {
     isBiometricCheckPassed,
@@ -77,6 +84,7 @@ export default function WelcomeStackNavigator() {
   const {
     error: deviceVerificationError,
     isLoading: isVerifyingDevice,
+    deviceVerified,
     deviceConflict,
   } = useDeviceVerification(shouldVerifyDevice);
 
@@ -86,68 +94,101 @@ export default function WelcomeStackNavigator() {
     isLoading: isCheckingScreenLockMechanism,
   } = useDeviceHasScreenLock(shouldCheckScreenLockMechanism);
 
-  const { data: customer } = useCustomer({
-    enabled: auth?.userSession !== null,
-  });
+  /*
+   * This is the last step of the verification process.
+   * It checks if the oid is stored in the SecureStore and applies the necessary logic.
+   */
+  const checkOid = async () => {
+    if (isNil(oid)) {
+      const customerId = await SecureStore.getItemAsync("oid");
+      const pubKeyFromStore = await SecureStore.getItemAsync(
+        customerId + "_publicKey"
+      );
 
-  useEffect(() => {
-    (async () => {
-      switch (currentOperation) {
-        case "verifyingDevice":
-          setShouldVerifyDevice(true);
-          break;
-
-        case "checkingScreenLock":
-          if (
-            (hasScreenLockMechanism || screenLockMechanismError) &&
-            !isCheckingScreenLockMechanism
-          ) {
-            setCurrentOperation("done");
+      if (isNil(customerId)) {
+        if (!isNil(auth?.userSession)) {
+          // something is wrong, logout
+          auth.logout();
+        }
+        setCurrentOperation("done");
+        return false;
+      } else {
+        if (!isNil(auth?.userSession)) {
+          // logout if there is no phone or email in userSession
+          if (isNil(auth.userSession.phone) || isNil(auth.userSession.email)) {
+            //auth.logout();
           }
-          break;
+        }
+        const isDeviceRegistered = await AsyncStorage.getItem(
+          customerId + "_deviceRegistered"
+        );
+        if (isNil(pubKeyFromStore) && isDeviceRegistered) {
+          // something is wrong, remove deviceRegistered and oid
+          await AsyncStorage.removeItem(customerId + "_deviceRegistered");
+          await SecureStore.deleteItemAsync("oid");
+          checkOid();
+        } else {
+          // set oid and start device verification process
+          setOid(customerId);
+          setShouldVerifyDevice(true);
+          setCurrentOperation("verifyingDevice");
+          return customerId;
+        }
       }
-    })();
-  }, [currentOperation]);
+    } else {
+      if (!shouldVerifyDevice) {
+        setShouldVerifyDevice(true);
+        setCurrentOperation("verifyingDevice");
+      }
+      return oid;
+    }
+  };
 
   useEffect(() => {
-    if (!isCheckingBiometric && isBiometricCheckPassed) {
-      setCurrentOperation("verifyingDevice");
-    } else {
+    if (!isCheckingBiometric) {
       if (biometricCheckError) {
         setCurrentOperation("done");
+      } else if (isBiometricCheckPassed) {
+        setShouldCheckScreenLockMechanism(true);
+        setCurrentOperation("checkingScreenLock");
       }
     }
-  }, [isCheckingBiometric]);
+  }, [isCheckingBiometric, isBiometricCheckPassed, biometricCheckError]);
 
   useEffect(() => {
-    if (isBiometricCheckPassed) {
-      setCurrentOperation("verifyingDevice");
-    }
-  }, [isBiometricCheckPassed]);
-
-  useEffect(() => {
-    if (isBiometricCheckPassed && shouldVerifyDevice) {
-      if (!isVerifyingDevice && (deviceConflict || deviceVerificationError)) {
+    if (
+      isBiometricCheckPassed &&
+      hasScreenLockMechanism &&
+      shouldVerifyDevice
+    ) {
+      if (!isVerifyingDevice) {
+        // doesn't matter if there is an error or not
         setCurrentOperation("done");
-      } else {
-        if (!isVerifyingDevice) {
-          setShouldCheckScreenLockMechanism(true);
-          setCurrentOperation("checkingScreenLock");
-        }
       }
     }
   }, [isVerifyingDevice]);
 
   useEffect(() => {
     if (
-      isBiometricCheckPassed &&
-      shouldVerifyDevice &&
-      shouldCheckScreenLockMechanism &&
-      hasScreenLockMechanism
+      currentOperation === "checkingScreenLock" &&
+      !isCheckingScreenLockMechanism
     ) {
-      setCurrentOperation("done");
+      if (hasScreenLockMechanism || screenLockMechanismError) {
+        checkOid();
+      }
     }
-  }, [isCheckingScreenLockMechanism]);
+  }, [
+    shouldCheckScreenLockMechanism,
+    isCheckingScreenLockMechanism,
+    hasScreenLockMechanism,
+    screenLockMechanismError,
+  ]);
+
+  useEffect(() => {
+    if (deviceVerified) {
+      AsyncStorage.setItem("deviceVerified", "true");
+    }
+  }, [deviceVerified]);
 
   useEffect(() => {
     WebBrowser.warmUpAsync();
@@ -256,7 +297,6 @@ export default function WelcomeStackNavigator() {
       </WelcomeStack.Navigator>
     );
   }
-
   if (customerContext?.isLoading) {
     return <FullScreenLoadingSpinner message="Checking your account..." />;
   }
@@ -312,7 +352,7 @@ export default function WelcomeStackNavigator() {
       );
     }
 
-    if (customerContext?.error) {
+    if (customerContext?.error && isNil(customer?.data?.value?.email)) {
       return (
         <WelcomeStack.Screen
           name="Feedback"
