@@ -39,11 +39,18 @@ namespace Core.Infrastructure.Nexus.Repositories
             }
 
             var builder = new CreateCustomerRequestBuilder(customer.CustomerCode, customer.TrustLevel, customer.CurrencyCode)
+                .SetIsBusiness(customer.IsMerchant)
+                .SetBankAccounts(
+                [
+                    new()
+                    {
+                        BankAccountName = customer.GetName(),
+                        BankAccountNumber = null
+                    }
+                ])
                 .SetEmail(customer.Email)
                 .SetStatus(status)
-                .SetCustomData(customer.Data)
-                .SetBusiness(customer.IsMerchant)
-                .AddBankAccount(new CustomerBankAccountRequest { BankAccountName = customer.GetName(), BankAccountNumber = null });
+                .SetCustomData(customer.Data);
 
             await _tokenServer.Customers.Create(builder.Build(), ip);
         }
@@ -64,11 +71,10 @@ namespace Core.Infrastructure.Nexus.Repositories
                 throw new CustomErrorsException(NexusErrorCodes.InvalidStatus.ToString(), customer.Status.ToString(), "Invalid customer status");
             }
 
-            var builder = new UpdateCustomerRequestBuilder(customer.CustomerCode, customer.UpdateReason)
+            var builder = new UpdateCustomerRequestBuilder(customer.CustomerCode)
                 .SetEmail(customer.Email)
                 .SetStatus(status)
-                .SetCustomData(customer.Data)
-                .SetBusiness(customer.IsMerchant);
+                .SetCustomData(customer.Data);
 
             await _tokenServer.Customers.Update(builder.Build());
         }

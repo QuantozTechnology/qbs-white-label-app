@@ -39,49 +39,57 @@ namespace Core.Infrastructure.Jobs
 
         public async Task Execute(IJobExecutionContext context)
         {
-            var mails = _mailsRepository.GetMailsAsync(MailStatus.ReadyToSend.ToString(), context.CancellationToken).Result;
-
-            if (mails != null && mails.Any())
+            try
             {
-                foreach (var mail in mails)
+                var mails = _mailsRepository.GetMailsAsync(MailStatus.ReadyToSend.ToString(), context.CancellationToken).Result;
+
+                if (mails != null && mails.Any())
                 {
-                    var customerCode = mail.References?.CustomerCode;
-
-                    if (string.IsNullOrWhiteSpace(customerCode))
+                    foreach (var mail in mails)
                     {
-                        throw new CustomErrorsException("MailService", "customerCode", "An error occured while sending mail.");
+                        var customerCode = mail.References?.CustomerCode;
+
+                        if (string.IsNullOrWhiteSpace(customerCode))
+                        {
+                            throw new CustomErrorsException("MailService", "customerCode", "An error occured while sending mail.");
+                        }
+
+                        var customer = await _customerRepository.GetAsync(customerCode, context.CancellationToken);
+
+                        var query = new Dictionary<string, string>
+                        {
+                            { "customerCode", customerCode }
+                        };
+
+                        var transactions = await _transactionRepository.GetAsync(query, 1, 1, context.CancellationToken);
+
+                        Transaction? transaction = null;
+
+                        if (transactions != null && transactions.Items.Any() && mail.References != null)
+                        {
+                            transaction = transactions.Items.FirstOrDefault(t => t.TransactionCode == mail.References!.TokenPaymentCode);
+
+                            try
+                            {
+                                await _sendGridMailService.SendMailAsync(mail, customer, transaction!);
+                            }
+                            catch (Exception ex)
+                            {
+                                _logger.LogError("An error occured sending email {code} with message {message}", mail.Code, ex.Message);
+                            }
+
+                            // once email has been sent, call nexus to update the status of this mail to 'Sent'
+                            await _mailsRepository.UpdateMailSent(mail.Code);
+
+                            await _unitOfWork.SaveChangesAsync();
+                        }
                     }
-
-                    var customer = await _customerRepository.GetAsync(customerCode, context.CancellationToken);
-
-                    if (mail.References == null || string.IsNullOrWhiteSpace(mail.References.TokenPaymentCode))
-                    {
-                        throw new CustomErrorsException("MailService", "TokenPaymentCode", "An error occured while sending mail.");
-                    }
-
-                    var transactions = await _transactionRepository.GetByCodeAsync(mail.References.TokenPaymentCode, context.CancellationToken);
-
-                    Transaction? transaction = null;
-                    if (transactions != null && transactions.Items.Any())
-                    {
-                        transaction = transactions.Items.FirstOrDefault();
-                    }
-
-                    try
-                    {
-                        await _sendGridMailService.SendMailAsync(mail, customer, transaction!);
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger.LogError("An error occured sending email {code} with message {message}", mail.Code, ex.Message);
-                    }
-
-                    // once email has been sent, call nexus to update the status of this mail to 'Sent'
-                    await _mailsRepository.UpdateMailSent(mail.Code);
                 }
             }
-
-            await _unitOfWork.SaveChangesAsync();
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while processing emails: {exception}", ex);
+            }
         }
     }
 }
