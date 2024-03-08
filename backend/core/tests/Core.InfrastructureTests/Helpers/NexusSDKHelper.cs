@@ -27,6 +27,11 @@ namespace Core.InfrastructureTests.Helpers
             return new CustomerResponse(customerCode, "FirstName", "LastName", "2020-12-12", "123456", null, "PTrusted", "EUR", "NL", "test@email.com", "ACTIVE", "TestBankAccount", false, "Low", new Dictionary<string, string>());
         }
 
+        public static CustomerResponse DeletedPrivateCustomer(string customerCode)
+        {
+            return new CustomerResponse(customerCode, "FirstName", "LastName", "2020-12-12", "123456", null, "PTrusted", "EUR", "NL", "test@email.com", "DELETED", "TestBankAccount", false, "Low", new Dictionary<string, string>());
+        }
+
         public static IDictionary<string, string> AccountQuery(string customerCode)
         {
             return new Dictionary<string, string>()

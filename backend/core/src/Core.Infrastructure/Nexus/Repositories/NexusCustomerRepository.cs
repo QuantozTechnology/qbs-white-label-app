@@ -24,11 +24,23 @@ namespace Core.Infrastructure.Nexus.Repositories
 
         public async Task CreateAsync(Customer customer, string? ip = null, CancellationToken cancellationToken = default)
         {
-            var exists = await _tokenServer.Customers.Exists(customer.CustomerCode);
+            var customerCodeExists = await _tokenServer.Customers.Exists(customer.CustomerCode);
 
-            if (exists)
+            if (customerCodeExists)
             {
-                throw new CustomErrorsException(NexusErrorCodes.ExistingProperty.ToString(), customer.CustomerCode, Constants.NexusErrorMessages.ExistingProperty);
+                throw new CustomErrorsException(NexusErrorCodes.ExistingProperty.ToString(), customer.CustomerCode, Constants.NexusErrorMessages.ExistingCode);
+            }
+
+            var query = new Dictionary<string, string>
+            {
+                { "Email", customer.Email.TrimEnd() }
+            };
+
+            var existingCustomersWithEmail = await _tokenServer.Customers.Get(query);
+
+            if (existingCustomersWithEmail != null && existingCustomersWithEmail.Records.Any(existingCustomer => existingCustomer.Status != CustomerStatus.DELETED.ToString()))
+            {
+                throw new CustomErrorsException(NexusErrorCodes.ExistingProperty.ToString(), customer.Email, Constants.NexusErrorMessages.ExistingEmail);
             }
 
             var success = Enum.TryParse<CustomerStatus>(customer.Status.ToString(), out var status);

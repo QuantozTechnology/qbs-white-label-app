@@ -19,7 +19,8 @@ namespace Core.Infrastructure.Nexus
         {
             public const string CustomerNotFound = "There is no customer with this customer code";
             public const string AccountNotFound = "There is no account for this customer";
-            public const string ExistingProperty = "A customer with this code already exists";
+            public const string ExistingCode = "A customer with this code already exists";
+            public const string ExistingEmail = "A customer with this email already exists";
         }
     }
 }
