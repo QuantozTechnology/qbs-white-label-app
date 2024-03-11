@@ -24,7 +24,7 @@ namespace Core.InfrastructureTests.Helpers
 
         public static CustomerResponse PrivateCustomer(string customerCode)
         {
-            return new CustomerResponse(customerCode, "PTrusted", "EUR", null, "test@test.com", "ACTIVE", "TestBankAccount", false, new Dictionary<string, string>());
+            return new CustomerResponse(customerCode, "FirstName", "LastName", "2020-12-12", "123456", null, "PTrusted", "EUR", "NL", "test@email.com", "ACTIVE", "TestBankAccount", false, "Low", new Dictionary<string, string>());
         }
 
         public static IDictionary<string, string> AccountQuery(string customerCode)
@@ -65,7 +65,7 @@ namespace Core.InfrastructureTests.Helpers
             return new AccountBalancesResponse(balances);
         }
 
-        public static bool AreEqual(CustomerRequest request1, CustomerRequest request2)
+        public static bool AreEqual(CreateCustomerRequest request1, CreateCustomerRequest request2)
         {
             return request1.IsBusiness == request2.IsBusiness
                 && request1.CustomerCode == request2.CustomerCode
