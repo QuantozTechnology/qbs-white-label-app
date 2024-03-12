@@ -6,11 +6,11 @@ import * as auth from "../../auth/AuthContext";
 import { render, screen } from "../../jest/test-utils";
 import * as LocalAuthenticationOrig from "expo-local-authentication";
 import WelcomeStack from "../WelcomeStack";
-// import { server } from "../../mocks/server";
-// import {
-//   deviceNotKnownApiResponse,
-//   devicesApiErrorResponse,
-// } from "../../api/customer/devices.mocks";
+import { server } from "../../mocks/server";
+import {
+  deviceNotKnownApiResponse,
+  devicesApiErrorResponse,
+} from "../../api/customer/devices.mocks";
 import * as CustomerContext from "../../context/CustomerContext";
 import {
   mockPrivateKeyPem,
@@ -19,9 +19,9 @@ import {
 } from "../../jest/jest.setup";
 import { biometricValidation } from "../../utils/biometric";
 
-// const LocalAuthentication = LocalAuthenticationOrig as jest.Mocked<
-//   typeof LocalAuthenticationOrig
-// >;
+const LocalAuthentication = LocalAuthenticationOrig as jest.Mocked<
+  typeof LocalAuthenticationOrig
+>;
 
 jest.mock("expo-secure-store", () => ({
   getItemAsync: jest.fn((key: string) => {
@@ -85,34 +85,34 @@ describe("WelcomeStack", () => {
     });
   });
 
-  // describe("Lock mechanism checks", () => {
-  //   it("shows an error screen if the screen lock mechanism check fails", async () => {
-  //     LocalAuthentication.getEnrolledLevelAsync.mockRejectedValueOnce(
-  //       new Error("Cannot get enrolled level")
-  //     );
+  describe("Lock mechanism checks", () => {
+    it("shows an error screen if the screen lock mechanism check fails", async () => {
+      LocalAuthentication.getEnrolledLevelAsync.mockRejectedValueOnce(
+        new Error("Cannot get enrolled level")
+      );
 
-  //     render(<WelcomeStack />);
+      render(<WelcomeStack />);
 
-  //     expect(
-  //       await screen.findByLabelText("feedback description")
-  //     ).toHaveTextContent(
-  //       "Cannot verify if your device has a screen lock mechanism. Please try again later"
-  //     );
-  //   });
-  //   // it("shows an error screen if the user has no security check on their phone", async () => {
-  //   //   LocalAuthentication.getEnrolledLevelAsync.mockResolvedValueOnce(
-  //   //     LocalAuthenticationOrig.SecurityLevel.NONE
-  //   //   );
+      expect(
+        await screen.findByLabelText("feedback description")
+      ).toHaveTextContent(
+        "Cannot verify if your device has a screen lock mechanism. Please try again later"
+      );
+    });
+    it("shows an error screen if the user has no security check on their phone", async () => {
+      LocalAuthentication.getEnrolledLevelAsync.mockResolvedValueOnce(
+        LocalAuthenticationOrig.SecurityLevel.NONE
+      );
 
-  //   //   render(<WelcomeStack />);
+      render(<WelcomeStack />);
 
-  //   //   expect(
-  //   //     await screen.findByLabelText("feedback description")
-  //   //   ).toHaveTextContent(
-  //   //     "Your device has no security measures set up (pin, passcode or fingerprint/faceID). Please enable one of these to be able to use the app."
-  //   //   );
-  //   // });
-  // });
+      expect(
+        await screen.findByLabelText("feedback description")
+      ).toHaveTextContent(
+        "Your device has no security measures set up (pin, passcode or fingerprint/faceID). Please enable one of these to be able to use the app."
+      );
+    });
+  });
 
   describe("Biometric checks", () => {
     it("shows an error screen if the biometric check throws error", async () => {
@@ -129,56 +129,56 @@ describe("WelcomeStack", () => {
       );
     });
 
-    // it("shows an error screen if the user does not pass the biometric check", async () => {
-    //   (biometricValidation as jest.Mock).mockImplementationOnce(() =>
-    //     Promise.resolve({
-    //       result: "error",
-    //       message: "biometric check not passed",
-    //     })
-    //   );
+    it("shows an error screen if the user does not pass the biometric check", async () => {
+      (biometricValidation as jest.Mock).mockImplementationOnce(() =>
+        Promise.resolve({
+          result: "error",
+          message: "biometric check not passed",
+        })
+      );
 
-    //   render(<WelcomeStack />);
+      render(<WelcomeStack />);
 
-    //   expect(
-    //     await screen.findByLabelText("full screen message title")
-    //   ).toHaveTextContent("Biometric check error");
-    //   expect(
-    //     await screen.findByLabelText("full screen message description")
-    //   ).toHaveTextContent("Please try again");
-    // });
+      expect(
+        await screen.findByLabelText("full screen message title")
+      ).toHaveTextContent("Biometric check error");
+      expect(
+        await screen.findByLabelText("full screen message description")
+      ).toHaveTextContent("Please try again");
+    });
   });
 
-  // describe("Device checks", () => {
-  //   beforeEach(() => {
-  //     (biometricValidation as jest.Mock).mockImplementation(() =>
-  //       Promise.resolve({
-  //         result: "success",
-  //       })
-  //     );
-  //   });
+  describe("Device checks", () => {
+    beforeEach(() => {
+      (biometricValidation as jest.Mock).mockImplementation(() =>
+        Promise.resolve({
+          result: "success",
+        })
+      );
+    });
 
-  //   // it("shows an error screen if the device check throws an error", async () => {
-  //   //   server.use(devicesApiErrorResponse);
+    it("shows an error screen if the device check throws an error", async () => {
+      server.use(devicesApiErrorResponse);
 
-  //   //   render(<WelcomeStack />);
+      render(<WelcomeStack />);
 
-  //   //   expect(
-  //   //     await screen.findByLabelText("feedback description")
-  //   //   ).toHaveTextContent(
-  //   //     "Cannot securely verify your device. Please try again later"
-  //   //   );
-  //   // });
+      expect(
+        await screen.findByLabelText("feedback description")
+      ).toHaveTextContent(
+        "Cannot securely verify your device. Please try again later"
+      );
+    });
 
-  //   // it(" ", async () => {
-  //   //   server.use(deviceNotKnownApiResponse);
+    it(" ", async () => {
+      server.use(deviceNotKnownApiResponse);
 
-  //   //   render(<WelcomeStack />);
+      render(<WelcomeStack />);
 
-  //   //   expect(
-  //   //     await screen.findByLabelText("confirm device screen")
-  //   //   ).toBeVisible();
-  //   // });
-  // });
+      expect(
+        await screen.findByLabelText("confirm device screen")
+      ).toBeVisible();
+    });
+  });
 
   describe("Customer checks", () => {
     beforeEach(() => {
