@@ -55,6 +55,18 @@ export function useDeviceVerification(shouldVerify: boolean) {
       let pubKey = await SecureStore.getItemAsync("publicKey");
       let privKey = await SecureStore.getItemAsync("privateKey");
 
+      // If the keys are longer than 64 characters, they are most likely RSA keys, so we clear them
+      if (privKey && privKey?.length > 64) {
+        console.log(
+          "Clearing keys from SecureStore as they are most likely RSA keys"
+        );
+
+        await SecureStore.deleteItemAsync("privateKey");
+        privKey = null;
+        await SecureStore.deleteItemAsync("publicKey");
+        pubKey = null;
+      }
+
       if (!pubKey || !privKey) {
         const keys = generateKeys();
         pubKey = keys.pubKey;
@@ -62,6 +74,7 @@ export function useDeviceVerification(shouldVerify: boolean) {
 
         await storeKeys(pubKey, privKey, null);
       }
+
       const verificationResult = await verifyDevice({ publicKey: pubKey });
       // Handle the case where the API response is not as expected, so we don't run into errors
       try {
