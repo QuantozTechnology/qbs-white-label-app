@@ -3,7 +3,10 @@
 // of this distribution or at http://www.apache.org/licenses/LICENSE-2.0
 
 import { Token } from "./types";
-import jwt_decode from "jwt-decode";
+import { jwtDecode } from "jwt-decode";
+
+import { atob } from "react-native-quick-base64";
+global.atob = atob;
 
 /**
  * Returns true if the token is expired or does not exist and false otherwise
@@ -32,7 +35,7 @@ export function isExpired(token: Token): boolean {
  * @returns T
  */
 export function decode<T>(jwtIdToken: string) {
-  return jwt_decode<T>(jwtIdToken);
+  return jwtDecode<T>(jwtIdToken);
 }
 
 /**

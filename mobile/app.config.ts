@@ -102,6 +102,8 @@ export default () => ({
             "The app accesses your photos to let you upload the necessary documentation.",
         },
       ],
+      "expo-font",
+      "expo-secure-store"
     ],
     scheme: process.env.SCHEME,
     platforms: ["ios", "android"],
