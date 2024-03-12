@@ -9,6 +9,7 @@ using Core.InfrastructureTests.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using Nexus.Sdk.Shared.Requests;
+using Nexus.Sdk.Shared.Responses;
 using Nexus.Sdk.Token;
 
 namespace Core.InfrastructureTests.Nexus.Repositories
@@ -142,6 +143,80 @@ namespace Core.InfrastructureTests.Nexus.Repositories
 
             server.Verify(s => s.Customers.Exists("TestCustomer"), Times.Once());
             server.Verify(s => s.Customers.Create(It.IsAny<CreateCustomerRequest>(), It.IsAny<string>()), Times.Never);
+        }
+
+        [TestMethod()]
+        public async Task CreateCustomer_Creating_Throws_EmailExistsError_TestAsync()
+        {
+            var server = new Mock<ITokenServer>();
+            server.Setup(s => s.Customers.Get(It.IsAny<Dictionary<string, string>>()))
+                .Returns(Task.FromResult(new PagedResponse<CustomerResponse>(
+                    page: 1,
+                    total: 1,
+                    totalPages: 1,
+                    filteringParameters: new Dictionary<string, string>(),
+                    records: [NexusSDKHelper.PrivateCustomer("TestCustomer123")])));
+
+            var repo = new NexusCustomerRepository(server.Object, DefaultOptions.TokenOptions);
+
+            var customer = new Customer()
+            {
+                CustomerCode = "TestCustomer",
+                CurrencyCode = string.Empty,
+                Email = "test@email.com",
+                IsMerchant = false,
+                Status = "ACTIVE",
+                TrustLevel = string.Empty,
+                BankAccount = string.Empty,
+                Data = new Dictionary<string, string>
+                {
+                    { "Key1", "Value1"},
+                    { "Key2", "Value2"}
+                }
+            };
+
+            var ex = await Assert.ThrowsExceptionAsync<CustomErrorsException>(async () => await repo.CreateAsync(customer));
+
+            Assert.AreEqual("ExistingProperty", ex.CustomErrors.Errors[0].Code);
+            Assert.AreEqual("A customer with this email already exists", ex.CustomErrors.Errors[0].Message);
+
+            server.Verify(s => s.Customers.Exists("TestCustomer"), Times.Once());
+            server.Verify(s => s.Customers.Create(It.IsAny<CreateCustomerRequest>(), It.IsAny<string>()), Times.Never);
+        }
+
+        [TestMethod()]
+        public async Task CreateCustomer_Creating_EmailExists_StatusDeleted_Success_TestAsync()
+        {
+            var server = new Mock<ITokenServer>();
+            server.Setup(s => s.Customers.Get(It.IsAny<Dictionary<string, string>>()))
+                .Returns(Task.FromResult(new PagedResponse<CustomerResponse>(
+                    page: 1,
+                    total: 1,
+                    totalPages: 1,
+                    filteringParameters: new Dictionary<string, string>(),
+                    records: [NexusSDKHelper.DeletedPrivateCustomer("TestCustomer")])));
+
+            var repo = new NexusCustomerRepository(server.Object, DefaultOptions.TokenOptions);
+
+            var customer = new Customer()
+            {
+                CustomerCode = "TestCustomer123",
+                CurrencyCode = "EUR",
+                Email = "test@test.com",
+                IsMerchant = false,
+                Status = "ACTIVE",
+                TrustLevel = "PTrusted",
+                BankAccount = string.Empty,
+                Data = new Dictionary<string, string>
+                {
+                    { "FirstName", "Hans"},
+                    { "LastName", "Peter"}
+                }
+            };
+
+            await repo.CreateAsync(customer);
+
+            server.Verify(s => s.Customers.Get(It.IsAny<Dictionary<string, string>>()), Times.Once);
         }
 
         public async static Task Get_Returns_Valid_Customer_TestAsync()
