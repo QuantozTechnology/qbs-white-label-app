@@ -21,20 +21,26 @@ import { appNavigationState } from "./src/config/config";
 import FullScreenLoadingSpinner from "./src/components/FullScreenLoadingSpinner";
 import { CustomerProvider } from "./src/context/CustomerContext";
 import { Feather } from "@expo/vector-icons";
-import * as Sentry from "sentry-expo";
 import Constants from "expo-constants";
 import { ToastProvider } from "./src/context/NotificationContext";
+import { AppStateProvider } from './src/context/AppStateContext';
+import { removeAllStoredData } from "./src/utils/functions";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { requestTrackingPermissionsAsync } from 'expo-tracking-transparency';
 
 const prefix = Linking.createURL("/");
 const queryClient = new QueryClient();
 
-Sentry.init({
-  dsn: Constants.expoConfig?.extra?.SENTRY_DSN,
-  enableInExpoDevelopment:
-    Constants.expoConfig?.extra?.APP_ENV !== "development",
-  debug: Constants.expoConfig?.extra?.APP_ENV !== "development",
-});
+const APP_INSTALLED_KEY = 'APP_INSTALLED_6';
 
+async function checkAppInstalled() {
+  const appInstalled = await AsyncStorage.getItem(APP_INSTALLED_KEY);
+  if (!appInstalled) {
+    await AsyncStorage.setItem(APP_INSTALLED_KEY, 'true');
+    await removeAllStoredData("app_installed");
+  }
+  return true;
+}
 export default function App() {
   const [appReady, setAppReady] = useState(false);
 
@@ -53,8 +59,11 @@ export default function App() {
       await Font.loadAsync(FontAwesome5.font);
       await Font.loadAsync(Ionicons.font);
       await Font.loadAsync(Feather.font);
-
-      setAppReady(true);
+      await checkAppInstalled();
+      const { status } = await requestTrackingPermissionsAsync();
+      if (status === 'granted') {
+        setAppReady(true);
+      }
     }
 
     loadFontsAsync();
@@ -75,11 +84,13 @@ export default function App() {
           >
             <QueryClientProvider client={queryClient}>
               <CustomerProvider>
-                <ToastProvider>
-                  <ErrorBoundary>
-                    <WelcomeStackNavigator />
-                  </ErrorBoundary>
-                </ToastProvider>
+                  <ToastProvider>
+                    <ErrorBoundary>
+                      <AppStateProvider>
+                        <WelcomeStackNavigator />
+                      </AppStateProvider>
+                    </ErrorBoundary>
+                  </ToastProvider>
               </CustomerProvider>
             </QueryClientProvider>
           </NavigationContainer>
