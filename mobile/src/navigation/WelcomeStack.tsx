@@ -12,19 +12,19 @@ import SignIn from "../screens/SignIn";
 import { useAuth } from "../auth/AuthContext";
 import { useCustomerState } from "../context/CustomerContext";
 import FullScreenLoadingSpinner from "../components/FullScreenLoadingSpinner";
-import CreateAccount from "../screens/CreateAccount";
-import FullScreenMessage from "../components/FullScreenMessage";
+//import FullScreenMessage from "../components/FullScreenMessage";
 import { useCustomer } from "../api/customer/customer";
 import { Icon } from "native-base";
 import { Ionicons } from "@expo/vector-icons";
-import { useDeviceVerification } from "../utils/hooks/useDeviceVerification";
 import { useBiometricValidation } from "../utils/hooks/useBiometricValidation";
 import { useDeviceHasScreenLock } from "../utils/hooks/useDeviceHasScreenLock";
 import CustomNavigationHeader from "../components/CustomNavigationHeader";
 import ConfirmDevice from "../screens/ConfirmDevice";
-import * as SecureStore from "expo-secure-store";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+
 import { isNil } from "lodash";
+import { getStoredKeys, getOid, handlePageType } from "../utils/functions";
+import { AppState } from "react-native";
+import { useAppState } from "../context/AppStateContext";
 
 export type WelcomeStackParamList = {
   Home: undefined;
@@ -60,33 +60,23 @@ export type CustomerStatus = {
 
 export default function WelcomeStackNavigator() {
   const auth = useAuth();
-  const { data: customer } = useCustomer({
-    enabled: auth?.userSession !== null,
-  });
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const customerContext = useCustomerState();
+  const { isRegistered } = useAppState();
   // We must perform verification in order to display related loading screens.
-  // First, biometrics, then verifyDevice, and finally screenLock.
+  // First, biometrics, then screenlock.
   const [currentOperation, setCurrentOperation] =
     useState("checkingBiometrics");
   // By using shouldVerify, we can run useDeviceVerification and useDeviceHasScreenLock manually and have more control over them.
-  const [shouldVerifyDevice, setShouldVerifyDevice] = useState(false);
   const [shouldCheckScreenLockMechanism, setShouldCheckScreenLockMechanism] =
     useState(false);
-  const [oid, setOid] = useState<string | null>(null);
+  const [currentPageType, setCurrentPageType] = useState<string | null>(null);
 
   const {
     isBiometricCheckPassed,
-    triggerRetry,
     error: biometricCheckError,
     isLoading: isCheckingBiometric,
   } = useBiometricValidation();
-
-  const {
-    error: deviceVerificationError,
-    isLoading: isVerifyingDevice,
-    deviceVerified,
-    deviceConflict,
-  } = useDeviceVerification(shouldVerifyDevice);
 
   const {
     hasScreenLockMechanism,
@@ -94,79 +84,99 @@ export default function WelcomeStackNavigator() {
     isLoading: isCheckingScreenLockMechanism,
   } = useDeviceHasScreenLock(shouldCheckScreenLockMechanism);
 
-  /*
-   * This is the last step of the verification process.
-   * It checks if the oid is stored in the SecureStore and applies the necessary logic.
-   */
-  const checkOid = async () => {
-    if (isNil(oid)) {
-      const customerId = await SecureStore.getItemAsync("oid");
-      const pubKeyFromStore = await SecureStore.getItemAsync(
-        customerId + "_publicKey"
-      );
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { data: customer } = useCustomer({
+    enabled: auth?.userSession !== null && currentPageType === "AutoLogin",
+  });
 
-      if (isNil(customerId)) {
-        if (!isNil(auth?.userSession)) {
-          // something is wrong, logout
-          auth.logout();
-        }
+  useEffect(() => {
+    const handleAppStateChange = () => {
+      handlePageType(setCurrentPageType);
+    };
+
+    const appStateSubscription = AppState.addEventListener(
+      "change",
+      handleAppStateChange
+    );
+    return () => {
+      appStateSubscription.remove();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (auth?.userSession) {
+      handlePageType(setCurrentPageType);
+    }
+  }, [auth?.userSession]);
+
+  useEffect(() => {
+    if (currentPageType !== null) {
+      nextAction();
+    }
+  }, [currentPageType]);
+
+  const verifyCurrentDevice = async () => {
+    const oid = await getOid();
+    if (oid) {
+      await getStoredKeys(oid);
+    }
+    setCurrentOperation("done");
+  };
+
+  useEffect(() => {
+    if (isRegistered) {
+      if (currentPageType != "AutoLogin") {
+        setCurrentPageType("AutoLogin");
+      }
+    }
+  }, [isRegistered]);
+
+  const nextAction = async () => {
+    switch (currentPageType) {
+      case "SignIn":
+        setCurrentOperation("checkingBiometrics");
+        break;
+      case "AutoLogin":
         setCurrentOperation("done");
-        return false;
-      } else {
-        if (!isNil(auth?.userSession)) {
-          // logout if there is no phone or email in userSession
-          if (isNil(auth.userSession.phone) || isNil(auth.userSession.email)) {
-            //auth.logout();
-          }
-        }
-        const isDeviceRegistered = await AsyncStorage.getItem(
-          customerId + "_deviceRegistered"
-        );
-        if (isNil(pubKeyFromStore) && isDeviceRegistered) {
-          // something is wrong, remove deviceRegistered and oid
-          await AsyncStorage.removeItem(customerId + "_deviceRegistered");
-          await SecureStore.deleteItemAsync("oid");
-          checkOid();
-        } else {
-          // set oid and start device verification process
-          setOid(customerId);
-          setShouldVerifyDevice(true);
-          setCurrentOperation("verifyingDevice");
-          return customerId;
-        }
-      }
-    } else {
-      if (!shouldVerifyDevice) {
-        setShouldVerifyDevice(true);
+        break;
+      case "RegistrationCompleteForm":
+        setCurrentOperation("done");
+        break;
+      case "DeviceVerification":
         setCurrentOperation("verifyingDevice");
-      }
-      return oid;
+        await verifyCurrentDevice();
+        setCurrentOperation("checkingScreenLock");
+        break;
+      default:
+        setCurrentPageType("SignIn");
+        setCurrentOperation("checkingBiometrics");
+        break;
     }
   };
+  useEffect(() => {
+    if (currentPageType !== null) {
+      nextAction();
+    }
+  }, [currentPageType]);
 
   useEffect(() => {
     if (!isCheckingBiometric) {
       if (biometricCheckError) {
         setCurrentOperation("done");
-      } else if (isBiometricCheckPassed) {
-        setShouldCheckScreenLockMechanism(true);
+      } else if (
+        isBiometricCheckPassed &&
+        currentOperation === "checkingBiometrics"
+      ) {
         setCurrentOperation("checkingScreenLock");
+        setShouldCheckScreenLockMechanism(true);
       }
     }
-  }, [isCheckingBiometric, isBiometricCheckPassed, biometricCheckError]);
-
-  useEffect(() => {
-    if (
-      isBiometricCheckPassed &&
-      hasScreenLockMechanism &&
-      shouldVerifyDevice
-    ) {
-      if (!isVerifyingDevice) {
-        // doesn't matter if there is an error or not
-        setCurrentOperation("done");
-      }
-    }
-  }, [isVerifyingDevice]);
+  }, [
+    isCheckingBiometric,
+    isBiometricCheckPassed,
+    biometricCheckError,
+    currentOperation,
+  ]);
 
   useEffect(() => {
     if (
@@ -174,21 +184,15 @@ export default function WelcomeStackNavigator() {
       !isCheckingScreenLockMechanism
     ) {
       if (hasScreenLockMechanism || screenLockMechanismError) {
-        checkOid();
+        setCurrentOperation("done");
       }
     }
   }, [
-    shouldCheckScreenLockMechanism,
+    currentOperation,
     isCheckingScreenLockMechanism,
     hasScreenLockMechanism,
     screenLockMechanismError,
   ]);
-
-  useEffect(() => {
-    if (deviceVerified) {
-      AsyncStorage.setItem("deviceVerified", "true");
-    }
-  }, [deviceVerified]);
 
   useEffect(() => {
     WebBrowser.warmUpAsync();
@@ -229,36 +233,36 @@ export default function WelcomeStackNavigator() {
       );
     }
 
-    if (!isBiometricCheckPassed) {
-      return (
-        <FullScreenMessage
-          title="Biometric check error"
-          message="Please try again"
-          actionButton={{
-            label: "Try again",
-            callback: triggerRetry,
-          }}
-        />
-      );
-    }
+    // if (biometricCheckError) {
+    //   return (
+    //     <FullScreenMessage
+    //       title="Biometric check error"
+    //       message="Please try again"
+    //       actionButton={{
+    //         label: "Try again",
+    //         callback: triggerRetry,
+    //       }}
+    //     />
+    //   );
+    // }
 
-    if (deviceVerificationError) {
-      return (
-        <WelcomeStack.Navigator>
-          {showGenericErrorScreen(
-            "Cannot securely verify your device. Please try again later"
-          )}
-        </WelcomeStack.Navigator>
-      );
-    }
+    // if (deviceVerificationError) {
+    //   return (
+    //     <WelcomeStack.Navigator>
+    //       {showGenericErrorScreen(
+    //         "Cannot securely verify your device. Please try again later"
+    //       )}
+    //     </WelcomeStack.Navigator>
+    //   );
+    // }
 
-    if (deviceConflict) {
-      return (
-        <WelcomeStack.Navigator>
-          {showConfirmDeviceScreens()}
-        </WelcomeStack.Navigator>
-      );
-    }
+    // if (deviceConflict) {
+    //   return (
+    //     <WelcomeStack.Navigator>
+    //       {showConfirmDeviceScreens()}
+    //     </WelcomeStack.Navigator>
+    //   );
+    // }
 
     if (screenLockMechanismError) {
       return (
@@ -270,7 +274,7 @@ export default function WelcomeStackNavigator() {
       );
     }
 
-    if (!hasScreenLockMechanism) {
+    if (screenLockMechanismError) {
       return (
         <WelcomeStack.Navigator>
           <WelcomeStack.Screen
@@ -297,7 +301,8 @@ export default function WelcomeStackNavigator() {
       </WelcomeStack.Navigator>
     );
   }
-  if (customerContext?.isLoading) {
+
+  if (isNil(currentPageType)) {
     return <FullScreenLoadingSpinner message="Checking your account..." />;
   }
 
@@ -309,72 +314,58 @@ export default function WelcomeStackNavigator() {
     </WelcomeStack.Navigator>
   );
 
-  function renderCorrectStack() {
-    if (customerContext?.requiresCustomer) {
-      return (
-        <>
-          <WelcomeStack.Screen
-            options={{
-              title: "Complete registration",
-              headerShown: true,
-              headerBackVisible: false,
-            }}
-            name="RegistrationStack"
-            component={RegistrationTopTabsStack}
-          />
-          <WelcomeStack.Screen name="Feedback" component={Feedback} />
-        </>
-      );
-    }
-
-    if (customerContext?.isUnderReview) {
-      return (
-        <WelcomeStack.Screen
-          name="Feedback"
-          component={Feedback}
-          initialParams={{
-            title: "Account under review",
-            description: customer?.data?.value?.isBusiness
-              ? "Your business account is being reviewed by our compliance team. You will be notified when you'll be able to access it."
-              : "Our operators are checking your account details. We will let you know when you can access it.",
-            illustration: ImageIdentifier.Find,
-          }}
-        />
-      );
-    }
-
-    if (customerContext?.requiresAccount) {
-      return (
-        <>
-          <WelcomeStack.Screen name="CreateAccount" component={CreateAccount} />
-          <WelcomeStack.Screen name="Feedback" component={Feedback} />
-        </>
-      );
-    }
-
-    if (customerContext?.error && isNil(customer?.data?.value?.email)) {
-      return (
-        <WelcomeStack.Screen
-          name="Feedback"
-          component={Feedback}
-          initialParams={{
-            title: "Login error",
-            description: "Sorry for the inconvenience, please try again later",
-            illustration: ImageIdentifier.Find,
-          }}
-        />
-      );
-    }
-
-    if (customerContext?.isLoading) {
-      return;
-    }
-
-    return (
-      <WelcomeStack.Screen name="AppStack" component={AppBottomTabNavigator} />
-    );
+  function VerifyingDeviceScreen() {
+    return <FullScreenLoadingSpinner message="Verifying device..." />;
   }
 
+  function CheckingAccountScreen() {
+    return <FullScreenLoadingSpinner message="Checking your account2..." />;
+  }
+
+  function renderCorrectStack() {
+    switch (currentPageType) {
+      case "RegistrationCompleteForm":
+        return (
+          <>
+            <WelcomeStack.Screen
+              options={{
+                title: "Complete registration",
+                headerShown: true,
+                headerBackVisible: false,
+              }}
+              name="RegistrationStack"
+              component={RegistrationTopTabsStack}
+            />
+            <WelcomeStack.Screen name="Feedback" component={Feedback} />
+          </>
+        );
+      case "AutoLogin":
+        return (
+          <WelcomeStack.Screen
+            name="AppStack"
+            component={AppBottomTabNavigator}
+          />
+        );
+      case "DeviceVerification":
+        return (
+          <WelcomeStack.Screen
+            name="Home"
+            component={VerifyingDeviceScreen}
+            options={{ headerShown: false }}
+          />
+        );
+      default:
+        return (
+          <WelcomeStack.Screen
+            name="Home"
+            component={CheckingAccountScreen}
+            options={{ headerShown: false }}
+          />
+        );
+    }
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   function showConfirmDeviceScreens() {
     return (
       <>
