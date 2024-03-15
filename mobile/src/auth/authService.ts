@@ -16,6 +16,7 @@ import {
 import { azureAuthProvider } from "./azureAuthProvider";
 import { authStorageService } from "./authStorageService";
 import { decode, isExpired } from "./utils";
+import * as SecureStore from "expo-secure-store";
 
 const auth = azureAuthProvider();
 const storage = authStorageService();
@@ -43,7 +44,6 @@ export const AuthService = (): IAsyncAuthService => {
     };
 
     const tokenResponse = await auth.exchange(exchangeRequest);
-
     if (tokenResponse.type === "error") {
       return error(tokenResponse.errorMessage);
     }
@@ -108,14 +108,14 @@ export const AuthService = (): IAsyncAuthService => {
 
   async function logout(): Promise<VoidResponse> {
     const jwtIdToken = await storage.getIdToken();
-
     if (!jwtIdToken) {
-      return error("An error occurred while logging you out");
+      await storage.clearAll();
+      return success();
+    } else {
+      await auth.endSession({ jwtIdToken });
+      await storage.clearAll();
+      return success();
     }
-
-    await auth.endSession({ jwtIdToken });
-    await storage.clearAll();
-    return success();
   }
 
   async function refresh(): Promise<VoidResponse> {
@@ -155,22 +155,52 @@ export const AuthService = (): IAsyncAuthService => {
     return success();
   }
 
+  async function renew(): Promise<VoidResponse> {
+    const jwtRefreshToken = await storage.getRefreshToken();
+
+    if (!jwtRefreshToken) {
+      return login();
+    } else {
+      const nonce = await storage.getTokenNonce();
+
+      const tokenResponse = await auth.refresh({
+        jwtRefreshToken,
+        nonce,
+      });
+
+      // If an error occurs the user needs to login again
+      if (tokenResponse.type === "error") {
+        return tokenResponse;
+      }
+
+      await storeTokens(tokenResponse);
+    }
+    return success();
+  }
+
   async function getUserSession(): Promise<UserSessionResponse> {
     const jwtIdToken = await storage.getIdToken();
+    //const { setStartDeviceVerification } = useAppState();
 
     if (!jwtIdToken) {
       return error("An error occurred getting the user session");
     }
 
     const idToken = decode<IdToken>(jwtIdToken);
+    const email = await SecureStore.getItemAsync("email");
+    const phone = await SecureStore.getItemAsync("phoneNumber");
+    const sessionEmail = idToken.email ?? email ? email : null;
+    const sessionPhone = idToken.phoneNumber ?? phone ? phone : null;
+    const accessToken = await storage.getAccessToken();
 
     return {
       type: "success",
       userSession: {
         isNew: idToken.newUser ?? false,
         objectId: idToken.oid,
-        email: idToken.email,
-        phone: idToken.phoneNumber,
+        email: sessionEmail ?? "",
+        phone: sessionPhone ?? "",
+        token: accessToken ?? null,
       },
     };
   }
@@ -181,6 +211,7 @@ export const AuthService = (): IAsyncAuthService => {
     changePassword,
     logout,
     refresh,
+    renew,
     getUserSession,
   };
 };
