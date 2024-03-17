@@ -5,18 +5,17 @@
 import axios, { AxiosResponse, InternalAxiosRequestConfig } from "axios";
 import Constants from "expo-constants";
 import { authStorageService } from "../auth/authStorageService";
-import { AuthService } from "../auth/authService";
 import * as SecureStore from "expo-secure-store";
 import * as ed from "@noble/ed25519";
 import { sha512 } from "@noble/hashes/sha512";
 import { fromByteArray, toByteArray } from "react-native-quick-base64";
 import { Buffer } from "buffer";
 import { isNil } from "lodash";
+import { AuthService } from "../auth/authService";
 
 ed.etc.sha512Sync = (...m) => sha512(ed.etc.concatBytes(...m));
 
 export const backendApiUrl = Constants.expoConfig?.extra?.API_URL;
-
 export const mockApiUrl = Constants.expoConfig?.extra?.POSTMAN_MOCK_API_URL;
 export const mockPaymentsApi = axios.create({
   baseURL: mockApiUrl,
@@ -50,24 +49,17 @@ async function requestInterceptor(config: InternalAxiosRequestConfig) {
   const oid = await SecureStore.getItemAsync("oid");
   const storage = authStorageService();
   let accessToken = await storage.getAccessToken();
+
   if (isNil(accessToken)) {
-    // refresh token
-    const result = await AuthService().refresh();
-    if (result.type !== "error") {
-      accessToken = await authStorageService().getAccessToken();
-    }
+    accessToken = await getNewAccessToken();
   }
 
-  const deviceRegistered = await SecureStore.getItemAsync(
-    oid + "_deviceRegistered"
-  );
   const pubKeyFromStore = await SecureStore.getItemAsync(oid + "_publicKey");
   const privKeyFromStore = await SecureStore.getItemAsync(oid + "_privateKey");
   if (
-    !isNil(accessToken) &&
     !isNil(pubKeyFromStore) &&
     !isNil(privKeyFromStore) &&
-    !isNil(deviceRegistered)
+    !isNil(accessToken)
   ) {
     if (config.headers) {
       config.headers["Authorization"] = `Bearer ${accessToken}`;
@@ -75,7 +67,7 @@ async function requestInterceptor(config: InternalAxiosRequestConfig) {
 
     const sigData = getSignatureHeaders(
       new Date(),
-      config.data,
+      config?.data,
       privKeyFromStore
     );
     config.headers["x-public-key"] = pubKeyFromStore;
@@ -114,6 +106,17 @@ export function getSignatureHeaders(
   };
 }
 
+const getNewAccessToken = async () => {
+  const result = await AuthService().renew();
+  if (result.type === "error") {
+    await AuthService().logout();
+    return null;
+  } else {
+    const newToken = await authStorageService().getAccessToken();
+    return newToken;
+  }
+};
+
 async function responseInterceptor(response: AxiosResponse) {
   return response;
 }
@@ -121,41 +124,24 @@ async function responseInterceptor(response: AxiosResponse) {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function responseInterceptorError(error: any) {
   const originalRequest = error.config;
-
-  // Check if we've already tried to retry the request
-  if (!originalRequest._retryCount) originalRequest._retryCount = 0;
-  if (originalRequest._retryCount > 2) {
-    // Stop retrying after 3 attempts
-    return Promise.reject(error);
-  }
-
-  if (error.response.status === 401) {
-    originalRequest._retryCount += 1; // Increment the retry count
-
+  if (
+    error.response.status === 401 &&
+    error.response?.data?.Errors[0]?.Code === "Unauthorized"
+  ) {
     try {
-      // Attempt to refresh the token
-      const result = await AuthService().refresh();
-      if (result.type === "error") {
-        // If refreshing fails, logout and reject the promise
-        await AuthService().logout();
-        return Promise.reject(error);
-      }
-
-      // fetch the new token
-      const newToken = await authStorageService().getAccessToken();
-
-      // Update the authorization header with the new token
+      const newToken = await getNewAccessToken();
       originalRequest.headers["Authorization"] = `Bearer ${newToken}`;
-
-      // Retry the original request with the updated token
       return paymentsApi(originalRequest);
-    } catch (refreshError) {
-      // If there's an error refreshing the token, log out and reject the promise
-      await AuthService().logout();
+    } catch (e) {
       return Promise.reject(error);
     }
   }
 
-  // For all other errors, just reject the promise
-  return Promise.reject(error);
+  if (
+    error.response.status === 400 &&
+    error.response?.data?.Errors[0]?.Code === "StellarHorizonFailure"
+  ) {
+    await AuthService().logout();
+    return Promise.reject(error);
+  }
 }
