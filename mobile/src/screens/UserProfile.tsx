@@ -28,6 +28,7 @@ import { useAccount } from "../api/account/account";
 import { useCustomerState } from "../context/CustomerContext";
 import * as Clipboard from "expo-clipboard";
 import Notification from "../components/Notification";
+import { useEffect, useState } from "react";
 
 type Props = NativeStackScreenProps<UserProfileStackParamList, "UserProfile">;
 
@@ -36,16 +37,64 @@ function UserProfile({ navigation }: Props) {
   const customerContext = useCustomerState();
   const queryClient = useQueryClient();
 
-  const { data: account, status: accountStatus } = useAccount();
-  const { status: customerStatus, data: customer } = useCustomer();
+  const [errorMessage, setErrorMessage] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
 
-  if (customerStatus === "error" || accountStatus === "error") {
+  const {
+    data: account,
+    status: accountStatus,
+    error: accountError,
+  } = useAccount();
+  const {
+    status: customerStatus,
+    data: customer,
+    error: customerError,
+  } = useCustomer();
+
+  const fetchData = async () => {
+    setIsLoading(true);
+    setErrorMessage("");
+
+    try {
+      await Promise.all([queryClient.fetchQuery(["account"])]);
+    } catch (error) {
+      setErrorMessage("Could not get your details, try again later");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    if (customerError || accountError) {
+      setErrorMessage("Could not get your details, try again later");
+      fetchData();
+    }
+  }, [customerError, accountError]);
+
+  if (isLoading) {
+    return (
+      <VStack py={4} space={8}>
+        <VStack space={1}>
+          <AllCapsSectionHeading text="Personal info" px={4} />
+          <DataDisplayFieldSkeleton />
+          <DataDisplayFieldSkeleton />
+          <DataDisplayFieldSkeleton />
+          <DataDisplayFieldSkeleton />
+          <DataDisplayFieldSkeleton />
+          <DataDisplayFieldSkeleton />
+        </VStack>
+      </VStack>
+    );
+  }
+
+  if (errorMessage) {
     return (
       <VStack space={2}>
-        <FullScreenMessage
-          title="Error"
-          message="Could not get your details, try again later"
-        />
+        <FullScreenMessage title="Error" message={errorMessage} />
+        <Button onPress={retryFetchData}>Retry</Button>
       </VStack>
     );
   }
@@ -66,8 +115,9 @@ function UserProfile({ navigation }: Props) {
     );
   }
 
-  const { bankAccountNumber, isBusiness, data, email } = customer.data.value;
-  const { accountCode } = account.data.value;
+  const { bankAccountNumber, isBusiness, data, email } =
+    customer?.data?.value || {};
+  const { accountCode } = account?.data?.value || {};
 
   return (
     <ScreenWrapper p={-4}>
@@ -147,6 +197,11 @@ function UserProfile({ navigation }: Props) {
         />
       ),
     });
+  }
+
+  function retryFetchData() {
+    queryClient.invalidateQueries(["customer"]);
+    queryClient.invalidateQueries(["account"]);
   }
 }
 
