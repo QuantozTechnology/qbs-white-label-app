@@ -21,7 +21,6 @@ import { appNavigationState } from "./src/config/config";
 import FullScreenLoadingSpinner from "./src/components/FullScreenLoadingSpinner";
 import { CustomerProvider } from "./src/context/CustomerContext";
 import { Feather } from "@expo/vector-icons";
-import Constants from "expo-constants";
 import { ToastProvider } from "./src/context/NotificationContext";
 import { AppStateProvider } from './src/context/AppStateContext';
 import { removeAllStoredData } from "./src/utils/functions";
