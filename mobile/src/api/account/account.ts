@@ -20,6 +20,7 @@ export function useAccount(options?: any) {
   const queryOptions = Object.assign(options ?? {}, {
     queryKey: ["account"],
     queryFn: getAccount,
+    retry: 1,
   });
   return useQuery<
     AxiosResponse<GenericApiResponse<Account>>,
