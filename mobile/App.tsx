@@ -23,20 +23,19 @@ import { CustomerProvider } from "./src/context/CustomerContext";
 import { Feather } from "@expo/vector-icons";
 import { ToastProvider } from "./src/context/NotificationContext";
 import { AppStateProvider } from './src/context/AppStateContext';
-import { removeAllStoredData } from "./src/utils/functions";
+import { removeStoredData } from "./src/utils/functions";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { requestTrackingPermissionsAsync } from 'expo-tracking-transparency';
-
 const prefix = Linking.createURL("/");
 const queryClient = new QueryClient();
 
-const APP_INSTALLED_KEY = 'APP_INSTALLED_6';
+const APP_INSTALLED_KEY = 'APP_INSTALLED';
 
 async function checkAppInstalled() {
   const appInstalled = await AsyncStorage.getItem(APP_INSTALLED_KEY);
   if (!appInstalled) {
     await AsyncStorage.setItem(APP_INSTALLED_KEY, 'true');
-    await removeAllStoredData("app_installed");
+    // remove oid
+    await removeStoredData(["oid"]);
   }
   return true;
 }
@@ -48,25 +47,22 @@ export default function App() {
     config: appNavigationState,
   };
 
+  const loadFontsAsync = async() => {
+    await Font.loadAsync({
+      "Lato-Light": require("./assets/fonts/Lato-Light.ttf"),
+      "Lato-Regular": require("./assets/fonts/Lato-Regular.ttf"),
+      "Lato-Bold": require("./assets/fonts/Lato-Bold.ttf"),
+    });
+    await Font.loadAsync(FontAwesome5.font);
+    await Font.loadAsync(Ionicons.font);
+    await Font.loadAsync(Feather.font);
+    await checkAppInstalled();
+    setAppReady(true);
+  }
   useEffect(() => {
-    async function loadFontsAsync() {
-      await Font.loadAsync({
-        "Lato-Light": require("./assets/fonts/Lato-Light.ttf"),
-        "Lato-Regular": require("./assets/fonts/Lato-Regular.ttf"),
-        "Lato-Bold": require("./assets/fonts/Lato-Bold.ttf"),
-      });
-      await Font.loadAsync(FontAwesome5.font);
-      await Font.loadAsync(Ionicons.font);
-      await Font.loadAsync(Feather.font);
-      await checkAppInstalled();
-      const { status } = await requestTrackingPermissionsAsync();
-      if (status === 'granted') {
-        setAppReady(true);
-      }
-    }
-
     loadFontsAsync();
   }, []);
+
 
   if (!appReady) {
     return null;
