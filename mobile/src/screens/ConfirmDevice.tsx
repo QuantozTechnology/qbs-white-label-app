@@ -26,6 +26,7 @@ import * as SecureStore from "expo-secure-store";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { WelcomeStackParamList } from "../navigation/WelcomeStack";
 import { ImageIdentifier } from "../utils/images";
+import { useAuth } from "../auth/AuthContext";
 
 type ConfirmDeviceProps = NativeStackScreenProps<
   WelcomeStackParamList,
@@ -33,6 +34,7 @@ type ConfirmDeviceProps = NativeStackScreenProps<
 >;
 
 export default function ConfirmDevice({ navigation }: ConfirmDeviceProps) {
+  const auth = useAuth();
   const [codes, setCodes] = useState<string[]>(["", "", "", "", "", ""]);
   const [isCheckingCode, setIsCheckingCode] = useState(false);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -50,6 +52,10 @@ export default function ConfirmDevice({ navigation }: ConfirmDeviceProps) {
   useEffect(() => {
     (async () => await handleComplete())();
   }, [codes]);
+
+  const handleLogout = async () => {
+    auth?.logout();
+  };
 
   return (
     <ScreenWrapper flex={1} accessibilityLabel="confirm device screen">
@@ -77,6 +83,25 @@ export default function ConfirmDevice({ navigation }: ConfirmDeviceProps) {
           isUnderlined={false}
         >
           I don&apos;t have access to my existing device
+        </Link>
+      </HStack>
+      <HStack mt={4} alignItems="center" space={1}>
+        <Icon
+          as={Ionicons}
+          name="log-out-outline"
+          size="sm"
+          color="primary.500"
+        />
+        <Link
+          onPress={handleLogout}
+          _text={{
+            color: "primary.500",
+            fontSize: "md",
+            fontWeight: "bold",
+          }}
+          isUnderlined={false}
+        >
+          Logout
         </Link>
       </HStack>
       <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding">
