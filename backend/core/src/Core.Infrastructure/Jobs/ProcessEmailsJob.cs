@@ -54,34 +54,35 @@ namespace Core.Infrastructure.Jobs
 
                     var customer = await _customerRepository.GetAsync(customerCode, context.CancellationToken);
 
-                    if (mail.References == null || string.IsNullOrWhiteSpace(mail.References.TokenPaymentCode))
-                    {
-                        throw new CustomErrorsException("MailService", "TokenPaymentCode", "An error occured while sending mail.");
-                    }
+                    var query = new Dictionary<string, string>
+                        {
+                            { "customerCode", customerCode }
+                        };
 
-                    var transactions = await _transactionRepository.GetByCodeAsync(mail.References.TokenPaymentCode, context.CancellationToken);
+                    var transactions = await _transactionRepository.GetAsync(query, 1, 1, context.CancellationToken);
 
                     Transaction? transaction = null;
-                    if (transactions != null && transactions.Items.Any())
-                    {
-                        transaction = transactions.Items.FirstOrDefault();
-                    }
 
-                    try
+                    if (transactions != null && transactions.Items.Any() && mail.References != null)
                     {
-                        await _sendGridMailService.SendMailAsync(mail, customer, transaction!);
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger.LogError("An error occured sending email {code} with message {message}", mail.Code, ex.Message);
-                    }
+                        transaction = transactions.Items.FirstOrDefault(t => t.TransactionCode == mail.References!.TokenPaymentCode);
 
-                    // once email has been sent, call nexus to update the status of this mail to 'Sent'
-                    await _mailsRepository.UpdateMailSent(mail.Code);
+                        try
+                        {
+                            await _sendGridMailService.SendMailAsync(mail, customer, transaction!);
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogError("An error occured sending email {code} with message {message}", mail.Code, ex.Message);
+                        }
+
+                        // once email has been sent, call nexus to update the status of this mail to 'Sent'
+                        await _mailsRepository.UpdateMailSent(mail.Code);
+
+                        await _unitOfWork.SaveChangesAsync();
+                    }
                 }
             }
-
-            await _unitOfWork.SaveChangesAsync();
         }
     }
 }

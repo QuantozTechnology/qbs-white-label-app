@@ -24,11 +24,23 @@ namespace Core.Infrastructure.Nexus.Repositories
 
         public async Task CreateAsync(Customer customer, string? ip = null, CancellationToken cancellationToken = default)
         {
-            var exists = await _tokenServer.Customers.Exists(customer.CustomerCode);
+            var customerCodeExists = await _tokenServer.Customers.Exists(customer.CustomerCode);
 
-            if (exists)
+            if (customerCodeExists)
             {
-                throw new CustomErrorsException(NexusErrorCodes.ExistingProperty.ToString(), customer.CustomerCode, Constants.NexusErrorMessages.ExistingProperty);
+                throw new CustomErrorsException(NexusErrorCodes.ExistingProperty.ToString(), customer.CustomerCode, Constants.NexusErrorMessages.ExistingCode);
+            }
+
+            var query = new Dictionary<string, string>
+            {
+                { "Email", customer.Email.TrimEnd() }
+            };
+
+            var existingCustomersWithEmail = await _tokenServer.Customers.Get(query);
+
+            if (existingCustomersWithEmail != null && existingCustomersWithEmail.Records.Any(existingCustomer => existingCustomer.Status != CustomerStatus.DELETED.ToString()))
+            {
+                throw new CustomErrorsException(NexusErrorCodes.ExistingProperty.ToString(), customer.Email, Constants.NexusErrorMessages.ExistingEmail);
             }
 
             var success = Enum.TryParse<CustomerStatus>(customer.Status.ToString(), out var status);
@@ -39,11 +51,18 @@ namespace Core.Infrastructure.Nexus.Repositories
             }
 
             var builder = new CreateCustomerRequestBuilder(customer.CustomerCode, customer.TrustLevel, customer.CurrencyCode)
+                .SetIsBusiness(customer.IsMerchant)
+                .SetBankAccounts(
+                [
+                    new()
+                    {
+                        BankAccountName = customer.GetName(),
+                        BankAccountNumber = null
+                    }
+                ])
                 .SetEmail(customer.Email)
                 .SetStatus(status)
-                .SetCustomData(customer.Data)
-                .SetBusiness(customer.IsMerchant)
-                .AddBankAccount(new CustomerBankAccountRequest { BankAccountName = customer.GetName(), BankAccountNumber = null });
+                .SetCustomData(customer.Data);
 
             await _tokenServer.Customers.Create(builder.Build(), ip);
         }
@@ -64,11 +83,10 @@ namespace Core.Infrastructure.Nexus.Repositories
                 throw new CustomErrorsException(NexusErrorCodes.InvalidStatus.ToString(), customer.Status.ToString(), "Invalid customer status");
             }
 
-            var builder = new UpdateCustomerRequestBuilder(customer.CustomerCode, customer.UpdateReason)
+            var builder = new UpdateCustomerRequestBuilder(customer.CustomerCode)
                 .SetEmail(customer.Email)
                 .SetStatus(status)
-                .SetCustomData(customer.Data)
-                .SetBusiness(customer.IsMerchant);
+                .SetCustomData(customer.Data);
 
             await _tokenServer.Customers.Update(builder.Build());
         }
