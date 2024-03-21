@@ -111,9 +111,10 @@ const getNewAccessToken = async () => {
   if (result.type === "error") {
     await AuthService().logout();
     return null;
+  } else if (result.type === "success" && "token" in result) {
+    return result.token;
   } else {
-    const newToken = await authStorageService().getAccessToken();
-    return newToken;
+    return null;
   }
 };
 
@@ -125,6 +126,7 @@ async function responseInterceptor(response: AxiosResponse) {
 async function responseInterceptorError(error: any) {
   const originalRequest = error.config;
   if (
+    error.response &&
     error.response.status === 401 &&
     error.response?.data?.Errors[0]?.Code === "Unauthorized"
   ) {
@@ -133,15 +135,18 @@ async function responseInterceptorError(error: any) {
       originalRequest.headers["Authorization"] = `Bearer ${newToken}`;
       return paymentsApi(originalRequest);
     } catch (e) {
-      return Promise.reject(error);
+      return Promise.reject({ ...error, originalError: error });
     }
   }
 
   if (
+    error.response &&
     error.response.status === 400 &&
     error.response?.data?.Errors[0]?.Code === "StellarHorizonFailure"
   ) {
     await AuthService().logout();
-    return Promise.reject(error);
+    return Promise.reject({ ...error, originalError: error });
   }
+
+  return Promise.reject({ ...error, originalError: error });
 }
