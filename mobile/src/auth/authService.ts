@@ -155,12 +155,12 @@ export const AuthService = (): IAsyncAuthService => {
     return success();
   }
 
-  async function renew(): Promise<VoidResponse> {
+  async function renew(): Promise<
+    { type: "success"; token: string } | { type: "error"; errorMessage: string }
+  > {
     const jwtRefreshToken = await storage.getRefreshToken();
 
-    if (!jwtRefreshToken) {
-      return login();
-    } else {
+    if (jwtRefreshToken) {
       const nonce = await storage.getTokenNonce();
 
       const tokenResponse = await auth.refresh({
@@ -174,13 +174,14 @@ export const AuthService = (): IAsyncAuthService => {
       }
 
       await storeTokens(tokenResponse);
+      return { type: "success", token: tokenResponse.jwtAccessToken };
+    } else {
+      return { type: "error", errorMessage: "jwtRefreshToken not found" };
     }
-    return success();
   }
 
   async function getUserSession(): Promise<UserSessionResponse> {
     const jwtIdToken = await storage.getIdToken();
-    //const { setStartDeviceVerification } = useAppState();
 
     if (!jwtIdToken) {
       return error("An error occurred getting the user session");
