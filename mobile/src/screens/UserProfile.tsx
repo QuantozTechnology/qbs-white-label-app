@@ -56,13 +56,22 @@ function UserProfile({ navigation }: Props) {
     setErrorMessage("");
 
     try {
-      await Promise.all([queryClient.fetchQuery(["account"])]);
+      await Promise.all([
+        queryClient.fetchQuery(["account"]),
+        queryClient.fetchQuery(["customer"]),
+      ]);
     } catch (error) {
       setErrorMessage("Could not get your details, try again later");
     } finally {
       setIsLoading(false);
     }
   };
+
+  function retryFetchData() {
+    setErrorMessage("");
+    fetchData();
+  }
+
   useEffect(() => {
     fetchData();
   }, []);
@@ -70,7 +79,6 @@ function UserProfile({ navigation }: Props) {
   useEffect(() => {
     if (customerError || accountError) {
       setErrorMessage("Could not get your details, try again later");
-      fetchData();
     }
   }, [customerError, accountError]);
 
@@ -93,8 +101,14 @@ function UserProfile({ navigation }: Props) {
   if (errorMessage) {
     return (
       <VStack space={2}>
-        <FullScreenMessage title="Error" message={errorMessage} />
-        <Button onPress={retryFetchData}>Retry</Button>
+        <FullScreenMessage
+          title="Error"
+          message={errorMessage}
+          actionButton={{
+            label: "Retry",
+            callback: retryFetchData,
+          }}
+        />
       </VStack>
     );
   }
@@ -197,11 +211,6 @@ function UserProfile({ navigation }: Props) {
         />
       ),
     });
-  }
-
-  function retryFetchData() {
-    queryClient.invalidateQueries(["customer"]);
-    queryClient.invalidateQueries(["account"]);
   }
 }
 
