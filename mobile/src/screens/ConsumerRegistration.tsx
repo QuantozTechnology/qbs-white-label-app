@@ -225,6 +225,11 @@ function ConsumerRegistration() {
           onPress={onCreateAccountPress}
           accessibilityLabel="create account"
           aria-label="Create account"
+          isDisabled={!termsAccepted}
+          _disabled={{
+            bg: "gray.400",
+            _text: { color: "gray.700" },
+          }}
         >
           Create account
         </Button>
