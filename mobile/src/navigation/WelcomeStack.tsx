@@ -104,13 +104,13 @@ export default function WelcomeStackNavigator() {
 
   const checkScreenLockMechanism = async () => {
     checkDeviceHasScreenLock(
-      (hasScreenLockMechanism: boolean, error: ErrorType | null) => {
+      (result: boolean | null, error: { message: string } | null) => {
         if (error) {
           setCurrentPageType("ScreenLockError");
+        } else if (result === null) {
+          setCurrentPageType("ScreenLockError");
         } else {
-          setCurrentPageType(
-            hasScreenLockMechanism ? "ScreenLockDone" : "ScreenLockNone"
-          );
+          setCurrentPageType(result ? "ScreenLockDone" : "ScreenLockNone");
         }
       }
     );
