@@ -64,7 +64,7 @@ namespace Core.Application.Commands.CustomerCommands
             // rare case of exception
             if (customerDevice == null || string.IsNullOrEmpty(customerDevice.OTPKey))
             {
-                throw new CustomErrorsException(DomainErrorCode.CustomerNotFoundError.ToString(), request.CustomerCode, "Customer not found.");
+                throw new CustomErrorsException(DomainErrorCode.CustomerNotFoundError.ToString(), request.CustomerCode, "Customer device key not found.");
             }
 
             // Generate OTPCode
