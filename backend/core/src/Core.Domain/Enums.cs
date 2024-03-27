@@ -43,7 +43,9 @@ namespace Core.Domain
         InvalidStatusError,
         InvalidPropertyError,
         ExistingKeyError,
-        SecurityCheckError
+        SecurityCheckError,
+        CustomerNotFoundError,
+        CustomerNotActiveError,
     }
 
     public enum PaymentRequestStatus

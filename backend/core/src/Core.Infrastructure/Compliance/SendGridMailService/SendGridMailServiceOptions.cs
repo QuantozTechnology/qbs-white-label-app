@@ -25,5 +25,8 @@ namespace Core.Infrastructure.Compliance.SendGridMailService
 
         [Required]
         public required string FundingtemplateID { get; set; }
+
+        [Required]
+        public required string OTPCodeTemplateID { get; set; }
     }
 }

@@ -3,6 +3,8 @@
 // of this distribution or at http://www.apache.org/licenses/LICENSE-2.0
 
 using Asp.Versioning;
+using Core.Application.Commands;
+using Core.Application.Commands.CustomerCommands;
 using Core.Application.Queries.CustomerQueries;
 using Core.Presentation.Models;
 using Core.Presentation.Models.Requests.CustomerRequests;
@@ -99,6 +101,19 @@ namespace Core.Presentation.Controllers
             var result = await _sender.Send(command);
             var response = ConstructCustomResponse(result, DeviceAuthenticationResponse.FromOTPKey);
             return Ok(response);
+        }
+
+        [HttpPost("otp/email", Name = "SendOTPCodeEmail")]
+        [ProducesResponseType(typeof(CustomResponse<EmptyCustomResponse>), 201)]
+        [ProducesResponseType(typeof(CustomErrorsResponse), 400)]
+        [ProducesResponseType(typeof(CustomErrorsResponse), 404)]
+        [ProducesResponseType(typeof(CustomErrorsResponse), 500)]
+        [RequiredScope("Customer.Create")]
+        public async Task<IActionResult> SendOTPCodeEmailAsync()
+        {
+            var command = new OTPCodeByEmailCommand(GetUserId(), GetIP());
+            await _sender.Send(command);
+            return CreatedAtRoute("SendOTPCodeEmail", null, new EmptyCustomResponse());
         }
     }
 }

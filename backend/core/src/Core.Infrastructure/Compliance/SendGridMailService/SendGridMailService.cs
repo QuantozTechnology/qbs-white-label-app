@@ -79,5 +79,33 @@ namespace Core.Infrastructure.Compliance.SendGridMailService
                 throw new CustomErrorsException("MailService", "mail", "An error occured while sending mail.");
             }
         }
+
+        public async Task SendOTPCodeMailAsync(Customer customer, string otpCode)
+        {
+            var from = new EmailAddress(_mailOptions.Sender);
+            var to = new EmailAddress(customer.Email);
+            var msg = new SendGridMessage();
+
+            msg.SetFrom(new EmailAddress(from.Email, from.Name));
+            msg.AddTo(new EmailAddress(to.Email, to.Name));
+
+            msg.SetTemplateId(_mailOptions.Templates.OTPCodeTemplateID);
+
+            // Fill in the dynamic template fields
+            var templateData = new OTPCodeMailTemplate()
+            {
+                CustomerFullName = customer?.GetName(),
+                OTPCode = otpCode
+            };
+
+            msg.SetTemplateData(templateData);
+
+            var response = await _sendGridClient.SendEmailAsync(msg);
+
+            if (response.StatusCode != HttpStatusCode.Accepted)
+            {
+                throw new CustomErrorsException("MailService", "mail", "An error occured while sending mail.");
+            }
+        }
     }
 }
