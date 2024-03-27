@@ -57,7 +57,7 @@ namespace Core.Infrastructure.CustomerFileStorage
                 var keyBytes = Base32Encoding.ToBytes(otpKey);
 
                 // Create a TOTP generator with the key and time step (default is 30 seconds)
-                var totp = new Totp(keyBytes);
+                var totp = new Totp(keyBytes, step: 120);
 
                 // Generate the OTP code for the current time
                 var otpCode = totp.ComputeTotp();

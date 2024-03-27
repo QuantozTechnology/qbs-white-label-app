@@ -39,6 +39,7 @@ namespace Core.Infrastructure.Jobs
 
         public async Task Execute(IJobExecutionContext context)
         {
+            _logger.LogInformation("Process emails job");
             var mails = _mailsRepository.GetMailsAsync(MailStatus.ReadyToSend.ToString(), context.CancellationToken).Result;
 
             if (mails != null && mails.Any())

@@ -41,12 +41,12 @@ app.UseHttpsRedirection();
 
 app.ConfigureCustomAuthenticationMiddleware();
 app.ConfigureCustomExceptionMiddleware();
-app.ConfigureSignatureVerificationMiddleware();
 
 app.UseAuthentication();
 app.UseRouting();
 app.UseAuthorization();
 
+app.ConfigureSignatureVerificationMiddleware();
 app.UseMiddleware<PublicKeyLinkedMiddleware>();
 
 app.MapControllers();

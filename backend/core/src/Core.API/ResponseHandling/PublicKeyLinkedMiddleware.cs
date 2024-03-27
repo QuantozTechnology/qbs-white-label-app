@@ -79,7 +79,7 @@ public class PublicKeyLinkedMiddleware
         var endpoint = context.GetEndpoint();
         var endpointName = endpoint?.Metadata.GetMetadata<EndpointNameMetadata>()?.EndpointName;
 
-        var excludeList = new[] { "DeviceAuthentication" };
+        var excludeList = new[] { "DeviceAuthentication", "SendOTPCodeEmail" };
 
         return context.Request.Path.StartsWithSegments("/health")
                || excludeList.Contains(endpointName);

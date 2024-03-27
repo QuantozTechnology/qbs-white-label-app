@@ -42,76 +42,80 @@ namespace Core.API.ResponseHandling
 
         public async Task Invoke(HttpContext context)
         {
-            // Retrieve headers from the request
-            string? signatureHeader = context.Request.Headers["x-signature"];
-            string? algorithmHeader = context.Request.Headers["x-algorithm"];
-            string? publicKeyHeader = context.Request.Headers["x-public-key"];
-            string? timestampHeader = context.Request.Headers["x-timestamp"];
-
-            // Make sure the headers are present
-            if (!Enum.TryParse<SignatureAlgorithmHeader>(algorithmHeader, ignoreCase: true, out _))
+            if (!SkipEndpoint(context))
             {
-                _logger.LogError("Invalid algorithm header");
-                var customErrors = new CustomErrors(new CustomError("Forbidden", "Invalid Header", "x-algorithm"));
-                await WriteCustomErrors(context.Response, customErrors, (int)HttpStatusCode.Forbidden);
-                return;
+                // Retrieve headers from the request
+                string? signatureHeader = context.Request.Headers["x-signature"];
+                string? algorithmHeader = context.Request.Headers["x-algorithm"];
+                string? publicKeyHeader = context.Request.Headers["x-public-key"];
+                string? timestampHeader = context.Request.Headers["x-timestamp"];
+
+                // Make sure the headers are present
+                if (!Enum.TryParse<SignatureAlgorithmHeader>(algorithmHeader, ignoreCase: true, out _))
+                {
+                    _logger.LogError("Invalid algorithm header");
+                    var customErrors = new CustomErrors(new CustomError("Forbidden", "Invalid Header", "x-algorithm"));
+                    await WriteCustomErrors(context.Response, customErrors, (int)HttpStatusCode.Forbidden);
+                    return;
+                }
+
+                if (string.IsNullOrWhiteSpace(signatureHeader))
+                {
+                    _logger.LogError("Missing signature header");
+                    var customErrors = new CustomErrors(new CustomError("Forbidden", "Missing Header", "x-signature"));
+                    await WriteCustomErrors(context.Response, customErrors, (int)HttpStatusCode.Forbidden);
+                    return;
+                }
+
+                if (string.IsNullOrWhiteSpace(publicKeyHeader))
+                {
+                    _logger.LogError("Missing publicKey header");
+                    var customErrors = new CustomErrors(new CustomError("Forbidden", "Missing Header", "x-public-key"));
+                    await WriteCustomErrors(context.Response, customErrors, (int)HttpStatusCode.Forbidden);
+                    return;
+                }
+
+                if (string.IsNullOrWhiteSpace(timestampHeader)
+                    || !long.TryParse(timestampHeader, out var timestampHeaderLong))
+                {
+                    _logger.LogError("Missing timestamp header");
+                    var customErrors = new CustomErrors(new CustomError("Forbidden", "Missing Header", "x-timestamp"));
+                    await WriteCustomErrors(context.Response, customErrors, (int)HttpStatusCode.Forbidden);
+                    return;
+                }
+
+                // Check if the timestamp is within the allowed time
+                if (!IsWithinAllowedTime(timestampHeaderLong))
+                {
+                    _logger.LogError("Timestamp outdated");
+                    var customErrors = new CustomErrors(new CustomError("Forbidden", "Invalid timestamp", "x-timestamp"));
+                    await WriteCustomErrors(context.Response, customErrors, (int)HttpStatusCode.Forbidden);
+                    return;
+                }
+
+                // TODO: Check if the public key is valid according to algorithm
+
+                var payloadSigningStream = await GetPayloadStream(context, timestampHeader);
+
+                // Parse the public key
+                var publicKeyBytes = Convert.FromBase64String(publicKeyHeader);
+
+                // Decode the signature header from Base64
+                var signatureBytes = Convert.FromBase64String(signatureHeader);
+
+                if (VerifySignature(publicKeyBytes, payloadSigningStream.ToArray(), signatureBytes))
+                {
+                    // Signature is valid, continue with the request
+                    await _next(context);
+                }
+                else
+                {
+                    _logger.LogError("Invalid signature");
+                    var customErrors = new CustomErrors(new CustomError("Forbidden", "Invalid signature", "x-signature"));
+                    await WriteCustomErrors(context.Response, customErrors, (int)HttpStatusCode.Forbidden);
+                }
             }
-
-            if (string.IsNullOrWhiteSpace(signatureHeader))
-            {
-                _logger.LogError("Missing signature header");
-                var customErrors = new CustomErrors(new CustomError("Forbidden", "Missing Header", "x-signature"));
-                await WriteCustomErrors(context.Response, customErrors, (int)HttpStatusCode.Forbidden);
-                return;
-            }
-
-            if (string.IsNullOrWhiteSpace(publicKeyHeader))
-            {
-                _logger.LogError("Missing publicKey header");
-                var customErrors = new CustomErrors(new CustomError("Forbidden", "Missing Header", "x-public-key"));
-                await WriteCustomErrors(context.Response, customErrors, (int)HttpStatusCode.Forbidden);
-                return;
-            }
-
-            if (string.IsNullOrWhiteSpace(timestampHeader)
-                || !long.TryParse(timestampHeader, out var timestampHeaderLong))
-            {
-                _logger.LogError("Missing timestamp header");
-                var customErrors = new CustomErrors(new CustomError("Forbidden", "Missing Header", "x-timestamp"));
-                await WriteCustomErrors(context.Response, customErrors, (int)HttpStatusCode.Forbidden);
-                return;
-            }
-
-            // Check if the timestamp is within the allowed time
-            if (!IsWithinAllowedTime(timestampHeaderLong))
-            {
-                _logger.LogError("Timestamp outdated");
-                var customErrors = new CustomErrors(new CustomError("Forbidden", "Invalid timestamp", "x-timestamp"));
-                await WriteCustomErrors(context.Response, customErrors, (int)HttpStatusCode.Forbidden);
-                return;
-            }
-
-            // TODO: Check if the public key is valid according to algorithm
-
-            var payloadSigningStream = await GetPayloadStream(context, timestampHeader);
-
-            // Parse the public key
-            var publicKeyBytes = Convert.FromBase64String(publicKeyHeader);
-
-            // Decode the signature header from Base64
-            var signatureBytes = Convert.FromBase64String(signatureHeader);
-
-            if (VerifySignature(publicKeyBytes, payloadSigningStream.ToArray(), signatureBytes))
-            {
-                // Signature is valid, continue with the request
-                await _next(context);
-            }
-            else
-            {
-                _logger.LogError("Invalid signature");
-                var customErrors = new CustomErrors(new CustomError("Forbidden", "Invalid signature", "x-signature"));
-                await WriteCustomErrors(context.Response, customErrors, (int)HttpStatusCode.Forbidden);
-            }
+            await _next(context);
         }
 
         private static async Task<MemoryStream> GetPayloadStream(HttpContext context, string timestampHeader)
@@ -165,6 +169,20 @@ namespace Core.API.ResponseHandling
                 // Signature verification failed
                 return false;
             }
+        }
+
+        /// <summary>
+        /// Skip the middleware for specific endpoints
+        /// </summary>
+        private static bool SkipEndpoint(HttpContext context)
+        {
+            var endpoint = context.GetEndpoint();
+            var endpointName = endpoint?.Metadata.GetMetadata<EndpointNameMetadata>()?.EndpointName;
+
+            var excludeList = new[] { "SendOTPCodeEmail" };
+
+            return context.Request.Path.StartsWithSegments("/health")
+                   || excludeList.Contains(endpointName);
         }
     }
 

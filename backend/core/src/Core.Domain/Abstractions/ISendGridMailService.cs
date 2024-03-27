@@ -11,5 +11,7 @@ namespace Core.Domain.Abstractions
     public interface ISendGridMailService
     {
         public Task SendMailAsync(Mail mail, Customer customer, Transaction transaction);
+
+        public Task SendOTPCodeMailAsync(Customer customer, string otpCode);
     }
 }
