@@ -51,6 +51,10 @@ export interface IAsyncAuthService {
    */
   refresh: () => Promise<VoidResponse>;
   /**
+   * Renew the access token using the refresh token and re-store all tokens
+   */
+  renew: () => Promise<VoidResponse>;
+  /**
    * Get a new user session based on the id token
    */
   getUserSession: () => Promise<UserSessionResponse>;
@@ -175,6 +179,7 @@ export type UserSession = {
   phone: string;
   isNew: boolean;
   objectId: string;
+  token: string | null;
 };
 
 export type AuthContextType = {

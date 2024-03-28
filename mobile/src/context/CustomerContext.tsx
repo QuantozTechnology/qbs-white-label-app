@@ -14,7 +14,7 @@ import {
 import { getCustomer } from "../api/customer/customer";
 import { getAccount } from "../api/account/account";
 import { AxiosError } from "axios";
-import { APIError } from "../api/generic/error.interface";
+import { isNil } from "lodash";
 
 // We initialize the context with default values and override them later
 const CustomerContext = React.createContext<CustomerStateContext | null>(null);
@@ -90,10 +90,10 @@ export function CustomerProvider({
   }
 
   async function updateCustomerState() {
-    try {
-      const customerResponse = await getCustomer();
+    const customerResponse = await getCustomer();
 
-      if (customerResponse.data.value.status === "UNDERREVIEW") {
+    if (!isNil(customerResponse)) {
+      if (customerResponse?.data.value.status === "UNDERREVIEW") {
         dispatch({
           type: CustomerStateActionType.UPDATE_STATE,
           state: CustomerStateType.CUSTOMER_UNDER_REVIEW,
@@ -101,26 +101,7 @@ export function CustomerProvider({
         return false;
       }
       return true;
-    } catch (error) {
-      const axiosError = error as AxiosError<APIError>;
-
-      if (axiosError.response?.status === 404 ||
-        axiosError.response?.status === 401) {
-        dispatch({
-          type: CustomerStateActionType.UPDATE_STATE,
-          state: CustomerStateType.CUSTOMER_REQUIRED,
-        });
-        return false;
-      }
-
-      dispatch({
-        type: CustomerStateActionType.ERROR,
-        errorMessage:
-          error instanceof AxiosError && axiosError.response?.data.Errors[0]
-            ? axiosError.response.data.Errors[0].Message
-            : (error as Error).message,
-      });
-
+    } else {
       return false;
     }
   }

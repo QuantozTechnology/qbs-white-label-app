@@ -11,7 +11,9 @@ export type Customer = {
   email: string;
   status: string;
   bankAccountNumber: string | null;
-  data: Record<keyof ConsumerData | keyof MerchantData, string>;
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  data?: Record<keyof ConsumerData | keyof MerchantData, string> | any;
   isBusiness: boolean;
 };
 

@@ -107,6 +107,12 @@ function Withdraw({ navigation }: Props) {
     },
   });
 
+  const retryFetchData = () => {
+    queryClient.invalidateQueries({ queryKey: ["balances"] });
+    queryClient.invalidateQueries({ queryKey: ["limits"] });
+    queryClient.invalidateQueries({ queryKey: ["customer"] });
+  };
+
   useEffect(() => {
     if (balances != null && selectedToken == null) {
       setSelectedToken(balances.value[0]);
@@ -123,6 +129,10 @@ function Withdraw({ navigation }: Props) {
         <CustomerLimitsProgressError />
         <FullScreenMessage
           message="Please try again later"
+          actionButton={{
+            label: "Retry",
+            callback: retryFetchData,
+          }}
           title="Error loading data"
           noFullScreen
         />

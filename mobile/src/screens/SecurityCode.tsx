@@ -10,7 +10,6 @@ import ScreenWrapper from "../components/ScreenWrapper";
 const totp: any = require("totp-generator");
 import * as SecureStore from "expo-secure-store";
 import FullScreenMessage from "../components/FullScreenMessage";
-import * as Sentry from "sentry-expo";
 import FullScreenLoadingSpinner from "../components/FullScreenLoadingSpinner";
 
 export function SecurityCode() {
@@ -105,19 +104,9 @@ Please try later or contact support.`}
         setOtpSeed(otpSeedFromSecureStore);
       } else {
         setOtpGenerationError(true);
-
-        Sentry.Native.captureMessage(
-          "SecureStore is not available, or otpSeed is null",
-          {
-            level: "warning",
-            tags: { key: "SecureStoreNotAvailableOrOtpSeedNull" },
-            extra: { isSecureStoreAvailable, otpSeedFromSecureStore },
-          }
-        );
       }
     } catch (error) {
       setOtpGenerationError(true);
-      Sentry.Native.captureException(error);
     }
   }
   function updateOtpAndProgressBar() {

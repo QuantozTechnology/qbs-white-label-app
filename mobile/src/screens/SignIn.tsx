@@ -14,7 +14,6 @@ import {
   Image,
   HStack,
 } from "native-base";
-import { useEffect } from "react";
 import { useWindowDimensions } from "react-native";
 import { useAuth } from "../auth/AuthContext";
 import FullScreenLoadingSpinner from "../components/FullScreenLoadingSpinner";
@@ -25,21 +24,6 @@ import { formatError } from "../utils/errors";
 function SignIn() {
   const auth = useAuth();
   const { height, width } = useWindowDimensions();
-
-  useEffect(() => {
-    if (auth?.error) {
-      Toast.show({
-        render: () =>
-          auth.error !== null && (
-            <Notification
-              message={auth.error}
-              variant="error"
-              isToastNotification
-            />
-          ),
-      });
-    }
-  }, [auth?.error]);
 
   if (auth?.isLoading) {
     return <FullScreenLoadingSpinner />;
@@ -113,6 +97,7 @@ function SignIn() {
 
   async function azureSignup() {
     try {
+      await auth?.logout();
       await auth?.signup();
     } catch (error) {
       Toast.show({

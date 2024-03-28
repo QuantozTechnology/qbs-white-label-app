@@ -12,6 +12,7 @@ export type RegistrationStackParamList = {
   Consumer: undefined;
   Business: undefined;
   Feedback: FeedbackProps;
+  AppStack: undefined;
 };
 
 const RegistrationTopTabs =

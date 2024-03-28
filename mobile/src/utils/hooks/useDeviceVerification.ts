@@ -19,6 +19,14 @@ export function useDeviceVerification(shouldVerify: boolean) {
   const [error, setError] = useState<Error | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [deviceConflict, setDeviceConflict] = useState(false);
+  const [oid, setOid] = useState<string | null>(null);
+  const [deviceVerified, setDeviceVerified] = useState(false);
+
+  const getOid = async () => {
+    const customerId = await SecureStore.getItemAsync("oid");
+    setOid(customerId);
+    return customerId;
+  };
 
   const generateKeys = () => {
     const privKey = ed.utils.randomPrivateKey();
@@ -34,8 +42,8 @@ export function useDeviceVerification(shouldVerify: boolean) {
     privKey: string,
     otpSeed?: string | null
   ) => {
-    await SecureStore.setItemAsync("publicKey", pubKey);
-    await SecureStore.setItemAsync("privateKey", privKey);
+    await SecureStore.setItemAsync(oid + "_publicKey", pubKey);
+    await SecureStore.setItemAsync(oid + "_privateKey", privKey);
     if (otpSeed) {
       await SecureStore.setItemAsync("otpSeed", otpSeed);
     }
@@ -49,17 +57,19 @@ export function useDeviceVerification(shouldVerify: boolean) {
   }, [shouldVerify]);
 
   const setupAndVerifyDeviceSecurity = async () => {
+    const customerId = await getOid();
+    if (isNil(customerId)) {
+      return;
+    }
     setIsLoading(true);
 
     try {
-      let pubKey = await SecureStore.getItemAsync("publicKey");
-      let privKey = await SecureStore.getItemAsync("privateKey");
-
-      if (!pubKey || !privKey) {
+      let pubKey = await SecureStore.getItemAsync(customerId + "_publicKey");
+      let privKey = await SecureStore.getItemAsync(customerId + "_privateKey");
+      if (isNil(pubKey) || isNil(privKey)) {
         const keys = generateKeys();
         pubKey = keys.pubKey;
         privKey = keys.privKey;
-
         await storeKeys(pubKey, privKey, null);
       }
       const verificationResult = await verifyDevice({ publicKey: pubKey });
@@ -75,6 +85,20 @@ export function useDeviceVerification(shouldVerify: boolean) {
       } catch (e) {
         console.log("error in verifyDevice", e);
       }
+      const deviceRegistered = await SecureStore.getItemAsync(
+        customerId + "_deviceRegistered"
+      );
+      if (isNil(deviceRegistered)) {
+        const registeredTime =
+          new Date().toISOString().split("T")[0] +
+          " " +
+          new Date().toTimeString().split(" ")[0];
+        SecureStore.setItemAsync(
+          customerId + "_deviceRegistered",
+          "Registered at " + registeredTime
+        );
+      }
+      setDeviceVerified(true);
     } catch (e: unknown) {
       if (isAxiosError(e) && e.response?.status === 409) {
         setDeviceConflict(true);
@@ -90,5 +114,6 @@ export function useDeviceVerification(shouldVerify: boolean) {
     error,
     isLoading,
     deviceConflict,
+    deviceVerified,
   };
 }
