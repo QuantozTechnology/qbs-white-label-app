@@ -33,11 +33,6 @@ namespace Core.Application.Queries.CustomerQueries
         {
             var customer = await _customerRepository.GetAsync(request.CustomerCode);
 
-            if (customer.Status != CustomerStatus.ACTIVE.ToString() && customer.Status != CustomerStatus.UNDERREVIEW.ToString())
-            {
-                throw new CustomErrorsException(ApplicationErrorCode.InvalidStatusError.ToString(), request.CustomerCode, "Customer status with this reference is not valid");
-            }
-
             return customer;
         }
     }
