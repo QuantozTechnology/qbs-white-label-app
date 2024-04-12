@@ -38,10 +38,12 @@ namespace Core.Infrastructure.CustomerFileStorage
                 var keyBytes = Base32Encoding.ToBytes(otpKey);
 
                 // Create a TOTP generator with the key and time step
-                var totp = new Totp(keyBytes, step: 30);
+                var totp = new Totp(keyBytes, step: 120);
 
                 // Verify the OTP code
-                return totp.VerifyTotp(otpCode, out _, VerificationWindow.RfcSpecifiedNetworkDelay);
+                bool isValid = totp.VerifyTotp(otpCode, out long timeStepMatched, VerificationWindow.RfcSpecifiedNetworkDelay);
+
+                return isValid;
             }
             catch
             {
