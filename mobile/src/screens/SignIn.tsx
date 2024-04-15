@@ -97,7 +97,7 @@ function SignIn() {
 
   async function azureSignup() {
     try {
-      await auth?.logout();
+      //await auth?.logout();
       await auth?.signup();
     } catch (error) {
       Toast.show({
