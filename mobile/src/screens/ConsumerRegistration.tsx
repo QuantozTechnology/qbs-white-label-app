@@ -115,6 +115,11 @@ function ConsumerRegistration() {
     }
   };
 
+  function isValidNameInput(text: string): boolean {
+    const pattern = /^[^0-9!@#$%^*()_+=[\]{};':"\\|,<>/?]*$/;
+    return pattern.test(text);
+  }
+
   // passing props for masked input to NativeBase input
   const maskedInputProps = useMaskedInputProps({
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -138,7 +143,11 @@ function ConsumerRegistration() {
                   value={firstName}
                   accessibilityLabel="first name"
                   aria-label="First name"
-                  onChangeText={setFirstName}
+                  onChangeText={(text) => {
+                    if (isValidNameInput(text) || text === "") {
+                      setFirstName(text);
+                    }
+                  }}
                   returnKeyType="next"
                   // @ts-ignore it works, but it complains about the current property possibly undefined
                   onSubmitEditing={() => lastNameInput.current.focus()}
@@ -156,7 +165,11 @@ function ConsumerRegistration() {
                   value={lastName}
                   accessibilityLabel="last name"
                   aria-label="Last name"
-                  onChangeText={setLastName}
+                  onChangeText={(text) => {
+                    if (isValidNameInput(text) || text === "") {
+                      setLastName(text);
+                    }
+                  }}
                   ref={lastNameInput}
                   returnKeyType="next"
                   // @ts-ignore it works, but it complains about the current property possibly undefined
@@ -233,6 +246,12 @@ function ConsumerRegistration() {
         >
           Create account
         </Button>
+        {/* <Button
+          onPress={() => auth?.logout()}
+          variant="unstyled"
+          accessibilityLabel="cancel registration"
+          aria-label="Cancel registration"
+          >Exit</Button> */}
       </KeyboardAvoidingView>
     </ScreenWrapper>
   );
