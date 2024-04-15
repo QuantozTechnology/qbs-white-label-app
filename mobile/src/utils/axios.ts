@@ -125,17 +125,29 @@ async function responseInterceptor(response: AxiosResponse) {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function responseInterceptorError(error: any) {
   const originalRequest = error.config;
+  //console.warn("responseInterceptorError", error.response?.data?.Errors[0])
   if (
     error.response &&
     error.response.status === 401 &&
     error.response?.data?.Errors[0]?.Code === "Unauthorized"
   ) {
-    try {
-      const newToken = await getNewAccessToken();
-      originalRequest.headers["Authorization"] = `Bearer ${newToken}`;
-      return paymentsApi(originalRequest);
-    } catch (e) {
-      return Promise.reject({ ...error, originalError: error });
+    // Check if the request has already been retried
+    if (!originalRequest._retry) {
+      originalRequest._retry = true;
+      originalRequest._retryCount = 0;
+    }
+
+    // Check if the retry count is less than 2
+    if (originalRequest._retryCount < 2) {
+      originalRequest._retryCount++;
+
+      try {
+        const newToken = await getNewAccessToken();
+        originalRequest.headers["Authorization"] = `Bearer ${newToken}`;
+        return paymentsApi(originalRequest);
+      } catch (e) {
+        return Promise.reject({ ...error, originalError: error });
+      }
     }
   }
 
