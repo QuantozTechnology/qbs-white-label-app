@@ -42,7 +42,7 @@ namespace Core.Infrastructure.Nexus.Repositories
 
             var query = new Dictionary<string, string>
             {
-                { "Email", customer.Email.TrimEnd() }
+                { "Email", customer.Email.ToLower().Trim() }
             };
 
             var existingCustomersWithEmail = await _tokenServer.Customers.Get(query);
@@ -69,7 +69,7 @@ namespace Core.Infrastructure.Nexus.Repositories
                         BankAccountNumber = null
                     }
                 ])
-                .SetEmail(customer.Email)
+                .SetEmail(customer.Email.ToLower().Trim())
                 .SetStatus(status)
                 .SetCustomData(customer.Data);
 
@@ -93,7 +93,7 @@ namespace Core.Infrastructure.Nexus.Repositories
             }
 
             var builder = new UpdateCustomerRequestBuilder(customer.CustomerCode)
-                .SetEmail(customer.Email)
+                .SetEmail(customer.Email.ToLower().Trim())
                 .SetStatus(status)
                 .SetCustomData(customer.Data);
 
