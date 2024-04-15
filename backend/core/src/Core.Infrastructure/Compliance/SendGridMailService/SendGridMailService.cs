@@ -35,7 +35,7 @@ namespace Core.Infrastructure.Compliance.SendGridMailService
             }
 
             var from = new EmailAddress(_mailOptions.Sender);
-            var to = new EmailAddress(mail.Recipient?.Email) ?? throw new CustomErrorsException("MailService", "toAddress", "An error occured while sending mail.");
+            var to = new EmailAddress(mail.Recipient?.Email?.ToLower().Trim()) ?? throw new CustomErrorsException("MailService", "toAddress", "An error occured while sending mail.");
 
             var msg = new SendGridMessage();
 
@@ -83,7 +83,7 @@ namespace Core.Infrastructure.Compliance.SendGridMailService
         public async Task SendOTPCodeMailAsync(Customer customer, string otpCode)
         {
             var from = new EmailAddress(_mailOptions.Sender);
-            var to = new EmailAddress(customer.Email);
+            var to = new EmailAddress(customer.Email?.ToLower().Trim());
             var msg = new SendGridMessage();
 
             msg.SetFrom(new EmailAddress(from.Email, from.Name));
