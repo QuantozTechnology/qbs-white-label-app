@@ -8,6 +8,7 @@ namespace Core.Application
     {
         InvalidStatusError,
         InvalidPropertyError,
-        ExistingPropertyError
+        ExistingPropertyError,
+        NotFoundError
     }
 }

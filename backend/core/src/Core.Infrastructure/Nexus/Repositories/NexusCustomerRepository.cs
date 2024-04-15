@@ -2,12 +2,16 @@
 // under the Apache License, Version 2.0. See the NOTICE file at the root
 // of this distribution or at http://www.apache.org/licenses/LICENSE-2.0
 
+using Algorand.V2.Algod.Model;
 using Core.Domain.Entities.CustomerAggregate;
 using Core.Domain.Exceptions;
 using Core.Domain.Repositories;
+using Core.Infrastructure.Nexus.SigningService;
 using Nexus.Sdk.Shared.Requests;
 using Nexus.Sdk.Token;
+using Nexus.Sdk.Token.Requests;
 using Nexus.Sdk.Token.Responses;
+using stellar_dotnet_sdk.responses;
 
 namespace Core.Infrastructure.Nexus.Repositories
 {
@@ -15,11 +19,16 @@ namespace Core.Infrastructure.Nexus.Repositories
     {
         private readonly ITokenServer _tokenServer;
         private readonly TokenOptions _tokenSettings;
+        private readonly ISigningService _signingService;
 
-        public NexusCustomerRepository(ITokenServer tokenServer, TokenOptions tokenSettings)
+        public NexusCustomerRepository(
+            ITokenServer tokenServer, 
+            TokenOptions tokenSettings,
+            ISigningService signingService)
         {
             _tokenServer = tokenServer;
             _tokenSettings = tokenSettings;
+            _signingService = signingService;
         }
 
         public async Task CreateAsync(Customer customer, string? ip = null, CancellationToken cancellationToken = default)
@@ -138,6 +147,69 @@ namespace Core.Infrastructure.Nexus.Repositories
             }
 
             return limits;
+        }
+
+        public async Task DeleteAsync(Customer customer, string? ip = null, CancellationToken cancellationToken = default)
+        {
+            var customerCodeExists = await _tokenServer.Customers.Exists(customer.CustomerCode);
+
+            if (!customerCodeExists)
+            {
+                throw new CustomErrorsException(NexusErrorCodes.CustomerNotFoundError.ToString(), customer.CustomerCode, Constants.NexusErrorMessages.CustomerNotFound);
+            }
+
+            // Check if the status is ACTIVE
+            if (customer.Status != CustomerStatus.ACTIVE.ToString())
+            {
+                throw new CustomErrorsException(NexusErrorCodes.InvalidStatus.ToString(), customer.Status.ToString(), "Invalid customer status");
+            }
+
+            // Get Customer accounts
+            var accounts = await _tokenServer.Accounts.Get(
+                new Dictionary<string, string> { { "CustomerCode", customer.CustomerCode } });
+
+            // Check if the customer has any accounts and balance
+            if (accounts.Records.Any())
+            {
+                foreach (var account in accounts.Records)
+                {
+                    // Get the account balance
+                    var response = await _tokenServer.Accounts.GetBalances(account.AccountCode);
+
+                    var balances = response.Balances;
+                    var tokensToBeRemoved = new List<string>();
+
+                    foreach(var balance in balances)
+                    {
+                        if (balance.Amount > 0)
+                        {
+                            throw new CustomErrorsException(NexusErrorCodes.NonZeroAccountBalance.ToString(), account.AccountCode, "Customer cannot be deleted due to non zero balance");
+                        }
+
+                    }
+
+                    // First call update account to remove the trustlines
+                    var updateAccount = new UpdateTokenAccountRequest
+                    {
+                        Settings = new UpdateTokenAccountSettings
+                        {
+                            AllowedTokens = new AllowedTokens
+                            {
+                                RemoveTokens = new string[] { }
+                            }
+                        }
+                    };
+                    var signableResponse = await _tokenServer.Accounts.Update(customer.CustomerCode, account.AccountCode, updateAccount);
+
+                    var submitRequest = await _signingService.SignStellarTransactionEnvelopeAsync(withdraw.PublicKey, signableResponse);
+                    await _tokenServer.Submit.OnStellarAsync(submitRequest);
+                }
+            }
+
+
+
+
+           
         }
 
         public Task SaveChangesAsync(CancellationToken cancellationToken = default)

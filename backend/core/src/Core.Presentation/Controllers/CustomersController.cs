@@ -88,6 +88,19 @@ namespace Core.Presentation.Controllers
             return Ok(response);
         }
 
+        [HttpDelete(Name = "DeleteCustomer")]
+        [ProducesResponseType(typeof(CustomResponse<EmptyCustomResponse>), 201)]
+        [ProducesResponseType(typeof(CustomErrorsResponse), 400)]
+        [ProducesResponseType(typeof(CustomErrorsResponse), 404)]
+        [ProducesResponseType(typeof(CustomErrorsResponse), 500)]
+        [RequiredScope("Customer.Create")]
+        public async Task<IActionResult> DeleteCustomerAsync()
+        {
+            var command = new CreateAccountCommand(GetUserId());
+            await _sender.Send(command);
+            return CreatedAtRoute("GetAccount", null, new EmptyCustomResponse());
+        }
+
         [HttpPost("devices", Name = "DeviceAuthentication")]
         [ProducesResponseType(typeof(CustomResponse<DeviceAuthenticationResponse>), 201)]
         [ProducesResponseType(typeof(CustomErrorsResponse), 400)]
