@@ -6,7 +6,10 @@ import { isEmpty, isNil } from "lodash";
 import { paymentsApi } from "./axios";
 import "react-native-get-random-values";
 import * as LocalAuthentication from "expo-local-authentication";
-import { biometricValidation } from "../utils/biometric";
+import {
+  biometricValidation,
+  isBiometricCheckSupportedByDevice,
+} from "../utils/biometric";
 import { AxiosError } from "axios";
 
 export const generateKeys = async () => {
@@ -18,6 +21,16 @@ export const generateKeys = async () => {
   const privKeyBase64 = fromByteArray(privKey);
   const pubKeyBase64 = fromByteArray(pubKey);
   return { pubKey: pubKeyBase64, privKey: privKeyBase64 };
+};
+
+export const sendOtpCodeToMail = async () => {
+  try {
+    const response = await paymentsApi.post("/api/customers/otp/email", {});
+    return response;
+  } catch (error) {
+    //const axiosErrror = error as AxiosError;
+    return "error";
+  }
 };
 
 export const storeKeys = async (
@@ -35,15 +48,23 @@ export const renewKeys = async (oid: string) => {
   return keys;
 };
 
-export const verifyDevice = async (pubKey: string, oid: string) => {
+export const verifyDevice = async (
+  pubKey: string,
+  oid: string,
+  otpCode: string | null
+) => {
   const otpSeed = await SecureStore.getItemAsync(oid + "otpSeed");
   if (!isNil(otpSeed) && !isEmpty(otpSeed)) {
     return { data: { value: { otpSeed: otpSeed } } };
   } else {
     try {
-      const result = await paymentsApi.post("/api/customers/devices", {
+      const payload: { publicKey: string; otpCode?: string } = {
         publicKey: pubKey,
-      });
+      };
+      if (!isNil(otpCode)) {
+        payload.otpCode = otpCode;
+      }
+      const result = await paymentsApi.post("/api/customers/devices", payload);
       if (result.status === 200) {
         if (result.data?.value?.otpSeed) {
           await SecureStore.setItemAsync(
@@ -67,7 +88,7 @@ export const verifyDevice = async (pubKey: string, oid: string) => {
   }
 };
 export const registerDevice = async (pubKey: string, oid: string) => {
-  const response = await verifyDevice(pubKey, oid);
+  const response = await verifyDevice(pubKey, oid, null);
   if (response) {
     if (response === true) {
       return true;
@@ -75,6 +96,8 @@ export const registerDevice = async (pubKey: string, oid: string) => {
       if (response?.data?.error === "conflict") {
         return "conflict";
       } else if (response?.data?.error === "error") {
+        return "error";
+      } else {
         return "error";
       }
     }
@@ -89,7 +112,8 @@ export const checkStoredKeys = async (oid: string) => {
 
   const publicKey = await SecureStore.getItemAsync(oid + "_publicKey");
   const privateKey = await SecureStore.getItemAsync(oid + "_privateKey");
-  const deviceVerified = await SecureStore.getItemAsync(oid + "deviceVerified");
+  const otpSeed = await SecureStore.getItemAsync(oid + "otpSeed");
+
   if (isNil(publicKey) || isNil(privateKey)) {
     const keys = await renewKeys(oid);
     // verify device
@@ -97,7 +121,7 @@ export const checkStoredKeys = async (oid: string) => {
     const deviceRegistered = await registerDevice(pubKey, oid);
     return deviceRegistered;
   }
-  if (isNil(deviceVerified)) {
+  if (isNil(otpSeed)) {
     const deviceRegistered = await registerDevice(publicKey, oid);
     return deviceRegistered;
   }
@@ -130,6 +154,7 @@ export const removeStoredData = async (keys: string[]) => {
     await SecureStore.deleteItemAsync(key);
   }
 };
+
 export const removeStoredKeys = async (whocallthisfunc: string) => {
   const oid = await SecureStore.getItemAsync("oid");
   await SecureStore.deleteItemAsync(oid + "_publicKey");
@@ -147,7 +172,7 @@ export const getAllStoredData = async () => {
   );
   const email = await SecureStore.getItemAsync("email");
   const phoneNumber = await SecureStore.getItemAsync("phoneNumber");
-  const deviceVerified = await SecureStore.getItemAsync(oid + "deviceVerified");
+  //const deviceVerified = await SecureStore.getItemAsync(oid + "deviceVerified");
   const RegistrationCompleted = await SecureStore.getItemAsync(
     oid + "RegistrationCompleted"
   );
@@ -157,7 +182,6 @@ export const getAllStoredData = async () => {
   console.warn("deviceRegistered: ", deviceRegistered);
   console.warn("email: ", email);
   console.warn("phoneNumber: ", phoneNumber);
-  console.warn("deviceVerified: ", deviceVerified);
   console.warn("RegistrationCompleted: ", RegistrationCompleted);
 };
 
@@ -181,25 +205,43 @@ export const checkDeviceHasScreenLock = (
     });
 };
 
-export const performBiometricValidation = (
+export const performBiometricValidation = async (
   callback: (
-    isBiometricCheckPassed: boolean,
+    biometricCheckStatus: "success" | "error" | "checking",
     error: { message: string } | null
   ) => void
 ) => {
-  biometricValidation()
-    .then((result) => {
-      if (result.result === "success") {
-        callback(true, null); // First argument is isBiometricCheckPassed, second is error
-      } else {
-        callback(false, {
-          message: result.message || "Biometric check failed",
-        });
-      }
-    })
-    .catch((error) => {
-      callback(false, {
-        message: "Error checking biometric: " + error.message,
-      });
+  const isHardwareSupported = await isBiometricCheckSupportedByDevice();
+  if (!isHardwareSupported) {
+    callback("error", {
+      message: "Biometric check is not supported",
     });
+    console.warn("Biometric check is not supported", isHardwareSupported);
+  } else {
+    await biometricValidation()
+      .then((result) => {
+        console.warn("biometricValidation result", result);
+        if (result.result === "success") {
+          callback("success", null); // First argument is biometricCheckStatus, second is error
+        } else if (result.result === "checking") {
+          callback("checking", {
+            message: "Biometric check is not supported",
+          });
+        } else if (result.result === "error") {
+          callback("error", {
+            message: result.message || "Biometric check failed",
+          });
+        } else {
+          callback("error", {
+            message: "Biometric check failed",
+          });
+        }
+      })
+      .catch((error) => {
+        console.log("biometricValidation error", error);
+        // callback("error", {
+        //   message: "Error checking biometric: " + error.message,
+        // });
+      });
+  }
 };
