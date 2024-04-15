@@ -16,7 +16,7 @@ export function SecurityCode() {
   const [otp, setOtp] = useState<string>("");
   const [otpSeed, setOtpSeed] = useState<string | null>(null);
   const [otpGenerationError, setOtpGenerationError] = useState(false);
-  const period = 30;
+  const period = 120;
   const progressAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
@@ -98,7 +98,10 @@ Please try later or contact support.`}
   async function retrieveOTPKeyFromSecureStore() {
     try {
       const isSecureStoreAvailable = await SecureStore.isAvailableAsync();
-      const otpSeedFromSecureStore = await SecureStore.getItemAsync("otpSeed");
+      const oid = await SecureStore.getItemAsync("oid");
+      const otpSeedFromSecureStore = await SecureStore.getItemAsync(
+        oid + "otpSeed"
+      );
 
       if (isSecureStoreAvailable && otpSeedFromSecureStore !== null) {
         setOtpSeed(otpSeedFromSecureStore);
