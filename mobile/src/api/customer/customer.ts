@@ -7,11 +7,28 @@ import { useQuery } from "@tanstack/react-query";
 import { paymentsApi } from "../../utils/axios";
 import { ICreateCustomer } from "./customer.interface";
 import * as SecureStore from "expo-secure-store";
+import { isNil } from "lodash";
+import { AxiosError } from "axios";
 
 export async function getCustomer(): Promise<any> {
-  // Since API response is inconsistent, we are not able to specify the exact type
-  const response = await paymentsApi.get("/api/customers");
-  return response;
+  try {
+    const response = await paymentsApi.get("/api/customers");
+    return response;
+  } catch (error) {
+    const axiosErrror = error as AxiosError;
+    if (!isNil(axiosErrror?.response?.data)) {
+      // check error Code
+      if (
+        axiosErrror?.response?.data?.Errors[0]?.Code === "InvalidStatusError"
+      ) {
+        return null;
+      } else {
+        return null;
+      }
+    } else {
+      return null;
+    }
+  }
 }
 
 export function useCustomer(options?: any) {
