@@ -51,6 +51,7 @@ export function CustomerProvider({
           isLoading: false,
           state: action.state,
           error: null,
+          is_business: null,
         };
       }
       default: {
@@ -91,12 +92,36 @@ export function CustomerProvider({
 
   async function updateCustomerState() {
     const customerResponse = await getCustomer();
-
     if (!isNil(customerResponse)) {
       if (customerResponse?.data.value.status === "UNDERREVIEW") {
         dispatch({
           type: CustomerStateActionType.UPDATE_STATE,
           state: CustomerStateType.CUSTOMER_UNDER_REVIEW,
+          is_business: customerResponse?.data.value.isBusiness,
+        });
+        return false;
+      }
+      if (customerResponse?.data.value.status === "BLOCKED") {
+        dispatch({
+          type: CustomerStateActionType.UPDATE_STATE,
+          state: CustomerStateType.CUSTOMER_UNDER_REVIEW,
+          is_business: customerResponse?.data.value.isBusiness,
+        });
+        return false;
+      }
+      if (customerResponse?.data.value.status === "NEW") {
+        dispatch({
+          type: CustomerStateActionType.UPDATE_STATE,
+          state: CustomerStateType.CUSTOMER_UNDER_REVIEW,
+          is_business: customerResponse?.data.value.isBusiness,
+        });
+        return false;
+      }
+      if (customerResponse?.data.value.status === "DELETED") {
+        dispatch({
+          type: CustomerStateActionType.UPDATE_STATE,
+          state: CustomerStateType.CUSTOMER_UNDER_REVIEW,
+          is_business: customerResponse?.data.value.isBusiness,
         });
         return false;
       }
@@ -134,6 +159,13 @@ export function CustomerProvider({
     isUnderReview: state.state
       ? state.state === CustomerStateType.CUSTOMER_UNDER_REVIEW
       : null,
+    isBlocked: state.state
+      ? state.state === CustomerStateType.CUSTOMER_BLOCKED
+      : null,
+    isNew: state.state ? state.state === CustomerStateType.CUSTOMER_NEW : null,
+    isDeleted: state.state
+      ? state.state === CustomerStateType.CUSTOMER_DELETED
+      : null,
     requiresCustomer: state.state
       ? state.state === CustomerStateType.CUSTOMER_REQUIRED
       : null,
@@ -143,6 +175,7 @@ export function CustomerProvider({
     error: state.error,
     isLoading: state.isLoading,
     refresh: refresh,
+    is_business: state.is_business,
   };
 
   return (
