@@ -96,7 +96,7 @@ namespace Core.Presentation.Controllers
         [RequiredScope("Customer.Create")]
         public async Task<IActionResult> DeleteCustomerAsync()
         {
-            var command = new CreateAccountCommand(GetUserId());
+            var command = new DeleteCustomerCommand(GetUserId(), GetIP());
             await _sender.Send(command);
             return CreatedAtRoute("GetAccount", null, new EmptyCustomResponse());
         }

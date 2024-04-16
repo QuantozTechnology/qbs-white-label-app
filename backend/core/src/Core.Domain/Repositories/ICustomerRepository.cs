@@ -15,5 +15,7 @@ namespace Core.Domain.Repositories
         public Task<IEnumerable<CustomerLimit>> GetLimitsAsync(string customerCode, CancellationToken cancellationToken = default);
 
         public Task UpdateAsync(Customer customer, CancellationToken cancellationToken = default);
+
+        public Task DeleteAsync(Customer customer, string? ip = null, CancellationToken cancellationToken = default);
     }
 }

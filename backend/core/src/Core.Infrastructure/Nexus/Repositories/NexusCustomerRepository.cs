@@ -2,7 +2,6 @@
 // under the Apache License, Version 2.0. See the NOTICE file at the root
 // of this distribution or at http://www.apache.org/licenses/LICENSE-2.0
 
-using Algorand.V2.Algod.Model;
 using Core.Domain.Entities.CustomerAggregate;
 using Core.Domain.Exceptions;
 using Core.Domain.Repositories;
@@ -11,7 +10,7 @@ using Nexus.Sdk.Shared.Requests;
 using Nexus.Sdk.Token;
 using Nexus.Sdk.Token.Requests;
 using Nexus.Sdk.Token.Responses;
-using stellar_dotnet_sdk.responses;
+using Account = Core.Domain.Entities.AccountAggregate.Account;
 
 namespace Core.Infrastructure.Nexus.Repositories
 {
@@ -22,7 +21,7 @@ namespace Core.Infrastructure.Nexus.Repositories
         private readonly ISigningService _signingService;
 
         public NexusCustomerRepository(
-            ITokenServer tokenServer, 
+            ITokenServer tokenServer,
             TokenOptions tokenSettings,
             ISigningService signingService)
         {
@@ -151,6 +150,7 @@ namespace Core.Infrastructure.Nexus.Repositories
 
         public async Task DeleteAsync(Customer customer, string? ip = null, CancellationToken cancellationToken = default)
         {
+            customer.CustomerCode = "5B2B5A2F-272A-4C79-9B4C-6BB51B5F25DF";
             var customerCodeExists = await _tokenServer.Customers.Exists(customer.CustomerCode);
 
             if (!customerCodeExists)
@@ -171,45 +171,76 @@ namespace Core.Infrastructure.Nexus.Repositories
             // Check if the customer has any accounts and balance
             if (accounts.Records.Any())
             {
-                foreach (var account in accounts.Records)
+                foreach (var acc in accounts.Records)
                 {
+                    Account account = new()
+                    {
+                        AccountCode = acc.AccountCode,
+                        CustomerCode = acc.CustomerCode,
+                        PublicKey = acc.PublicKey
+                    };
+
                     // Get the account balance
                     var response = await _tokenServer.Accounts.GetBalances(account.AccountCode);
 
-                    var balances = response.Balances;
-                    var tokensToBeRemoved = new List<string>();
+                    var accountBalances = response.Balances;
 
-                    foreach(var balance in balances)
+                    if (response.Balances.Any(balance => balance.Amount > 0))
                     {
-                        if (balance.Amount > 0)
-                        {
-                            throw new CustomErrorsException(NexusErrorCodes.NonZeroAccountBalance.ToString(), account.AccountCode, "Customer cannot be deleted due to non zero balance");
-                        }
-
+                        throw new CustomErrorsException(NexusErrorCodes.NonZeroAccountBalance.ToString(), account.AccountCode, "Customer cannot be deleted due to non-zero balance");
                     }
 
-                    // First call update account to remove the trustlines
-                    var updateAccount = new UpdateTokenAccountRequest
+                    if (accountBalances.Any())
                     {
-                        Settings = new UpdateTokenAccountSettings
-                        {
-                            AllowedTokens = new AllowedTokens
-                            {
-                                RemoveTokens = new string[] { }
-                            }
-                        }
-                    };
-                    var signableResponse = await _tokenServer.Accounts.Update(customer.CustomerCode, account.AccountCode, updateAccount);
+                        // Get the token codes to be removed
+                        var tokensToBeRemoved = accountBalances.Select(b => b.TokenCode).ToArray();
 
-                    var submitRequest = await _signingService.SignStellarTransactionEnvelopeAsync(withdraw.PublicKey, signableResponse);
-                    await _tokenServer.Submit.OnStellarAsync(submitRequest);
+                        // First call update account to remove the trustlines
+                        await RemoveTrustlines(customer, account, tokensToBeRemoved);
+                    }
                 }
             }
 
+            // then call delete customer
+            var deleteRequest = new DeleteCustomerRequest
+            {
+                CustomerCode = customer.CustomerCode
+            };
 
+            await _tokenServer.Customers.Delete(deleteRequest, ip);
+        }
 
+        private async Task RemoveTrustlines(Customer customer, Account account, string[]? tokensToBeRemoved = null)
+        {
+            var updateAccount = new UpdateTokenAccountRequest
+            {
+                Settings = new UpdateTokenAccountSettings
+                {
+                    AllowedTokens = new AllowedTokens
+                    {
+                        DisableTokens = tokensToBeRemoved
+                        //RemoveTokens = tokensToBeRemoved
+                    }
+                }
+            };
 
-           
+            var signableResponse = await _tokenServer.Accounts.Update(customer.CustomerCode, account.AccountCode, updateAccount);
+
+            switch (_tokenSettings.Blockchain)
+            {
+                case Blockchain.STELLAR:
+                    {
+                        var submitRequest = await _signingService.SignStellarTransactionEnvelopeAsync(account.PublicKey, signableResponse);
+                        await _tokenServer.Submit.OnStellarAsync(submitRequest);
+                        break;
+                    }
+                case Blockchain.ALGORAND:
+                    {
+                        var submitRequest = await _signingService.SignAlgorandTransactionAsync(account.PublicKey, signableResponse);
+                        await _tokenServer.Submit.OnAlgorandAsync(submitRequest);
+                        break;
+                    }
+            }
         }
 
         public Task SaveChangesAsync(CancellationToken cancellationToken = default)
