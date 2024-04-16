@@ -28,6 +28,8 @@ import {
 import { useAppState } from "../context/AppStateContext";
 import FullScreenMessage from "../components/FullScreenMessage";
 import * as SecureStore from "expo-secure-store";
+import { getCustomer } from "../api/customer/customer";
+import { useNotification } from "../context/NotificationContext";
 
 export type WelcomeStackParamList = {
   Home: undefined;
@@ -59,7 +61,13 @@ const WelcomeStack = createNativeStackNavigator<WelcomeStackParamList>();
 type ErrorType = { message: string };
 
 export type CustomerStatus = {
-  result: "success" | "register" | "error" | "underReview";
+  result:
+    | "success"
+    | "register"
+    | "error"
+    | "underReview"
+    | "blocked"
+    | "deleted";
   message?: string;
 };
 
@@ -78,6 +86,9 @@ export type PageType =
   | "DeviceVerificationError"
   | "DeviceVerificationDone"
   | "AutoLogin"
+  | "UnderReview"
+  | "Blocked"
+  | "Deleted"
   | "RegistrationCompleteForm";
 
 export default function WelcomeStackNavigator() {
@@ -87,16 +98,22 @@ export default function WelcomeStackNavigator() {
   const { isRegistered } = useAppState();
 
   const [currentPageType, setCurrentPageType] = useState<PageType | null>(null);
+  const { showErrorNotification, showCustomNotification } = useNotification();
 
   const performBiometricCheck = async () => {
     performBiometricValidation(
-      (isBiometricCheckPassed: boolean, error: ErrorType | null) => {
-        if (error) {
+      (
+        biometricCheckStatus: "success" | "checking" | "error",
+        error: ErrorType | null
+      ) => {
+        if (biometricCheckStatus === "success") {
+          setCurrentPageType("BiometricDone");
+        }
+        if (biometricCheckStatus === "error") {
           setCurrentPageType("BiometricError");
-        } else {
-          setCurrentPageType(
-            isBiometricCheckPassed ? "BiometricDone" : "BiometricNone"
-          );
+        }
+        if (!isNil(error)) {
+          console.log("biometricValidation error", error);
         }
       }
     );
@@ -149,6 +166,16 @@ export default function WelcomeStackNavigator() {
 
   const nextAction = async () => {
     switch (currentPageType) {
+      case "UnderReview":
+        // do nothing
+        break;
+      case "Blocked":
+        // do nothing
+        break;
+      case "Deleted":
+        await auth?.logout();
+        setCurrentPageType("SignIn");
+        break;
       case "BiometricCheck":
         await performBiometricCheck();
         break;
@@ -166,23 +193,53 @@ export default function WelcomeStackNavigator() {
           const oid = await getOid();
           if (!isNil(oid)) {
             const pubKey = await SecureStore.getItemAsync(oid + "_publicKey");
-            const deviceVerified = await SecureStore.getItemAsync(
-              oid + "deviceVerified"
-            );
+            const otpSeed = await SecureStore.getItemAsync(oid + "otpSeed");
             const RegistrationCompleted = await SecureStore.getItemAsync(
               oid + "RegistrationCompleted"
             );
+
             if (!isNil(RegistrationCompleted)) {
-              setCurrentPageType("AutoLogin");
+              const customerInfo = await getCustomer();
+              if (isNil(customerInfo)) {
+                showErrorNotification("Your account is not active", {
+                  position: "top",
+                });
+                await auth?.logout();
+                setCurrentPageType("SignIn");
+              } else {
+                if (
+                  customerInfo &&
+                  ["BLOCKED", "NEW"].includes(customerInfo?.data?.value?.status)
+                ) {
+                  setCurrentPageType("Blocked");
+                } else if (
+                  customerInfo &&
+                  customerInfo?.data?.value?.status === "DELETED"
+                ) {
+                  setCurrentPageType("Deleted");
+                } else {
+                  if (
+                    customerInfo &&
+                    customerInfo?.data?.value?.status === "UNDERREVIEW"
+                  ) {
+                    showCustomNotification(
+                      "This account is in progress of review, functionality is limited.",
+                      "info",
+                      { position: "top" }
+                    );
+                  }
+                  setCurrentPageType("AutoLogin");
+                }
+              }
             } else {
-              if (isNil(pubKey) || isNil(deviceVerified)) {
+              if (isNil(pubKey) || isNil(otpSeed)) {
                 setCurrentPageType("DeviceVerificationCheck");
               } else {
                 setCurrentPageType("RegistrationCompleteForm");
               }
             }
           } else {
-            auth?.logout();
+            await auth?.logout();
             setCurrentPageType("SignIn");
           }
         }
@@ -209,21 +266,53 @@ export default function WelcomeStackNavigator() {
           const oid = await getOid();
           if (!isNil(oid)) {
             const pubKey = await SecureStore.getItemAsync(oid + "_publicKey");
-            const deviceVerified = await SecureStore.getItemAsync(
-              oid + "deviceVerified"
-            );
+            const otpSeed = await SecureStore.getItemAsync(oid + "otpSeed");
             const RegistrationCompleted = await SecureStore.getItemAsync(
               oid + "RegistrationCompleted"
             );
+
             if (!isNil(RegistrationCompleted)) {
-              setCurrentPageType("AutoLogin");
+              const customerInfo = await getCustomer();
+              if (isNil(customerInfo)) {
+                showErrorNotification("Your account is not active", {
+                  position: "top",
+                });
+                await auth?.logout();
+                setCurrentPageType("SignIn");
+              } else {
+                if (
+                  customerInfo &&
+                  ["BLOCKED", "NEW", "DELETED"].includes(
+                    customerInfo?.data?.value?.status
+                  )
+                ) {
+                  setCurrentPageType("Blocked");
+                } else if (
+                  customerInfo &&
+                  customerInfo?.data?.value?.status === "DELETED"
+                ) {
+                  setCurrentPageType("Deleted");
+                } else {
+                  if (
+                    customerInfo &&
+                    customerInfo?.data?.value?.status === "UNDERREVIEW"
+                  ) {
+                    showCustomNotification(
+                      "This account is in progress of review, functionality is limited.",
+                      "info",
+                      { position: "top" }
+                    );
+                  }
+                  setCurrentPageType("AutoLogin");
+                }
+              }
             } else {
-              if (isNil(pubKey) || isNil(deviceVerified)) {
+              if (isNil(pubKey) || isNil(otpSeed)) {
                 setCurrentPageType("DeviceVerificationCheck");
               }
             }
           } else {
-            auth?.logout();
+            await auth?.logout();
           }
         }
         break;
@@ -252,6 +341,12 @@ export default function WelcomeStackNavigator() {
   }, [isRegistered]);
 
   useEffect(() => {
+    if (customerContext?.isBlocked) {
+      setCurrentPageType("Blocked");
+    }
+  }, [customerContext]);
+
+  useEffect(() => {
     nextAction();
   }, [auth?.userSession]);
 
@@ -264,7 +359,7 @@ export default function WelcomeStackNavigator() {
   }, []);
 
   switch (currentPageType) {
-    case "RegistrationCompleteForm":
+    case "RegistrationCompleteForm": {
       return (
         <WelcomeStack.Navigator
           screenOptions={{ headerShown: false, gestureEnabled: false }}
@@ -282,7 +377,8 @@ export default function WelcomeStackNavigator() {
         </WelcomeStack.Navigator>
       );
       break;
-    case "AutoLogin":
+    }
+    case "AutoLogin": {
       return (
         <WelcomeStack.Navigator
           screenOptions={{ headerShown: false, gestureEnabled: false }}
@@ -294,21 +390,45 @@ export default function WelcomeStackNavigator() {
         </WelcomeStack.Navigator>
       );
       break;
-    case "DeviceVerificationCheck":
+    }
+    case "DeviceVerificationCheck": {
       return (
         <FullScreenLoadingSpinner
           message={"Verifying device, it could take up to 1 minute..."}
         />
       );
       break;
-    case "DeviceVerificationConflict":
+    }
+    case "DeviceVerificationConflict": {
       return (
         <WelcomeStack.Navigator>
           {showConfirmDeviceScreens()}
         </WelcomeStack.Navigator>
       );
       break;
-    case "SignIn":
+    }
+    case "Blocked": {
+      const errorMessage = customerContext?.is_business
+        ? "Your business account is being reviewed by our compliance team. You will be notified when you'll be able to access it."
+        : "Your account is not active. For more information please contact our support team.";
+      return (
+        <FullScreenMessage
+          title="Account not active"
+          message={errorMessage}
+          actionButton={{
+            label: "Exit",
+            callback: async () => {
+              await auth?.logout();
+              // remove session and oid
+              await SecureStore.deleteItemAsync("oid");
+              setCurrentPageType("SignIn");
+            },
+          }}
+        />
+      );
+      break;
+    }
+    case "SignIn": {
       if (auth?.userSession) {
         <FullScreenLoadingSpinner message="Checking your account..." />;
       } else {
@@ -321,21 +441,38 @@ export default function WelcomeStackNavigator() {
         );
       }
       break;
-    case "BiometricCheck":
+    }
+    case "BiometricCheck": {
       return (
         <FullScreenLoadingSpinner message={"Checking biometric security..."} />
       );
       break;
-    case "BiometricError":
+    }
+    case "BiometricError": {
       return (
-        <WelcomeStack.Navigator>
-          {showGenericErrorScreen(
-            "Cannot verify your biometric security. Please try again later"
-          )}
-        </WelcomeStack.Navigator>
+        <FullScreenMessage
+          title="Biometric Check"
+          message="Cannot verify your biometric security. Please try again later"
+          backgroundColor="#324658"
+          textColor="white"
+          icon={
+            <Icon
+              as={Ionicons}
+              name="ios-finger-print-sharp"
+              size={"6xl"}
+              accessibilityLabel="warning icon"
+              color="white"
+            />
+          }
+          actionButton={{
+            label: "Try again",
+            callback: retry.bind(null, "BiometricCheck"),
+          }}
+        />
       );
       break;
-    case "BiometricNone":
+    }
+    case "BiometricNone": {
       return (
         <FullScreenMessage
           title="Biometric check error"
@@ -347,14 +484,16 @@ export default function WelcomeStackNavigator() {
         />
       );
       break;
-    case "ScreenLockCheck":
+    }
+    case "ScreenLockCheck": {
       return (
         <FullScreenLoadingSpinner
           message={"Checking screen lock mechanism..."}
         />
       );
       break;
-    case "ScreenLockError":
+    }
+    case "ScreenLockError": {
       return (
         <WelcomeStack.Navigator>
           {showGenericErrorScreen(
@@ -363,7 +502,8 @@ export default function WelcomeStackNavigator() {
         </WelcomeStack.Navigator>
       );
       break;
-    case "ScreenLockNone":
+    }
+    case "ScreenLockNone": {
       return (
         <WelcomeStack.Navigator>
           <WelcomeStack.Screen
@@ -378,7 +518,8 @@ export default function WelcomeStackNavigator() {
         </WelcomeStack.Navigator>
       );
       break;
-    case "DeviceVerificationError":
+    }
+    case "DeviceVerificationError": {
       return (
         <WelcomeStack.Navigator>
           {showGenericErrorScreen(
@@ -387,9 +528,11 @@ export default function WelcomeStackNavigator() {
         </WelcomeStack.Navigator>
       );
       break;
-    default:
+    }
+    default: {
       return <FullScreenLoadingSpinner message="Checking your account..." />;
       break;
+    }
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
