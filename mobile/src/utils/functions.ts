@@ -216,11 +216,8 @@ export const performBiometricValidation = async (
           });
         }
       })
-      .catch((error) => {
-        console.log("biometricValidation error", error);
-        // callback("error", {
-        //   message: "Error checking biometric: " + error.message,
-        // });
+      .catch(() => {
+        // do nothing
       });
   }
 };
