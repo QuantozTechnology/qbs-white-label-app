@@ -8,7 +8,6 @@ using Core.Domain.Repositories;
 using Nexus.Sdk.Shared.Requests;
 using Nexus.Sdk.Token;
 using Nexus.Sdk.Token.Responses;
-using stellar_dotnet_sdk;
 
 namespace Core.Infrastructure.Nexus.Repositories
 {
