@@ -135,31 +135,10 @@ export const getOid = async (): Promise<string | false> => {
   return oid;
 };
 
-export const removeAllStoredData = async (whocallthisfunc: string) => {
-  // check if there is an oid
-  const oid = await SecureStore.getItemAsync("oid");
-  await SecureStore.deleteItemAsync(oid + "_publicKey");
-  await SecureStore.deleteItemAsync(oid + "_privateKey");
-  await SecureStore.deleteItemAsync(oid + "_deviceRegistered");
-  await SecureStore.deleteItemAsync("oid");
-  await SecureStore.deleteItemAsync("email");
-  await SecureStore.deleteItemAsync("phoneNumber");
-  await SecureStore.deleteItemAsync(oid + "RegistrationCompleted");
-  await SecureStore.deleteItemAsync(oid + "deviceVerified");
-  console.log("All stored data removed. request from: ", whocallthisfunc);
-};
-
 export const removeStoredData = async (keys: string[]) => {
   for (const key of keys) {
     await SecureStore.deleteItemAsync(key);
   }
-};
-
-export const removeStoredKeys = async (whocallthisfunc: string) => {
-  const oid = await SecureStore.getItemAsync("oid");
-  await SecureStore.deleteItemAsync(oid + "_publicKey");
-  await SecureStore.deleteItemAsync(oid + "_privateKey");
-  console.log("Stored keys removed. request from: ", whocallthisfunc);
 };
 
 // For development: console log all stored data in secure store
