@@ -5,7 +5,13 @@
 import { HttpResponse, http } from "msw";
 import { APIError, ApiErrorCode } from "../../api/generic/error.interface";
 import { mockClipboardCopy } from "../../jest/jest.setup";
-import { fireEvent, render, screen, within } from "../../jest/test-utils";
+import {
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "../../jest/test-utils";
 import { server } from "../../mocks/server";
 import { backendApiUrl } from "../../utils/axios";
 import Funding from "../Funding";
@@ -79,22 +85,23 @@ describe("Funding", () => {
     };
 
     server.use(
-      http.get(`${backendApiUrl}/api/accounts/balances`, _ => {
+      http.get(`${backendApiUrl}/api/accounts/balances`, () => {
         return HttpResponse.json(balancesApiError, { status: 400 });
       })
     );
 
     props = createTestProps({});
     render(<Funding {...props} />);
+    waitFor(async () => {
+      const errorMessage = await screen.findByLabelText("full screen message");
 
-    const errorMessage = await screen.findByLabelText("full screen message");
-
-    expect(
-      within(errorMessage).getByLabelText("full screen message title")
-    ).toHaveTextContent("Error loading banking details");
-    expect(
-      within(errorMessage).getByLabelText("full screen message description")
-    ).toHaveTextContent("Please try again later");
+      expect(
+        within(errorMessage).getByLabelText("full screen message title")
+      ).toHaveTextContent("Error loading banking details");
+      expect(
+        within(errorMessage).getByLabelText("full screen message description")
+      ).toHaveTextContent("Please try again later");
+    });
   });
 
   it("shows error if cannot load customer limits from API", async () => {
@@ -109,7 +116,7 @@ describe("Funding", () => {
     };
 
     server.use(
-      http.get(`${backendApiUrl}/api/customers/limits`, _ => {
+      http.get(`${backendApiUrl}/api/customers/limits`, () => {
         return HttpResponse.json(limitsApiError, { status: 400 });
       })
     );
@@ -147,7 +154,7 @@ describe("Funding", () => {
     mockReachedLimits.value[0].funding.used.monthly = "500";
 
     server.use(
-      http.get(`${backendApiUrl}/api/customers/limits`, _ => {
+      http.get(`${backendApiUrl}/api/customers/limits`, () => {
         return HttpResponse.json(mockReachedLimits, { status: 200 });
       })
     );

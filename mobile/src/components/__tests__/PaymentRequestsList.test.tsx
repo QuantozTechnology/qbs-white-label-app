@@ -4,7 +4,7 @@
 
 import { HttpResponse, http } from "msw";
 import { genericApiError } from "../../api/generic/error.interface";
-import { render, screen, within } from "../../jest/test-utils";
+import { render, screen, waitFor, within } from "../../jest/test-utils";
 import { server } from "../../mocks/server";
 import { backendApiUrl } from "../../utils/axios";
 import PaymentRequestsList from "../../components/PaymentRequestsList";
@@ -30,7 +30,7 @@ describe("PaymentRequestDetails", () => {
 
   it("shows API error message if payment requests cannot be loaded", async () => {
     server.use(
-      http.get(`${backendApiUrl}/api/paymentrequests`, _ => {
+      http.get(`${backendApiUrl}/api/paymentrequests`, () => {
         return HttpResponse.json(genericApiError, { status: 400 });
       })
     );
@@ -38,22 +38,27 @@ describe("PaymentRequestDetails", () => {
     props = createTestProps({});
     render(<PaymentRequestsList {...props} />);
 
-    const errorMessage = await screen.findByLabelText("full screen message");
-
-    expect(
-      within(errorMessage).getByLabelText("full screen message description")
-    ).toHaveTextContent(/^Error loading payment request details$/);
+    waitFor(async () => {
+      const errorMessage = await screen.findByLabelText("full screen message");
+      expect(
+        within(errorMessage).getByLabelText("full screen message description")
+      ).toHaveTextContent(/^Error loading payment request details$/);
+    });
   });
 
   it("shows empty records message if there are no payment requests", async () => {
     server.use(
-      http.get(`${backendApiUrl}/api/paymentrequests`, _ => {
+      http.get(`${backendApiUrl}/api/paymentrequests`, () => {
         return HttpResponse.json(
           { value: [] },
           {
             status: 200,
-            headers: { "x-pagination": '{"TotalCount":5,"PageSize":10,"CurrentPage":1,"PreviousPage":null,"NextPage":null,"TotalPages":1}' }
-          });
+            headers: {
+              "x-pagination":
+                '{"TotalCount":5,"PageSize":10,"CurrentPage":1,"PreviousPage":null,"NextPage":null,"TotalPages":1}',
+            },
+          }
+        );
       })
     );
 

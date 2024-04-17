@@ -12,10 +12,12 @@ import {
   VoidResponse,
   Success,
   UserSessionResponse,
+  SECURE_STORE_KEYS,
 } from "./types";
 import { azureAuthProvider } from "./azureAuthProvider";
 import { authStorageService } from "./authStorageService";
 import { decode, isExpired } from "./utils";
+import * as SecureStore from "expo-secure-store";
 
 const auth = azureAuthProvider();
 const storage = authStorageService();
@@ -43,7 +45,6 @@ export const AuthService = (): IAsyncAuthService => {
     };
 
     const tokenResponse = await auth.exchange(exchangeRequest);
-
     if (tokenResponse.type === "error") {
       return error(tokenResponse.errorMessage);
     }
@@ -108,14 +109,14 @@ export const AuthService = (): IAsyncAuthService => {
 
   async function logout(): Promise<VoidResponse> {
     const jwtIdToken = await storage.getIdToken();
-
     if (!jwtIdToken) {
-      return error("An error occurred while logging you out");
+      await storage.clearAll();
+      return success();
+    } else {
+      await auth.endSession({ jwtIdToken });
+      await storage.clearAll();
+      return success();
     }
-
-    await auth.endSession({ jwtIdToken });
-    await storage.clearAll();
-    return success();
   }
 
   async function refresh(): Promise<VoidResponse> {
@@ -155,6 +156,31 @@ export const AuthService = (): IAsyncAuthService => {
     return success();
   }
 
+  async function renew(): Promise<
+    { type: "success"; token: string } | { type: "error"; errorMessage: string }
+  > {
+    const jwtRefreshToken = await storage.getRefreshToken();
+
+    if (jwtRefreshToken) {
+      const nonce = await storage.getTokenNonce();
+
+      const tokenResponse = await auth.refresh({
+        jwtRefreshToken,
+        nonce,
+      });
+
+      // If an error occurs the user needs to login again
+      if (tokenResponse.type === "error") {
+        return tokenResponse;
+      }
+
+      await storeTokens(tokenResponse);
+      return { type: "success", token: tokenResponse.jwtAccessToken };
+    } else {
+      return { type: "error", errorMessage: "jwtRefreshToken not found" };
+    }
+  }
+
   async function getUserSession(): Promise<UserSessionResponse> {
     const jwtIdToken = await storage.getIdToken();
 
@@ -163,14 +189,22 @@ export const AuthService = (): IAsyncAuthService => {
     }
 
     const idToken = decode<IdToken>(jwtIdToken);
+    const email = await SecureStore.getItemAsync(SECURE_STORE_KEYS.EMAIL);
+    const phone = await SecureStore.getItemAsync(
+      SECURE_STORE_KEYS.PHONE_NUMBER
+    );
+    const sessionEmail = idToken.email ?? email ? email : null;
+    const sessionPhone = idToken.phoneNumber ?? phone ? phone : null;
+    const accessToken = await storage.getAccessToken();
 
     return {
       type: "success",
       userSession: {
         isNew: idToken.newUser ?? false,
         objectId: idToken.oid,
-        email: idToken.email,
-        phone: idToken.phoneNumber,
+        email: sessionEmail ?? "",
+        phone: sessionPhone ?? "",
+        token: accessToken ?? null,
       },
     };
   }
@@ -181,6 +215,7 @@ export const AuthService = (): IAsyncAuthService => {
     changePassword,
     logout,
     refresh,
+    renew,
     getUserSession,
   };
 };

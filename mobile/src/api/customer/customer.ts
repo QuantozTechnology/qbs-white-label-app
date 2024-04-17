@@ -6,23 +6,51 @@
 import { useQuery } from "@tanstack/react-query";
 import { paymentsApi } from "../../utils/axios";
 import { ICreateCustomer } from "./customer.interface";
+import * as SecureStore from "expo-secure-store";
+import { SECURE_STORE_KEYS } from "../../auth/types";
 
 export async function getCustomer(): Promise<any> {
-  // Since API response is inconsistent, we are not able to specify the exact type
-  const response = await paymentsApi.get("/api/customers");
-  return response;
+  try {
+    const response = await paymentsApi.get("/api/customers");
+    return response;
+  } catch (error) {
+    return null;
+  }
 }
 
 export function useCustomer(options?: any) {
-  const queryOptions = Object.assign(options ?? {}, {
-    queryKey: ["customer"],
-    queryFn: getCustomer,
-  });
+  const queryOptions = Object.assign(
+    {
+      queryKey: ["customer"],
+      queryFn: getCustomer,
+      retry: 1,
+      refetchOnWindowFocus: false,
+    },
+    options ?? {}
+  );
 
   return useQuery(queryOptions);
 }
 
-export function createCustomer(payload: ICreateCustomer) {
-  const result = paymentsApi.post("/api/customers", payload);
-  return result;
+export async function createCustomer(payload: ICreateCustomer) {
+  const customerResult = await paymentsApi.post("/api/customers", payload);
+  if (customerResult) {
+    const accountResult = await paymentsApi.post("/api/accounts");
+    if (accountResult) {
+      const oid = await SecureStore.getItemAsync(SECURE_STORE_KEYS.OID);
+      await SecureStore.setItemAsync(
+        oid + SECURE_STORE_KEYS.REGISTRATION_COMPLETED,
+        "true"
+      );
+      return true;
+    } else {
+      const oid = await SecureStore.getItemAsync(SECURE_STORE_KEYS.OID);
+      await SecureStore.deleteItemAsync(
+        oid + SECURE_STORE_KEYS.REGISTRATION_COMPLETED
+      );
+      return false;
+    }
+  } else {
+    return false;
+  }
 }

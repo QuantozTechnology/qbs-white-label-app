@@ -6,17 +6,15 @@ import * as LocalAuthentication from "expo-local-authentication";
 
 export async function isBiometricCheckSupportedByDevice(): Promise<boolean> {
   const supportsBiometric = await LocalAuthentication.hasHardwareAsync();
-  const hasAlreadySetupBiometric = await LocalAuthentication.isEnrolledAsync();
-
-  return supportsBiometric && hasAlreadySetupBiometric;
+  await LocalAuthentication.isEnrolledAsync();
+  return supportsBiometric;
 }
 
 export async function biometricValidation(): Promise<{
-  result: "success" | "error";
+  result: "success" | "error" | "checking";
   message?: string;
 }> {
   const isBiometricSupported = await isBiometricCheckSupportedByDevice();
-
   if (isBiometricSupported) {
     const response = await LocalAuthentication.authenticateAsync({
       promptMessage: "Authenticate to use Quantoz Payments",
@@ -31,6 +29,6 @@ export async function biometricValidation(): Promise<{
 
   // if not supported, just allow to go on
   return {
-    result: "success",
+    result: "checking",
   };
 }

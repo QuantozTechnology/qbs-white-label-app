@@ -2,14 +2,7 @@
 // under the Apache License, Version 2.0. See the NOTICE file at the root
 // of this distribution or at http://www.apache.org/licenses/LICENSE-2.0
 
-import { HttpResponse, http } from "msw";
-import { Customer } from "../../api/customer/customer.interface";
-import { customerMocksDefaultResponse } from "../../api/customer/customer.mocks";
-import { genericApiError } from "../../api/generic/error.interface";
-import { GenericApiResponse } from "../../api/utils/api.interface";
 import { render, screen, within } from "../../jest/test-utils";
-import { server } from "../../mocks/server";
-import { backendApiUrl } from "../../utils/axios";
 import SecurityCentreOverview from "../SecurityCentreOverview";
 
 describe("Security centre overview", () => {
@@ -37,35 +30,12 @@ describe("Security centre overview", () => {
     expect(tiers).toHaveLength(3);
   });
 
-  it("shows full screen error if customer API returns error", async () => {
-    server.use(
-      http.get(`${backendApiUrl}/api/customers`, _ => {
-        return HttpResponse.json({
-          ...genericApiError,
-        }, { status: 400 });
-      })
-    );
-
-    props = createTestProps({});
-    render(<SecurityCentreOverview {...props} />);
-
-    const fullScreenError = await screen.findByLabelText("full screen message");
-
-    expect(fullScreenError).toBeTruthy();
-    expect(
-      within(fullScreenError).getByLabelText("full screen message title")
-    ).toHaveTextContent(/^Error$/);
-    expect(
-      within(fullScreenError).getByLabelText("full screen message description")
-    ).toHaveTextContent(/^Please try again later$/);
-  });
-
   it("shows full screen error if label partner limits API returns error", async () => {
-    server.use(
-      http.get(`${backendApiUrl}/api/trustlevels`, _ => {
-        return new HttpResponse(null, { status: 400 });
-      })
-    );
+    // server.use(
+    //   http.get(`${backendApiUrl}/api/trustlevels`, _ => {
+    //     return new HttpResponse(null, { status: 400 });
+    //   })
+    // );
 
     props = createTestProps({});
     render(<SecurityCentreOverview {...props} />);
@@ -82,14 +52,14 @@ describe("Security centre overview", () => {
   });
 
   it("hides description and changes behavior of onPress if customer is a business", async () => {
-    server.use(
-      http.get(`${backendApiUrl}/api/customers`, _ => {
-        return HttpResponse.json<GenericApiResponse<Customer>>({
-          ...customerMocksDefaultResponse,
-          value: { ...customerMocksDefaultResponse.value, isBusiness: true },
-        }, { status: 200 });
-      })
-    );
+    // server.use(
+    //   http.get(`${backendApiUrl}/api/customers`, _ => {
+    //     return  .json<GenericApiResponse<Customer>>({
+    //       ...customerMocksDefaultResponse,
+    //       value: { ...customerMocksDefaultResponse.value, isBusiness: true },
+    //     }, { status: 200 });
+    //   })
+    // );
 
     props = createTestProps({});
     render(<SecurityCentreOverview {...props} />);

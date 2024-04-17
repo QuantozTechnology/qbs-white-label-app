@@ -75,7 +75,9 @@ export function usePaymentRequests({ type }: UsePaymentRequestsProps) {
       getNextPageParam: (lastPage) => {
         return lastPage.nextPage ?? undefined;
       },
-      refetchInterval: 5000,
+      refetchInterval: 20000,
+      retry: 1, // Only retry once upon failure
+      refetchOnWindowFocus: false, // Disable refetching on window focus
     }
   );
 }

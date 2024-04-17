@@ -18,6 +18,7 @@ export type AppBottomTabParamList = {
   UserProfileStack: undefined;
   Settings: undefined;
   SecurityCode: undefined;
+  RemoveAccount: undefined;
   Support: undefined;
 };
 
@@ -44,6 +45,7 @@ export default function AppBottomTabNavigator() {
       "PaymentRequestDetails",
       "TokenDetails",
       "SecurityCode",
+      "RemoveAccount",
     ];
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     return hideOnScreens.indexOf(routeName!) <= -1;

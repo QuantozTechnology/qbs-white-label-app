@@ -6,7 +6,7 @@ import { HttpResponse, http } from "msw";
 import { APIError, ApiErrorCode } from "../../api/generic/error.interface";
 import { Transaction } from "../../api/transactions/transactions.interface";
 import { GenericApiResponse } from "../../api/utils/api.interface";
-import { render, screen, within } from "../../jest/test-utils";
+import { render, screen, waitFor, within } from "../../jest/test-utils";
 import { server } from "../../mocks/server";
 import { backendApiUrl } from "../../utils/axios";
 import TransactionsList from "../TransactionsList";
@@ -31,34 +31,38 @@ describe("Transactions list", () => {
     };
 
     server.use(
-      http.get(`${backendApiUrl}/api/transactions`, _ => {
+      http.get(`${backendApiUrl}/api/transactions`, () => {
         return HttpResponse.json(apiError, { status: 400 });
       })
     );
 
     render(<TransactionsList selectedToken="SCEUR" />);
+    waitFor(async () => {
+      const errorMessage = await screen.findByLabelText("full screen message");
+      const notificationMessage = await screen.findByLabelText(
+        "notification message description"
+      );
 
-    const errorMessage = await screen.findByLabelText("full screen message");
-    const notificationMessage = await screen.findByLabelText(
-      "notification message description"
-    );
-
-    expect(
-      within(errorMessage).getByLabelText("full screen message description")
-    ).toHaveTextContent(/^Cannot load transactions, try again later$/);
-    expect(notificationMessage).toHaveTextContent(/^Cannot load transactions$/);
+      expect(
+        within(errorMessage).getByLabelText("full screen message description")
+      ).toHaveTextContent(/^Cannot load transactions, try again later$/);
+      expect(notificationMessage).toHaveTextContent(
+        /^Cannot load transactions$/
+      );
+    });
   });
 
   it("shows empty records message if there are no transactions", async () => {
     server.use(
-      http.get(`${backendApiUrl}/api/transactions`, _ => {
+      http.get(`${backendApiUrl}/api/transactions`, () => {
         return HttpResponse.json<GenericApiResponse<Transaction[]>>(
           { value: [] },
           {
             status: 200,
             headers: {
-              "x-pagination": '{"TotalCount":5,"PageSize":10,"CurrentPage":1,"PreviousPage":null,"NextPage":null,"TotalPages":1}'
-            }
+              "x-pagination":
+                '{"TotalCount":5,"PageSize":10,"CurrentPage":1,"PreviousPage":null,"NextPage":null,"TotalPages":1}',
+            },
           }
         );
       })

@@ -8,15 +8,12 @@ import { Device, DevicesPayload } from "./devices.interface";
 import { GenericApiResponse } from "../utils/api.interface";
 import { isNil } from "lodash";
 
-export function verifyDevice(
+export async function verifyDevice(
   payload: DevicesPayload
 ): Promise<AxiosResponse<GenericApiResponse<Device>, DevicesPayload>> {
   const result = paymentsApi.post("/api/customers/devices", payload);
-  // When we call this function for the first time, we won't get value.otpSeed in the response
-  // The API response for first call is: {"_h": 0, "_i": 0, "_j": null, "_k": null}
-  // Until we fix the API response, we need to return a fake empty response
   try {
-    if (!isNil(result?.data?.value?.otpSeed)) {
+    if (!isNil((await result)?.data?.value?.otpSeed)) {
       return result;
     }
   } catch (e) {
