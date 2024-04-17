@@ -32,4 +32,13 @@ namespace Core.Infrastructure.Compliance.SendGridMailService
         [JsonProperty("finishedDate")]
         public string? FinishedDate { get; set; }
     }
+
+    public class OTPCodeMailTemplate
+    {
+        [JsonProperty("customerFullName")]
+        public string? CustomerFullName { get; set; }
+
+        [JsonProperty("otpCode")]
+        public string? OTPCode { get; set; }
+    }
 }
