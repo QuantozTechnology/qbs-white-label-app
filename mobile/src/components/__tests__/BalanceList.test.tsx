@@ -42,7 +42,6 @@ describe("BalancesList", () => {
       />
     );
     waitFor(() => expect(screen.getByLabelText("balance error")).toBeTruthy());
-    //expect(await screen.findByLabelText("balance error")).toBeTruthy();
   });
 
   it("renders correctly with data", async () => {

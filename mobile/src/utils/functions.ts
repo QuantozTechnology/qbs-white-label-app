@@ -29,7 +29,6 @@ export const sendOtpCodeToMail = async () => {
     const response = await paymentsApi.post("/api/customers/otp/email", {});
     return response;
   } catch (error) {
-    //const axiosErrror = error as AxiosError;
     return "error";
   }
 };

@@ -116,6 +116,8 @@ function ConsumerRegistration() {
   };
 
   function isValidNameInput(text: string): boolean {
+    if (text === "") return true;
+
     const pattern = /^[^0-9!@#$%^*()_+=[\]{};':"\\|,<>/?]*$/;
     return pattern.test(text);
   }
@@ -144,7 +146,7 @@ function ConsumerRegistration() {
                   accessibilityLabel="first name"
                   aria-label="First name"
                   onChangeText={(text) => {
-                    if (isValidNameInput(text) || text === "") {
+                    if (isValidNameInput(text)) {
                       setFirstName(text);
                     }
                   }}
@@ -166,7 +168,7 @@ function ConsumerRegistration() {
                   accessibilityLabel="last name"
                   aria-label="Last name"
                   onChangeText={(text) => {
-                    if (isValidNameInput(text) || text === "") {
+                    if (isValidNameInput(text)) {
                       setLastName(text);
                     }
                   }}
@@ -246,12 +248,6 @@ function ConsumerRegistration() {
         >
           Create account
         </Button>
-        {/* <Button
-          onPress={() => auth?.logout()}
-          variant="unstyled"
-          accessibilityLabel="cancel registration"
-          aria-label="Cancel registration"
-          >Exit</Button> */}
       </KeyboardAvoidingView>
     </ScreenWrapper>
   );
