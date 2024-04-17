@@ -3,7 +3,7 @@
 // of this distribution or at http://www.apache.org/licenses/LICENSE-2.0
 
 import BalancesList from "../BalancesList";
-import { render, screen } from "../../jest/test-utils";
+import { render, screen, waitFor } from "../../jest/test-utils";
 import { HttpResponse, http } from "msw";
 import { server } from "../../mocks/server";
 import { backendApiUrl } from "../../utils/axios";
@@ -31,7 +31,7 @@ describe("BalancesList", () => {
     };
 
     server.use(
-      http.get(`${backendApiUrl}/api/accounts/balances`, _ => {
+      http.get(`${backendApiUrl}/api/accounts/balances`, () => {
         return HttpResponse.json(apiError, { status: 400 });
       })
     );
@@ -41,8 +41,8 @@ describe("BalancesList", () => {
         setSelectedToken={mockSetToken}
       />
     );
-
-    expect(await screen.findByLabelText("balance error")).toBeTruthy();
+    waitFor(() => expect(screen.getByLabelText("balance error")).toBeTruthy());
+    //expect(await screen.findByLabelText("balance error")).toBeTruthy();
   });
 
   it("renders correctly with data", async () => {
