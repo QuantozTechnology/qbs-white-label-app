@@ -7,6 +7,7 @@ import { useQuery } from "@tanstack/react-query";
 import { paymentsApi } from "../../utils/axios";
 import { ICreateCustomer } from "./customer.interface";
 import * as SecureStore from "expo-secure-store";
+import { SECURE_STORE_KEYS } from "../../auth/types";
 
 export async function getCustomer(): Promise<any> {
   try {
@@ -36,12 +37,17 @@ export async function createCustomer(payload: ICreateCustomer) {
   if (customerResult) {
     const accountResult = await paymentsApi.post("/api/accounts");
     if (accountResult) {
-      const oid = await SecureStore.getItemAsync("oid");
-      await SecureStore.setItemAsync(oid + "RegistrationCompleted", "true");
+      const oid = await SecureStore.getItemAsync(SECURE_STORE_KEYS.OID);
+      await SecureStore.setItemAsync(
+        oid + SECURE_STORE_KEYS.REGISTRATION_COMPLETED,
+        "true"
+      );
       return true;
     } else {
-      const oid = await SecureStore.getItemAsync("oid");
-      await SecureStore.deleteItemAsync(oid + "RegistrationCompleted");
+      const oid = await SecureStore.getItemAsync(SECURE_STORE_KEYS.OID);
+      await SecureStore.deleteItemAsync(
+        oid + SECURE_STORE_KEYS.REGISTRATION_COMPLETED
+      );
       return false;
     }
   } else {

@@ -51,7 +51,7 @@ export function CustomerProvider({
           isLoading: false,
           state: action.state,
           error: null,
-          is_business: null,
+          isBusiness: null,
         };
       }
       default: {
@@ -93,35 +93,46 @@ export function CustomerProvider({
   async function updateCustomerState() {
     const customerResponse = await getCustomer();
     if (!isNil(customerResponse)) {
-      if (customerResponse?.data.value.status === "UNDERREVIEW") {
+      if (
+        customerResponse?.data.value.status ===
+        CustomerStateType.CUSTOMER_UNDER_REVIEW
+      ) {
         dispatch({
           type: CustomerStateActionType.UPDATE_STATE,
           state: CustomerStateType.CUSTOMER_UNDER_REVIEW,
-          is_business: customerResponse?.data.value.isBusiness,
+          isBusiness: customerResponse?.data.value.isBusiness,
         });
         return false;
       }
-      if (customerResponse?.data.value.status === "BLOCKED") {
+      if (
+        customerResponse?.data.value.status ===
+        CustomerStateType.CUSTOMER_BLOCKED
+      ) {
         dispatch({
           type: CustomerStateActionType.UPDATE_STATE,
           state: CustomerStateType.CUSTOMER_UNDER_REVIEW,
-          is_business: customerResponse?.data.value.isBusiness,
+          isBusiness: customerResponse?.data.value.isBusiness,
         });
         return false;
       }
-      if (customerResponse?.data.value.status === "NEW") {
+      if (
+        customerResponse?.data.value.status === CustomerStateType.CUSTOMER_NEW
+      ) {
         dispatch({
           type: CustomerStateActionType.UPDATE_STATE,
           state: CustomerStateType.CUSTOMER_UNDER_REVIEW,
-          is_business: customerResponse?.data.value.isBusiness,
+          isBusiness: customerResponse?.data.value.isBusiness,
         });
         return false;
       }
-      if (customerResponse?.data.value.status === "DELETED") {
+      if (
+        customerResponse?.data.value.status ===
+        CustomerStateType.CUSTOMER_DELETED
+      ) {
         dispatch({
           type: CustomerStateActionType.UPDATE_STATE,
           state: CustomerStateType.CUSTOMER_UNDER_REVIEW,
-          is_business: customerResponse?.data.value.isBusiness,
+          isBusiness: customerResponse?.data.value.isBusiness,
         });
         return false;
       }
@@ -175,7 +186,7 @@ export function CustomerProvider({
     error: state.error,
     isLoading: state.isLoading,
     refresh: refresh,
-    is_business: state.is_business,
+    isBusiness: state.isBusiness,
   };
 
   return (

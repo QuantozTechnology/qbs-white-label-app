@@ -6,7 +6,7 @@ export type CustomerState = {
   isLoading: boolean;
   state: CustomerStateType | null;
   error: string | null;
-  is_business?: boolean | null | undefined;
+  isBusiness?: boolean | null | undefined;
 };
 
 export type CustomerStateContext = {
@@ -19,7 +19,7 @@ export type CustomerStateContext = {
   isNew: boolean | null;
   error: string | null;
   refresh: () => Promise<void>;
-  is_business: boolean | null | undefined;
+  isBusiness: boolean | null | undefined;
 };
 
 export enum CustomerStateActionType {
@@ -31,10 +31,10 @@ export enum CustomerStateActionType {
 export enum CustomerStateType {
   CUSTOMER_REQUIRED = "customer_required",
   ACCOUNT_REQUIRED = "account_required",
-  CUSTOMER_UNDER_REVIEW = "customer_under_review",
-  CUSTOMER_BLOCKED = "customer_blocked",
-  CUSTOMER_NEW = "customer_new",
-  CUSTOMER_DELETED = "customer_deleted",
+  CUSTOMER_UNDER_REVIEW = "UNDERREVIEW",
+  CUSTOMER_BLOCKED = "BLOCKED",
+  CUSTOMER_NEW = "NEW",
+  CUSTOMER_DELETED = "DELETED",
   READY = "ready",
 }
 
@@ -43,6 +43,6 @@ export type CustomerStateAction =
   | {
       type: CustomerStateActionType.UPDATE_STATE;
       state: CustomerStateType;
-      is_business?: boolean | null | undefined;
+      isBusiness?: boolean | null | undefined;
     }
   | { type: CustomerStateActionType.ERROR; errorMessage: string };
