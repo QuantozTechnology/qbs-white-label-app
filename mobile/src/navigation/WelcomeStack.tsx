@@ -30,6 +30,8 @@ import FullScreenMessage from "../components/FullScreenMessage";
 import * as SecureStore from "expo-secure-store";
 import { getCustomer } from "../api/customer/customer";
 import { useNotification } from "../context/NotificationContext";
+import { SECURE_STORE_KEYS } from "../auth/types";
+import { CustomerStateType } from "../context/customerContext.interface";
 
 export type WelcomeStackParamList = {
   Home: undefined;
@@ -192,10 +194,14 @@ export default function WelcomeStackNavigator() {
         } else {
           const oid = await getOid();
           if (!isNil(oid)) {
-            const pubKey = await SecureStore.getItemAsync(oid + "_publicKey");
-            const otpSeed = await SecureStore.getItemAsync(oid + "otpSeed");
+            const pubKey = await SecureStore.getItemAsync(
+              oid + SECURE_STORE_KEYS.PUBLIC_KEY
+            );
+            const otpSeed = await SecureStore.getItemAsync(
+              oid + SECURE_STORE_KEYS.OTPSEED
+            );
             const RegistrationCompleted = await SecureStore.getItemAsync(
-              oid + "RegistrationCompleted"
+              oid + SECURE_STORE_KEYS.REGISTRATION_COMPLETED
             );
 
             if (!isNil(RegistrationCompleted)) {
@@ -209,18 +215,23 @@ export default function WelcomeStackNavigator() {
               } else {
                 if (
                   customerInfo &&
-                  ["BLOCKED", "NEW"].includes(customerInfo?.data?.value?.status)
+                  [
+                    CustomerStateType.CUSTOMER_BLOCKED,
+                    CustomerStateType.CUSTOMER_NEW,
+                  ].includes(customerInfo?.data?.value?.status)
                 ) {
                   setCurrentPageType("Blocked");
                 } else if (
                   customerInfo &&
-                  customerInfo?.data?.value?.status === "DELETED"
+                  customerInfo?.data?.value?.status ===
+                    CustomerStateType.CUSTOMER_DELETED
                 ) {
                   setCurrentPageType("Deleted");
                 } else {
                   if (
                     customerInfo &&
-                    customerInfo?.data?.value?.status === "UNDERREVIEW"
+                    customerInfo?.data?.value?.status ===
+                      CustomerStateType.CUSTOMER_UNDER_REVIEW
                   ) {
                     showCustomNotification(
                       "This account is in progress of review, functionality is limited.",
@@ -265,10 +276,14 @@ export default function WelcomeStackNavigator() {
         if (auth?.userSession) {
           const oid = await getOid();
           if (!isNil(oid)) {
-            const pubKey = await SecureStore.getItemAsync(oid + "_publicKey");
-            const otpSeed = await SecureStore.getItemAsync(oid + "otpSeed");
+            const pubKey = await SecureStore.getItemAsync(
+              oid + SECURE_STORE_KEYS.PUBLIC_KEY
+            );
+            const otpSeed = await SecureStore.getItemAsync(
+              oid + SECURE_STORE_KEYS.OTPSEED
+            );
             const RegistrationCompleted = await SecureStore.getItemAsync(
-              oid + "RegistrationCompleted"
+              oid + SECURE_STORE_KEYS.REGISTRATION_COMPLETED
             );
 
             if (!isNil(RegistrationCompleted)) {
@@ -282,20 +297,24 @@ export default function WelcomeStackNavigator() {
               } else {
                 if (
                   customerInfo &&
-                  ["BLOCKED", "NEW", "DELETED"].includes(
-                    customerInfo?.data?.value?.status
-                  )
+                  [
+                    CustomerStateType.CUSTOMER_BLOCKED,
+                    CustomerStateType.CUSTOMER_NEW,
+                    CustomerStateType.CUSTOMER_DELETED,
+                  ].includes(customerInfo?.data?.value?.status)
                 ) {
                   setCurrentPageType("Blocked");
                 } else if (
                   customerInfo &&
-                  customerInfo?.data?.value?.status === "DELETED"
+                  customerInfo?.data?.value?.status ===
+                    CustomerStateType.CUSTOMER_DELETED
                 ) {
                   setCurrentPageType("Deleted");
                 } else {
                   if (
                     customerInfo &&
-                    customerInfo?.data?.value?.status === "UNDERREVIEW"
+                    customerInfo?.data?.value?.status ===
+                      CustomerStateType.CUSTOMER_UNDER_REVIEW
                   ) {
                     showCustomNotification(
                       "This account is in progress of review, functionality is limited.",
@@ -408,7 +427,7 @@ export default function WelcomeStackNavigator() {
       break;
     }
     case "Blocked": {
-      const errorMessage = customerContext?.is_business
+      const errorMessage = customerContext?.isBusiness
         ? "Your business account is being reviewed by our compliance team. You will be notified when you'll be able to access it."
         : "Your account is not active. For more information please contact our support team.";
       return (
@@ -420,7 +439,7 @@ export default function WelcomeStackNavigator() {
             callback: async () => {
               await auth?.logout();
               // remove session and oid
-              await SecureStore.deleteItemAsync("oid");
+              await SecureStore.deleteItemAsync(SECURE_STORE_KEYS.OID);
               setCurrentPageType("SignIn");
             },
           }}

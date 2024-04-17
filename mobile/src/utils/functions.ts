@@ -11,6 +11,7 @@ import {
   isBiometricCheckSupportedByDevice,
 } from "../utils/biometric";
 import { AxiosError } from "axios";
+import { SECURE_STORE_KEYS } from "../auth/types";
 
 export const generateKeys = async () => {
   ed.etc.sha512Sync = (...m) => sha512(ed.etc.concatBytes(...m));
@@ -38,8 +39,8 @@ export const storeKeys = async (
   pubKey: string,
   privKey: string
 ) => {
-  await SecureStore.setItemAsync(oid + "_publicKey", pubKey);
-  await SecureStore.setItemAsync(oid + "_privateKey", privKey);
+  await SecureStore.setItemAsync(oid + SECURE_STORE_KEYS.PUBLIC_KEY, pubKey);
+  await SecureStore.setItemAsync(oid + SECURE_STORE_KEYS.PRIVATE_KEY, privKey);
 };
 
 export const renewKeys = async (oid: string) => {
@@ -53,7 +54,9 @@ export const verifyDevice = async (
   oid: string,
   otpCode: string | null
 ) => {
-  const otpSeed = await SecureStore.getItemAsync(oid + "otpSeed");
+  const otpSeed = await SecureStore.getItemAsync(
+    oid + SECURE_STORE_KEYS.OTPSEED
+  );
   if (!isNil(otpSeed) && !isEmpty(otpSeed)) {
     return { data: { value: { otpSeed: otpSeed } } };
   } else {
@@ -68,7 +71,7 @@ export const verifyDevice = async (
       if (result.status === 200) {
         if (result.data?.value?.otpSeed) {
           await SecureStore.setItemAsync(
-            oid + "otpSeed",
+            oid + SECURE_STORE_KEYS.OTPSEED,
             result.data.value.otpSeed
           );
           await SecureStore.setItemAsync(oid + "deviceVerified", "true");
@@ -110,9 +113,15 @@ export const checkStoredKeys = async (oid: string) => {
     return false;
   }
 
-  const publicKey = await SecureStore.getItemAsync(oid + "_publicKey");
-  const privateKey = await SecureStore.getItemAsync(oid + "_privateKey");
-  const otpSeed = await SecureStore.getItemAsync(oid + "otpSeed");
+  const publicKey = await SecureStore.getItemAsync(
+    oid + SECURE_STORE_KEYS.PUBLIC_KEY
+  );
+  const privateKey = await SecureStore.getItemAsync(
+    oid + SECURE_STORE_KEYS.PRIVATE_KEY
+  );
+  const otpSeed = await SecureStore.getItemAsync(
+    oid + SECURE_STORE_KEYS.OTPSEED
+  );
 
   if (isNil(publicKey) || isNil(privateKey)) {
     const keys = await renewKeys(oid);
@@ -128,7 +137,7 @@ export const checkStoredKeys = async (oid: string) => {
 };
 
 export const getOid = async (): Promise<string | false> => {
-  const oid = await SecureStore.getItemAsync("oid");
+  const oid = await SecureStore.getItemAsync(SECURE_STORE_KEYS.OID);
   if (isNil(oid)) {
     return false;
   }
@@ -143,17 +152,23 @@ export const removeStoredData = async (keys: string[]) => {
 
 // For development: console log all stored data in secure store
 export const getAllStoredData = async () => {
-  const oid = await SecureStore.getItemAsync("oid");
-  const publicKey = await SecureStore.getItemAsync(oid + "_publicKey");
-  const privateKey = await SecureStore.getItemAsync(oid + "_privateKey");
+  const oid = await SecureStore.getItemAsync(SECURE_STORE_KEYS.OID);
+  const publicKey = await SecureStore.getItemAsync(
+    oid + SECURE_STORE_KEYS.PUBLIC_KEY
+  );
+  const privateKey = await SecureStore.getItemAsync(
+    oid + SECURE_STORE_KEYS.PRIVATE_KEY
+  );
   const deviceRegistered = await SecureStore.getItemAsync(
     oid + "_deviceRegistered"
   );
-  const email = await SecureStore.getItemAsync("email");
-  const phoneNumber = await SecureStore.getItemAsync("phoneNumber");
+  const email = await SecureStore.getItemAsync(SECURE_STORE_KEYS.EMAIL);
+  const phoneNumber = await SecureStore.getItemAsync(
+    SECURE_STORE_KEYS.PHONE_NUMBER
+  );
   //const deviceVerified = await SecureStore.getItemAsync(oid + "deviceVerified");
   const RegistrationCompleted = await SecureStore.getItemAsync(
-    oid + "RegistrationCompleted"
+    oid + SECURE_STORE_KEYS.REGISTRATION_COMPLETED
   );
   console.warn("oid: ", oid);
   console.warn("publicKey: ", publicKey);

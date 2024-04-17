@@ -25,6 +25,7 @@ import { WelcomeStackParamList } from "../navigation/WelcomeStack";
 import { ImageIdentifier } from "../utils/images";
 import { useAuth } from "../auth/AuthContext";
 import { isNil } from "lodash";
+import { SECURE_STORE_KEYS } from "../auth/types";
 
 type ConfirmDeviceProps = NativeStackScreenProps<
   WelcomeStackParamList,
@@ -100,8 +101,11 @@ export default function ConfirmDevice({ navigation }: ConfirmDeviceProps) {
           }
         }, 200);
       } else {
-        const oid = await SecureStore.getItemAsync("oid");
-        await SecureStore.setItemAsync(oid + "RegistrationCompleted", "true");
+        const oid = await SecureStore.getItemAsync(SECURE_STORE_KEYS.OID);
+        await SecureStore.setItemAsync(
+          oid + SECURE_STORE_KEYS.REGISTRATION_COMPLETED,
+          "true"
+        );
         navigation.navigate("Feedback", {
           title: "Device verified!",
           description: "You can now use this device to access your account.",
@@ -124,9 +128,9 @@ export default function ConfirmDevice({ navigation }: ConfirmDeviceProps) {
 
   async function isCodeCorrect(otp: string) {
     try {
-      const oid = await SecureStore.getItemAsync("oid");
+      const oid = await SecureStore.getItemAsync(SECURE_STORE_KEYS.OID);
       const pubKeyFromStore = await SecureStore.getItemAsync(
-        oid + "_publicKey"
+        oid + SECURE_STORE_KEYS.PUBLIC_KEY
       );
 
       if (isNil(pubKeyFromStore) || isNil(oid) || isNil(otp)) {

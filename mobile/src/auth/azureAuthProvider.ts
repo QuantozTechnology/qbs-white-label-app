@@ -11,6 +11,7 @@ import {
   IAsyncAuthProvider,
   IdToken,
   RefreshRequest,
+  SECURE_STORE_KEYS,
   TokenResponse,
 } from "./types";
 import * as AuthSession from "expo-auth-session";
@@ -228,12 +229,18 @@ export const azureAuthProvider = (): IAsyncAuthProvider => {
       if (request.nonce) {
         if (validIdToken(request.nonce, result.idToken, request.issuer)) {
           const idToken = decode<IdToken>(result.idToken);
-          await SecureStore.setItemAsync("oid", idToken.oid);
+          await SecureStore.setItemAsync(SECURE_STORE_KEYS.OID, idToken.oid);
           if (idToken.email) {
-            await SecureStore.setItemAsync("email", idToken.email);
+            await SecureStore.setItemAsync(
+              SECURE_STORE_KEYS.EMAIL,
+              idToken.email
+            );
           }
           if (idToken.phoneNumber) {
-            await SecureStore.setItemAsync("phoneNumber", idToken.phoneNumber);
+            await SecureStore.setItemAsync(
+              SECURE_STORE_KEYS.PHONE_NUMBER,
+              idToken.phoneNumber
+            );
           }
         } else {
           return error(AuthErrorEnum.EX_INVALID_ID_TOKEN);
@@ -315,12 +322,18 @@ export const azureAuthProvider = (): IAsyncAuthProvider => {
           // store result.idToken.oid in expo secure store
           const idToken = decode<IdToken>(result.idToken);
 
-          await SecureStore.setItemAsync("oid", idToken.oid);
+          await SecureStore.setItemAsync(SECURE_STORE_KEYS.OID, idToken.oid);
           if (idToken.email) {
-            await SecureStore.setItemAsync("email", idToken.email);
+            await SecureStore.setItemAsync(
+              SECURE_STORE_KEYS.EMAIL,
+              idToken.email
+            );
           }
           if (idToken.phoneNumber) {
-            await SecureStore.setItemAsync("phoneNumber", idToken.phoneNumber);
+            await SecureStore.setItemAsync(
+              SECURE_STORE_KEYS.PHONE_NUMBER,
+              idToken.phoneNumber
+            );
           }
         } else {
           return error(AuthErrorEnum.REFRESH_INVALID_ID_TOKEN);

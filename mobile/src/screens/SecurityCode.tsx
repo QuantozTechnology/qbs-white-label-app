@@ -11,6 +11,7 @@ const totp: any = require("totp-generator");
 import * as SecureStore from "expo-secure-store";
 import FullScreenMessage from "../components/FullScreenMessage";
 import FullScreenLoadingSpinner from "../components/FullScreenLoadingSpinner";
+import { SECURE_STORE_KEYS } from "../auth/types";
 
 export function SecurityCode() {
   const [otp, setOtp] = useState<string>("");
@@ -98,9 +99,9 @@ Please try later or contact support.`}
   async function retrieveOTPKeyFromSecureStore() {
     try {
       const isSecureStoreAvailable = await SecureStore.isAvailableAsync();
-      const oid = await SecureStore.getItemAsync("oid");
+      const oid = await SecureStore.getItemAsync(SECURE_STORE_KEYS.OID);
       const otpSeedFromSecureStore = await SecureStore.getItemAsync(
-        oid + "otpSeed"
+        oid + SECURE_STORE_KEYS.OTPSEED
       );
 
       if (isSecureStoreAvailable && otpSeedFromSecureStore !== null) {

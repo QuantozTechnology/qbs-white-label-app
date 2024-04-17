@@ -12,6 +12,7 @@ import {
   VoidResponse,
   Success,
   UserSessionResponse,
+  SECURE_STORE_KEYS,
 } from "./types";
 import { azureAuthProvider } from "./azureAuthProvider";
 import { authStorageService } from "./authStorageService";
@@ -188,8 +189,10 @@ export const AuthService = (): IAsyncAuthService => {
     }
 
     const idToken = decode<IdToken>(jwtIdToken);
-    const email = await SecureStore.getItemAsync("email");
-    const phone = await SecureStore.getItemAsync("phoneNumber");
+    const email = await SecureStore.getItemAsync(SECURE_STORE_KEYS.EMAIL);
+    const phone = await SecureStore.getItemAsync(
+      SECURE_STORE_KEYS.PHONE_NUMBER
+    );
     const sessionEmail = idToken.email ?? email ? email : null;
     const sessionPhone = idToken.phoneNumber ?? phone ? phone : null;
     const accessToken = await storage.getAccessToken();

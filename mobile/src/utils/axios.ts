@@ -12,6 +12,7 @@ import { fromByteArray, toByteArray } from "react-native-quick-base64";
 import { Buffer } from "buffer";
 import { isNil } from "lodash";
 import { AuthService } from "../auth/authService";
+import { SECURE_STORE_KEYS } from "../auth/types";
 
 ed.etc.sha512Sync = (...m) => sha512(ed.etc.concatBytes(...m));
 
@@ -46,7 +47,7 @@ mockPaymentsApi.interceptors.response.use(
 );
 
 async function requestInterceptor(config: InternalAxiosRequestConfig) {
-  const oid = await SecureStore.getItemAsync("oid");
+  const oid = await SecureStore.getItemAsync(SECURE_STORE_KEYS.OID);
   const storage = authStorageService();
   let accessToken = await storage.getAccessToken();
 
@@ -54,8 +55,12 @@ async function requestInterceptor(config: InternalAxiosRequestConfig) {
     accessToken = await getNewAccessToken();
   }
 
-  const pubKeyFromStore = await SecureStore.getItemAsync(oid + "_publicKey");
-  const privKeyFromStore = await SecureStore.getItemAsync(oid + "_privateKey");
+  const pubKeyFromStore = await SecureStore.getItemAsync(
+    oid + SECURE_STORE_KEYS.PUBLIC_KEY
+  );
+  const privKeyFromStore = await SecureStore.getItemAsync(
+    oid + SECURE_STORE_KEYS.PRIVATE_KEY
+  );
   if (
     !isNil(pubKeyFromStore) &&
     !isNil(privKeyFromStore) &&

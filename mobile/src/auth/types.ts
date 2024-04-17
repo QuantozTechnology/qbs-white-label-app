@@ -212,3 +212,13 @@ export type AuthAction =
   | { type: AuthActionType.CHANGE_PASSWORD_SUCCESS }
   | { type: AuthActionType.INIT }
   | { type: AuthActionType.ERROR; errorMessage: string };
+
+export const SECURE_STORE_KEYS = {
+  EMAIL: "email",
+  PHONE_NUMBER: "phoneNumber",
+  OID: "oid",
+  REGISTRATION_COMPLETED: "RegistrationCompleted",
+  PRIVATE_KEY: "_privateKey",
+  PUBLIC_KEY: "_publicKey",
+  OTPSEED: "otpSeed",
+};

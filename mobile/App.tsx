@@ -26,6 +26,7 @@ import { AppStateProvider } from './src/context/AppStateContext';
 import { removeStoredData } from "./src/utils/functions";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { QPA_TOKEN_KEY } from "./src/auth/authStorageService";
+import { SECURE_STORE_KEYS } from "./src/auth/types";
 
 const prefix = Linking.createURL("/");
 const queryClient = new QueryClient();
@@ -37,7 +38,7 @@ async function checkAppInstalled() {
   if (!appInstalled) {
     await AsyncStorage.setItem(APP_INSTALLED_KEY, 'true');
     // remove oid
-    await removeStoredData(["oid", QPA_TOKEN_KEY.QPA_ACCESS_TOKEN, QPA_TOKEN_KEY.QPA_ID_TOKEN, QPA_TOKEN_KEY.QPA_REFRESH_TOKEN]);
+    await removeStoredData([SECURE_STORE_KEYS.OID, QPA_TOKEN_KEY.QPA_ACCESS_TOKEN, QPA_TOKEN_KEY.QPA_ID_TOKEN, QPA_TOKEN_KEY.QPA_REFRESH_TOKEN]);
   }
 
   return true;
