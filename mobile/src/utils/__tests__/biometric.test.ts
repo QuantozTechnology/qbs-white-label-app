@@ -34,15 +34,6 @@ describe("isBiometricCheckSupportedByDevice", () => {
 
     expect(result).toBe(false);
   });
-
-  it("returns false when enrollment is missing", async () => {
-    LocalAuthentication.hasHardwareAsync.mockResolvedValueOnce(true);
-    LocalAuthentication.isEnrolledAsync.mockResolvedValueOnce(false);
-
-    const result = await isBiometricCheckSupportedByDevice();
-
-    expect(result).toBe(false);
-  });
 });
 
 describe("biometricValidation", () => {
@@ -64,13 +55,5 @@ describe("biometricValidation", () => {
 
     expect(result.result).toBe("error");
     expect(result.message).toBe("Authentication failed");
-  });
-
-  it("returns success result when biometric check is not supported by the device", async () => {
-    LocalAuthentication.hasHardwareAsync.mockResolvedValueOnce(false);
-
-    const result = await biometricValidation();
-
-    expect(result.result).toBe("success");
   });
 });

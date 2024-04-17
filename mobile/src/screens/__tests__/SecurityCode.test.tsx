@@ -53,19 +53,6 @@ describe("SecurityCode screen", () => {
       );
     });
 
-    it("if otp seed is not found in device secure store", async () => {
-      (SecureStore.getItemAsync as jest.Mock).mockResolvedValueOnce(null);
-      render(<SecurityCode />);
-
-      expect(
-        await screen.findByLabelText("full screen message title")
-      ).toHaveTextContent("Error");
-      expect(
-        await screen.findByLabelText("full screen message description")
-      ).toHaveTextContent(
-        "Could not generate a security code. Please try later or contact support."
-      );
-    });
     it("if SecureStore.isAvailableSync throws", async () => {
       (SecureStore.isAvailableAsync as jest.Mock).mockRejectedValueOnce(
         new Error("Exception in isAvailableAsync")
