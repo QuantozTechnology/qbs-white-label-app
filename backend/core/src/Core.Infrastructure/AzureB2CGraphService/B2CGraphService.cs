@@ -36,7 +36,6 @@ namespace Core.Infrastructure.AzureB2CGraphService
 
         public async Task DeleteUserAsync(string customerCode)
         {
-            customerCode = "cf02bf4f-5501-4e7a-bb8c-fb4c353af1c2";
             _logger.LogInformation("Attempting to delete user {CustomerId} from B2C.", customerCode);
 
             try
