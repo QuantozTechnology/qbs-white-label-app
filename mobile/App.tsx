@@ -21,20 +21,28 @@ import { appNavigationState } from "./src/config/config";
 import FullScreenLoadingSpinner from "./src/components/FullScreenLoadingSpinner";
 import { CustomerProvider } from "./src/context/CustomerContext";
 import { Feather } from "@expo/vector-icons";
-import * as Sentry from "sentry-expo";
-import Constants from "expo-constants";
 import { ToastProvider } from "./src/context/NotificationContext";
+import { AppStateProvider } from './src/context/AppStateContext';
+import { removeStoredData } from "./src/utils/functions";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { QPA_TOKEN_KEY } from "./src/auth/authStorageService";
+import { SECURE_STORE_KEYS } from "./src/auth/types";
 
 const prefix = Linking.createURL("/");
 const queryClient = new QueryClient();
 
-Sentry.init({
-  dsn: Constants.expoConfig?.extra?.SENTRY_DSN,
-  enableInExpoDevelopment:
-    Constants.expoConfig?.extra?.APP_ENV !== "development",
-  debug: Constants.expoConfig?.extra?.APP_ENV !== "development",
-});
+const APP_INSTALLED_KEY = 'APP_INSTALLED';
 
+async function checkAppInstalled() {
+  const appInstalled = await AsyncStorage.getItem(APP_INSTALLED_KEY);
+  if (!appInstalled) {
+    await AsyncStorage.setItem(APP_INSTALLED_KEY, 'true');
+    // remove oid
+    await removeStoredData([SECURE_STORE_KEYS.OID, QPA_TOKEN_KEY.QPA_ACCESS_TOKEN, QPA_TOKEN_KEY.QPA_ID_TOKEN, QPA_TOKEN_KEY.QPA_REFRESH_TOKEN]);
+  }
+
+  return true;
+}
 export default function App() {
   const [appReady, setAppReady] = useState(false);
 
@@ -43,22 +51,22 @@ export default function App() {
     config: appNavigationState,
   };
 
+  const loadFontsAsync = async() => {
+    await Font.loadAsync({
+      "Lato-Light": require("./assets/fonts/Lato-Light.ttf"),
+      "Lato-Regular": require("./assets/fonts/Lato-Regular.ttf"),
+      "Lato-Bold": require("./assets/fonts/Lato-Bold.ttf"),
+    });
+    await Font.loadAsync(FontAwesome5.font);
+    await Font.loadAsync(Ionicons.font);
+    await Font.loadAsync(Feather.font);
+    await checkAppInstalled();
+    setAppReady(true);
+  }
   useEffect(() => {
-    async function loadFontsAsync() {
-      await Font.loadAsync({
-        "Lato-Light": require("./assets/fonts/Lato-Light.ttf"),
-        "Lato-Regular": require("./assets/fonts/Lato-Regular.ttf"),
-        "Lato-Bold": require("./assets/fonts/Lato-Bold.ttf"),
-      });
-      await Font.loadAsync(FontAwesome5.font);
-      await Font.loadAsync(Ionicons.font);
-      await Font.loadAsync(Feather.font);
-
-      setAppReady(true);
-    }
-
     loadFontsAsync();
   }, []);
+
 
   if (!appReady) {
     return null;
@@ -75,11 +83,13 @@ export default function App() {
           >
             <QueryClientProvider client={queryClient}>
               <CustomerProvider>
-                <ToastProvider>
-                  <ErrorBoundary>
-                    <WelcomeStackNavigator />
-                  </ErrorBoundary>
-                </ToastProvider>
+                  <ToastProvider>
+                    <ErrorBoundary>
+                      <AppStateProvider>
+                        <WelcomeStackNavigator />
+                      </AppStateProvider>
+                    </ErrorBoundary>
+                  </ToastProvider>
               </CustomerProvider>
             </QueryClientProvider>
           </NavigationContainer>

@@ -8,10 +8,12 @@ import { SecurityCode } from "../screens/SecurityCode";
 import CustomNavigationHeader from "../components/CustomNavigationHeader";
 import { Icon } from "native-base";
 import { Ionicons } from "@expo/vector-icons";
+import { RemoveAccount } from "../screens/RemoveAccount";
 
 export type SettingsStackParamList = {
   SettingsHome: undefined;
   SecurityCode: undefined;
+  RemoveAccount: undefined;
 };
 
 const SettingsStack = createNativeStackNavigator<SettingsStackParamList>();
@@ -44,6 +46,26 @@ export default function SettingsStackNavigator() {
         component={SecurityCode}
         options={{
           title: "Security code",
+          header: (props) => (
+            <CustomNavigationHeader
+              {...props}
+              customIcon={
+                <Icon
+                  as={Ionicons}
+                  name="close"
+                  size="xl"
+                  color="primary.500"
+                />
+              }
+            />
+          ),
+        }}
+      />
+      <SettingsStack.Screen
+        name="RemoveAccount"
+        component={RemoveAccount}
+        options={{
+          title: "Remove Account",
           header: (props) => (
             <CustomNavigationHeader
               {...props}

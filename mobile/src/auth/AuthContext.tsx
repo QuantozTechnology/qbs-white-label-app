@@ -165,17 +165,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
    */
   async function logout() {
     dispatch({ type: AuthActionType.INIT });
-
-    const response = await auth.logout();
-
-    if (response.type === "error") {
-      dispatch({
-        type: AuthActionType.ERROR,
-        errorMessage: response.errorMessage,
-      });
-      return;
-    }
-
+    await auth.logout();
     dispatch({ type: AuthActionType.CLEAR_USER_SESSION });
   }
 

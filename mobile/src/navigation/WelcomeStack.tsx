@@ -1,6 +1,7 @@
 // Copyright 2023 Quantoz Technology B.V. and contributors. Licensed
 // under the Apache License, Version 2.0. See the NOTICE file at the root
 // of this distribution or at http://www.apache.org/licenses/LICENSE-2.0
+
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { useEffect, useState } from "react";
 import Feedback from "../screens/Feedback";
@@ -12,16 +13,25 @@ import SignIn from "../screens/SignIn";
 import { useAuth } from "../auth/AuthContext";
 import { useCustomerState } from "../context/CustomerContext";
 import FullScreenLoadingSpinner from "../components/FullScreenLoadingSpinner";
-import CreateAccount from "../screens/CreateAccount";
-import FullScreenMessage from "../components/FullScreenMessage";
-import { useCustomer } from "../api/customer/customer";
 import { Icon } from "native-base";
 import { Ionicons } from "@expo/vector-icons";
-import { useDeviceVerification } from "../utils/hooks/useDeviceVerification";
-import { useBiometricValidation } from "../utils/hooks/useBiometricValidation";
-import { useDeviceHasScreenLock } from "../utils/hooks/useDeviceHasScreenLock";
 import CustomNavigationHeader from "../components/CustomNavigationHeader";
 import ConfirmDevice from "../screens/ConfirmDevice";
+
+import { isNil } from "lodash";
+import {
+  checkStoredKeys,
+  getOid,
+  performBiometricValidation,
+  checkDeviceHasScreenLock,
+} from "../utils/functions";
+import { useAppState } from "../context/AppStateContext";
+import FullScreenMessage from "../components/FullScreenMessage";
+import * as SecureStore from "expo-secure-store";
+import { getCustomer } from "../api/customer/customer";
+import { useNotification } from "../context/NotificationContext";
+import { SECURE_STORE_KEYS } from "../auth/types";
+import { CustomerStateType } from "../context/customerContext.interface";
 
 export type WelcomeStackParamList = {
   Home: undefined;
@@ -50,104 +60,314 @@ export type FeedbackProps = {
 
 const WelcomeStack = createNativeStackNavigator<WelcomeStackParamList>();
 
+type ErrorType = { message: string };
+
 export type CustomerStatus = {
-  result: "success" | "register" | "error" | "underReview";
+  result:
+    | "success"
+    | "register"
+    | "error"
+    | "underReview"
+    | "blocked"
+    | "deleted";
   message?: string;
 };
 
+export type PageType =
+  | "BiometricCheck"
+  | "BiometricError"
+  | "BiometricNone"
+  | "BiometricDone"
+  | "ScreenLockCheck"
+  | "ScreenLockError"
+  | "ScreenLockNone"
+  | "ScreenLockDone"
+  | "SignIn"
+  | "DeviceVerificationCheck"
+  | "DeviceVerificationConflict"
+  | "DeviceVerificationError"
+  | "DeviceVerificationDone"
+  | "AutoLogin"
+  | "UnderReview"
+  | "Blocked"
+  | "Deleted"
+  | "RegistrationCompleteForm";
+
 export default function WelcomeStackNavigator() {
   const auth = useAuth();
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const customerContext = useCustomerState();
-  // We must perform verification in order to display related loading screens.
-  // First, biometrics, then verifyDevice, and finally screenLock.
-  const [currentOperation, setCurrentOperation] =
-    useState("checkingBiometrics");
-  // By using shouldVerify, we can run useDeviceVerification and useDeviceHasScreenLock manually and have more control over them.
-  const [shouldVerifyDevice, setShouldVerifyDevice] = useState(false);
-  const [shouldCheckScreenLockMechanism, setShouldCheckScreenLockMechanism] =
-    useState(false);
+  const { isRegistered } = useAppState();
 
-  const {
-    isBiometricCheckPassed,
-    triggerRetry,
-    error: biometricCheckError,
-    isLoading: isCheckingBiometric,
-  } = useBiometricValidation();
+  const [currentPageType, setCurrentPageType] = useState<PageType | null>(null);
+  const { showErrorNotification, showCustomNotification } = useNotification();
 
-  const {
-    error: deviceVerificationError,
-    isLoading: isVerifyingDevice,
-    deviceConflict,
-  } = useDeviceVerification(shouldVerifyDevice);
-
-  const {
-    hasScreenLockMechanism,
-    error: screenLockMechanismError,
-    isLoading: isCheckingScreenLockMechanism,
-  } = useDeviceHasScreenLock(shouldCheckScreenLockMechanism);
-
-  const { data: customer } = useCustomer({
-    enabled: auth?.userSession !== null,
-  });
-
-  useEffect(() => {
-    (async () => {
-      switch (currentOperation) {
-        case "verifyingDevice":
-          setShouldVerifyDevice(true);
-          break;
-
-        case "checkingScreenLock":
-          if (
-            (hasScreenLockMechanism || screenLockMechanismError) &&
-            !isCheckingScreenLockMechanism
-          ) {
-            setCurrentOperation("done");
-          }
-          break;
-      }
-    })();
-  }, [currentOperation]);
-
-  useEffect(() => {
-    if (!isCheckingBiometric && isBiometricCheckPassed) {
-      setCurrentOperation("verifyingDevice");
-    } else {
-      if (biometricCheckError) {
-        setCurrentOperation("done");
-      }
-    }
-  }, [isCheckingBiometric]);
-
-  useEffect(() => {
-    if (isBiometricCheckPassed) {
-      setCurrentOperation("verifyingDevice");
-    }
-  }, [isBiometricCheckPassed]);
-
-  useEffect(() => {
-    if (isBiometricCheckPassed && shouldVerifyDevice) {
-      if (!isVerifyingDevice && (deviceConflict || deviceVerificationError)) {
-        setCurrentOperation("done");
-      } else {
-        if (!isVerifyingDevice) {
-          setShouldCheckScreenLockMechanism(true);
-          setCurrentOperation("checkingScreenLock");
+  const performBiometricCheck = async () => {
+    performBiometricValidation(
+      (
+        biometricCheckStatus: "success" | "checking" | "error",
+        error: ErrorType | null
+      ) => {
+        if (biometricCheckStatus === "success") {
+          setCurrentPageType("BiometricDone");
+        }
+        if (biometricCheckStatus === "error") {
+          setCurrentPageType("BiometricError");
+        }
+        if (!isNil(error)) {
+          console.log("biometricValidation error", error);
         }
       }
+    );
+  };
+
+  const checkScreenLockMechanism = async () => {
+    checkDeviceHasScreenLock(
+      (result: boolean | null, error: { message: string } | null) => {
+        if (error) {
+          setCurrentPageType("ScreenLockError");
+        } else if (result === null) {
+          setCurrentPageType("ScreenLockError");
+        } else {
+          setCurrentPageType(result ? "ScreenLockDone" : "ScreenLockNone");
+        }
+      }
+    );
+  };
+
+  const verifyCurrentDevice = async () => {
+    try {
+      const oid = await getOid();
+      if (oid) {
+        const deviceStatus = await checkStoredKeys(oid);
+        if (isNil(deviceStatus)) {
+          setCurrentPageType("SignIn");
+          return;
+        } else {
+          if (deviceStatus == "conflict") {
+            setCurrentPageType("DeviceVerificationConflict");
+            return;
+          }
+          if (deviceStatus == "error") {
+            setCurrentPageType("DeviceVerificationError");
+            return;
+          }
+          setCurrentPageType("DeviceVerificationDone");
+        }
+      } else {
+        setCurrentPageType("SignIn");
+      }
+    } catch (error) {
+      setCurrentPageType("DeviceVerificationError");
     }
-  }, [isVerifyingDevice]);
+  };
+
+  const retry = async (pageType: PageType) => {
+    setCurrentPageType(pageType);
+  };
+
+  const nextAction = async () => {
+    switch (currentPageType) {
+      case "UnderReview":
+        // do nothing
+        break;
+      case "Blocked":
+        // do nothing
+        break;
+      case "Deleted":
+        await auth?.logout();
+        setCurrentPageType("SignIn");
+        break;
+      case "BiometricCheck":
+        await performBiometricCheck();
+        break;
+      // eslint-disable-next-line
+      case "BiometricDone":
+        setCurrentPageType("ScreenLockCheck");
+        break;
+      case "ScreenLockCheck":
+        await checkScreenLockMechanism();
+        break;
+      case "ScreenLockDone":
+        if (isNil(auth?.userSession)) {
+          setCurrentPageType("SignIn");
+        } else {
+          const oid = await getOid();
+          if (!isNil(oid)) {
+            const pubKey = await SecureStore.getItemAsync(
+              oid + SECURE_STORE_KEYS.PUBLIC_KEY
+            );
+            const otpSeed = await SecureStore.getItemAsync(
+              oid + SECURE_STORE_KEYS.OTPSEED
+            );
+            const RegistrationCompleted = await SecureStore.getItemAsync(
+              oid + SECURE_STORE_KEYS.REGISTRATION_COMPLETED
+            );
+
+            if (!isNil(RegistrationCompleted)) {
+              const customerInfo = await getCustomer();
+              if (isNil(customerInfo)) {
+                showErrorNotification("Your account is not active", {
+                  position: "top",
+                });
+                await auth?.logout();
+                setCurrentPageType("SignIn");
+              } else {
+                if (
+                  customerInfo &&
+                  [
+                    CustomerStateType.CUSTOMER_BLOCKED,
+                    CustomerStateType.CUSTOMER_NEW,
+                  ].includes(customerInfo?.data?.value?.status)
+                ) {
+                  setCurrentPageType("Blocked");
+                } else if (
+                  customerInfo &&
+                  customerInfo?.data?.value?.status ===
+                    CustomerStateType.CUSTOMER_DELETED
+                ) {
+                  setCurrentPageType("Deleted");
+                } else {
+                  if (
+                    customerInfo &&
+                    customerInfo?.data?.value?.status ===
+                      CustomerStateType.CUSTOMER_UNDER_REVIEW
+                  ) {
+                    showCustomNotification(
+                      "This account is in progress of review, functionality is limited.",
+                      "info",
+                      { position: "top" }
+                    );
+                  }
+                  setCurrentPageType("AutoLogin");
+                }
+              }
+            } else {
+              if (isNil(pubKey) || isNil(otpSeed)) {
+                setCurrentPageType("DeviceVerificationCheck");
+              } else {
+                setCurrentPageType("RegistrationCompleteForm");
+              }
+            }
+          } else {
+            await auth?.logout();
+            setCurrentPageType("SignIn");
+          }
+        }
+
+        break;
+      case "DeviceVerificationCheck":
+        await verifyCurrentDevice();
+        break;
+      case "DeviceVerificationConflict":
+        if (auth?.userSession === null) {
+          setCurrentPageType("SignIn");
+        }
+        break;
+      case "DeviceVerificationDone":
+        setCurrentPageType("RegistrationCompleteForm");
+        break;
+      case "AutoLogin":
+        if (auth?.userSession === null) {
+          setCurrentPageType("SignIn");
+        }
+        break;
+      case "SignIn":
+        if (auth?.userSession) {
+          const oid = await getOid();
+          if (!isNil(oid)) {
+            const pubKey = await SecureStore.getItemAsync(
+              oid + SECURE_STORE_KEYS.PUBLIC_KEY
+            );
+            const otpSeed = await SecureStore.getItemAsync(
+              oid + SECURE_STORE_KEYS.OTPSEED
+            );
+            const RegistrationCompleted = await SecureStore.getItemAsync(
+              oid + SECURE_STORE_KEYS.REGISTRATION_COMPLETED
+            );
+
+            if (!isNil(RegistrationCompleted)) {
+              const customerInfo = await getCustomer();
+              if (isNil(customerInfo)) {
+                showErrorNotification("Your account is not active", {
+                  position: "top",
+                });
+                await auth?.logout();
+                setCurrentPageType("SignIn");
+              } else {
+                if (
+                  customerInfo &&
+                  [
+                    CustomerStateType.CUSTOMER_BLOCKED,
+                    CustomerStateType.CUSTOMER_NEW,
+                    CustomerStateType.CUSTOMER_DELETED,
+                  ].includes(customerInfo?.data?.value?.status)
+                ) {
+                  setCurrentPageType("Blocked");
+                } else if (
+                  customerInfo &&
+                  customerInfo?.data?.value?.status ===
+                    CustomerStateType.CUSTOMER_DELETED
+                ) {
+                  setCurrentPageType("Deleted");
+                } else {
+                  if (
+                    customerInfo &&
+                    customerInfo?.data?.value?.status ===
+                      CustomerStateType.CUSTOMER_UNDER_REVIEW
+                  ) {
+                    showCustomNotification(
+                      "This account is in progress of review, functionality is limited.",
+                      "info",
+                      { position: "top" }
+                    );
+                  }
+                  setCurrentPageType("AutoLogin");
+                }
+              }
+            } else {
+              if (isNil(pubKey) || isNil(otpSeed)) {
+                setCurrentPageType("DeviceVerificationCheck");
+              }
+            }
+          } else {
+            await auth?.logout();
+          }
+        }
+        break;
+      default:
+        if (isNil(currentPageType)) {
+          setCurrentPageType("BiometricCheck");
+        }
+        break;
+    }
+  };
 
   useEffect(() => {
-    if (
-      isBiometricCheckPassed &&
-      shouldVerifyDevice &&
-      shouldCheckScreenLockMechanism &&
-      hasScreenLockMechanism
-    ) {
-      setCurrentOperation("done");
+    if (currentPageType !== null) {
+      nextAction();
+    } else {
+      setCurrentPageType("BiometricCheck");
     }
-  }, [isCheckingScreenLockMechanism]);
+  }, [currentPageType]);
+
+  useEffect(() => {
+    if (isRegistered) {
+      if (currentPageType != "AutoLogin") {
+        setCurrentPageType("AutoLogin");
+      }
+    }
+  }, [isRegistered]);
+
+  useEffect(() => {
+    if (customerContext?.isBlocked) {
+      setCurrentPageType("Blocked");
+    }
+  }, [customerContext]);
+
+  useEffect(() => {
+    nextAction();
+  }, [auth?.userSession]);
 
   useEffect(() => {
     WebBrowser.warmUpAsync();
@@ -157,122 +377,12 @@ export default function WelcomeStackNavigator() {
     };
   }, []);
 
-  if (currentOperation !== "done") {
-    let message = "Loading...";
-    switch (currentOperation) {
-      case "checkingBiometrics":
-        message = "Checking biometric security...";
-        break;
-      case "verifyingDevice":
-        message = "Verifying device, it could take up to 1 minute...";
-        break;
-      case "checkingScreenLock":
-        message = "Checking screen lock mechanism...";
-        break;
-    }
-    return <FullScreenLoadingSpinner message={message} />;
-  }
-
-  if (auth?.isLoading) {
-    return <FullScreenLoadingSpinner />;
-  }
-
-  if (currentOperation === "done") {
-    if (biometricCheckError) {
+  switch (currentPageType) {
+    case "RegistrationCompleteForm": {
       return (
-        <WelcomeStack.Navigator>
-          {showGenericErrorScreen(
-            "Cannot verify your biometric security. Please try again later"
-          )}
-        </WelcomeStack.Navigator>
-      );
-    }
-
-    if (!isBiometricCheckPassed) {
-      return (
-        <FullScreenMessage
-          title="Biometric check error"
-          message="Please try again"
-          actionButton={{
-            label: "Try again",
-            callback: triggerRetry,
-          }}
-        />
-      );
-    }
-
-    if (deviceVerificationError) {
-      return (
-        <WelcomeStack.Navigator>
-          {showGenericErrorScreen(
-            "Cannot securely verify your device. Please try again later"
-          )}
-        </WelcomeStack.Navigator>
-      );
-    }
-
-    if (deviceConflict) {
-      return (
-        <WelcomeStack.Navigator>
-          {showConfirmDeviceScreens()}
-        </WelcomeStack.Navigator>
-      );
-    }
-
-    if (screenLockMechanismError) {
-      return (
-        <WelcomeStack.Navigator>
-          {showGenericErrorScreen(
-            "Cannot verify if your device has a screen lock mechanism. Please try again later"
-          )}
-        </WelcomeStack.Navigator>
-      );
-    }
-
-    if (!hasScreenLockMechanism) {
-      return (
-        <WelcomeStack.Navigator>
-          <WelcomeStack.Screen
-            name="Feedback"
-            component={Feedback}
-            initialParams={{
-              title: "Security issue",
-              description: `Your device has no security measures set up (pin, passcode or fingerprint/faceID).
-  Please enable one of these to be able to use the app.`,
-            }}
-          />
-        </WelcomeStack.Navigator>
-      );
-    }
-  }
-
-  // if no user session exists, show sign in screen
-  if (auth?.userSession === null && !auth.isLoading) {
-    return (
-      <WelcomeStack.Navigator
-        screenOptions={{ headerShown: false, gestureEnabled: false }}
-      >
-        <WelcomeStack.Screen name="SignIn" component={SignIn} />
-      </WelcomeStack.Navigator>
-    );
-  }
-
-  if (customerContext?.isLoading) {
-    return <FullScreenLoadingSpinner message="Checking your account..." />;
-  }
-
-  return (
-    <WelcomeStack.Navigator
-      screenOptions={{ headerShown: false, gestureEnabled: false }}
-    >
-      {renderCorrectStack()}
-    </WelcomeStack.Navigator>
-  );
-
-  function renderCorrectStack() {
-    if (customerContext?.requiresCustomer) {
-      return (
-        <>
+        <WelcomeStack.Navigator
+          screenOptions={{ headerShown: false, gestureEnabled: false }}
+        >
           <WelcomeStack.Screen
             options={{
               title: "Complete registration",
@@ -283,58 +393,168 @@ export default function WelcomeStackNavigator() {
             component={RegistrationTopTabsStack}
           />
           <WelcomeStack.Screen name="Feedback" component={Feedback} />
-        </>
+        </WelcomeStack.Navigator>
       );
+      break;
     }
-
-    if (customerContext?.isUnderReview) {
+    case "AutoLogin": {
       return (
-        <WelcomeStack.Screen
-          name="Feedback"
-          component={Feedback}
-          initialParams={{
-            title: "Account under review",
-            description: customer?.data?.value?.isBusiness
-              ? "Your business account is being reviewed by our compliance team. You will be notified when you'll be able to access it."
-              : "Our operators are checking your account details. We will let you know when you can access it.",
-            illustration: ImageIdentifier.Find,
+        <WelcomeStack.Navigator
+          screenOptions={{ headerShown: false, gestureEnabled: false }}
+        >
+          <WelcomeStack.Screen
+            name="AppStack"
+            component={AppBottomTabNavigator}
+          />
+        </WelcomeStack.Navigator>
+      );
+      break;
+    }
+    case "DeviceVerificationCheck": {
+      return (
+        <FullScreenLoadingSpinner
+          message={"Verifying device, it could take up to 1 minute..."}
+        />
+      );
+      break;
+    }
+    case "DeviceVerificationConflict": {
+      return (
+        <WelcomeStack.Navigator>
+          {showConfirmDeviceScreens()}
+        </WelcomeStack.Navigator>
+      );
+      break;
+    }
+    case "Blocked": {
+      const errorMessage = customerContext?.isBusiness
+        ? "Your business account is being reviewed by our compliance team. You will be notified when you'll be able to access it."
+        : "Your account is not active. For more information please contact our support team.";
+      return (
+        <FullScreenMessage
+          title="Account not active"
+          message={errorMessage}
+          actionButton={{
+            label: "Exit",
+            callback: async () => {
+              await auth?.logout();
+              // remove session and oid
+              await SecureStore.deleteItemAsync(SECURE_STORE_KEYS.OID);
+              setCurrentPageType("SignIn");
+            },
           }}
         />
       );
+      break;
     }
-
-    if (customerContext?.requiresAccount) {
+    case "SignIn": {
+      if (auth?.userSession) {
+        <FullScreenLoadingSpinner message="Checking your account..." />;
+      } else {
+        return (
+          <WelcomeStack.Navigator
+            screenOptions={{ headerShown: false, gestureEnabled: false }}
+          >
+            <WelcomeStack.Screen name="SignIn" component={SignIn} />
+          </WelcomeStack.Navigator>
+        );
+      }
+      break;
+    }
+    case "BiometricCheck": {
       return (
-        <>
-          <WelcomeStack.Screen name="CreateAccount" component={CreateAccount} />
-          <WelcomeStack.Screen name="Feedback" component={Feedback} />
-        </>
+        <FullScreenLoadingSpinner message={"Checking biometric security..."} />
       );
+      break;
     }
-
-    if (customerContext?.error) {
+    case "BiometricError": {
       return (
-        <WelcomeStack.Screen
-          name="Feedback"
-          component={Feedback}
-          initialParams={{
-            title: "Login error",
-            description: "Sorry for the inconvenience, please try again later",
-            illustration: ImageIdentifier.Find,
+        <FullScreenMessage
+          title="Biometric Check"
+          message="Cannot verify your biometric security. Please try again later"
+          backgroundColor="#324658"
+          textColor="white"
+          icon={
+            <Icon
+              as={Ionicons}
+              name="ios-finger-print-sharp"
+              size={"6xl"}
+              accessibilityLabel="warning icon"
+              color="white"
+            />
+          }
+          actionButton={{
+            label: "Try again",
+            callback: retry.bind(null, "BiometricCheck"),
           }}
         />
       );
+      break;
     }
-
-    if (customerContext?.isLoading) {
-      return;
+    case "BiometricNone": {
+      return (
+        <FullScreenMessage
+          title="Biometric check error"
+          message="Please try again"
+          actionButton={{
+            label: "Try again",
+            callback: retry.bind(null, "BiometricCheck"),
+          }}
+        />
+      );
+      break;
     }
-
-    return (
-      <WelcomeStack.Screen name="AppStack" component={AppBottomTabNavigator} />
-    );
+    case "ScreenLockCheck": {
+      return (
+        <FullScreenLoadingSpinner
+          message={"Checking screen lock mechanism..."}
+        />
+      );
+      break;
+    }
+    case "ScreenLockError": {
+      return (
+        <WelcomeStack.Navigator>
+          {showGenericErrorScreen(
+            "Cannot verify if your device has a screen lock mechanism. Please try again later"
+          )}
+        </WelcomeStack.Navigator>
+      );
+      break;
+    }
+    case "ScreenLockNone": {
+      return (
+        <WelcomeStack.Navigator>
+          <WelcomeStack.Screen
+            name="Feedback"
+            component={Feedback}
+            initialParams={{
+              title: "Security issue",
+              description: `Your device has no security measures set up (pin, passcode or fingerprint/faceID).
+          Please enable one of these to be able to use the app.`,
+            }}
+          />
+        </WelcomeStack.Navigator>
+      );
+      break;
+    }
+    case "DeviceVerificationError": {
+      return (
+        <WelcomeStack.Navigator>
+          {showGenericErrorScreen(
+            "Cannot securely verify your device. Please try again later"
+          )}
+        </WelcomeStack.Navigator>
+      );
+      break;
+    }
+    default: {
+      return <FullScreenLoadingSpinner message="Checking your account..." />;
+      break;
+    }
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   function showConfirmDeviceScreens() {
     return (
       <>

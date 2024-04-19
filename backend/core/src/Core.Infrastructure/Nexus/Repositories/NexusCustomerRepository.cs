@@ -43,14 +43,18 @@ namespace Core.Infrastructure.Nexus.Repositories
                 throw new CustomErrorsException(NexusErrorCodes.ExistingProperty.ToString(), customer.CustomerCode, Constants.NexusErrorMessages.ExistingCode);
             }
 
+            var encodedEmail = Uri.EscapeDataString(customer.Email.ToLower().Trim());
+
             var query = new Dictionary<string, string>
             {
-                { "Email", customer.Email.ToLower().Trim() }
+                { "Email", encodedEmail }
             };
 
             var existingCustomersWithEmail = await _tokenServer.Customers.Get(query);
 
-            if (existingCustomersWithEmail != null && existingCustomersWithEmail.Records.Any(existingCustomer => existingCustomer.Status != CustomerStatus.DELETED.ToString()))
+            if (existingCustomersWithEmail != null
+                && existingCustomersWithEmail.Records.Any()
+                && existingCustomersWithEmail.Records.Any(existingCustomer => existingCustomer.Status != CustomerStatus.DELETED.ToString()))
             {
                 throw new CustomErrorsException(NexusErrorCodes.ExistingProperty.ToString(), customer.Email, Constants.NexusErrorMessages.ExistingEmail);
             }
