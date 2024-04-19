@@ -24,7 +24,8 @@ namespace Core.Infrastructure.Nexus
         TrustlevelNotFoundError = 4,
         InvalidStatus = 4,
         InvalidProperty = 5,
-        TransactionNotFoundError = 6
+        TransactionNotFoundError = 6,
+        NonZeroAccountBalance = 7,
     }
 
     public enum MailStatus

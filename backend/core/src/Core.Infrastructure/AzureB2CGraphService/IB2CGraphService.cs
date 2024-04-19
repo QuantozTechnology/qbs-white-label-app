@@ -2,13 +2,12 @@
 // under the Apache License, Version 2.0. See the NOTICE file at the root
 // of this distribution or at http://www.apache.org/licenses/LICENSE-2.0
 
-namespace Core.Application
+using Core.Domain.Entities.CustomerAggregate;
+
+namespace Core.Infrastructure.AzureB2CGraphService
 {
-    public enum ApplicationErrorCode
+    public interface IB2CGraphService
     {
-        InvalidStatusError,
-        InvalidPropertyError,
-        ExistingPropertyError,
-        NotFoundError
+        public Task DeleteUserAsync(string customerCode);
     }
 }

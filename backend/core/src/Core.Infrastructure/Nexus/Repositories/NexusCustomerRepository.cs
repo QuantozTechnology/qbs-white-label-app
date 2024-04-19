@@ -5,9 +5,13 @@
 using Core.Domain.Entities.CustomerAggregate;
 using Core.Domain.Exceptions;
 using Core.Domain.Repositories;
+using Core.Infrastructure.AzureB2CGraphService;
+using Core.Infrastructure.Nexus.SigningService;
 using Nexus.Sdk.Shared.Requests;
 using Nexus.Sdk.Token;
+using Nexus.Sdk.Token.Requests;
 using Nexus.Sdk.Token.Responses;
+using Account = Core.Domain.Entities.AccountAggregate.Account;
 
 namespace Core.Infrastructure.Nexus.Repositories
 {
@@ -15,11 +19,19 @@ namespace Core.Infrastructure.Nexus.Repositories
     {
         private readonly ITokenServer _tokenServer;
         private readonly TokenOptions _tokenSettings;
+        private readonly ISigningService _signingService;
+        private readonly IB2CGraphService _b2cGraphService;
 
-        public NexusCustomerRepository(ITokenServer tokenServer, TokenOptions tokenSettings)
+        public NexusCustomerRepository(
+            ITokenServer tokenServer,
+            TokenOptions tokenSettings,
+            ISigningService signingService,
+            IB2CGraphService b2CGraphService)
         {
             _tokenServer = tokenServer;
             _tokenSettings = tokenSettings;
+            _signingService = signingService;
+            _b2cGraphService = b2CGraphService;
         }
 
         public async Task CreateAsync(Customer customer, string? ip = null, CancellationToken cancellationToken = default)
@@ -142,6 +154,104 @@ namespace Core.Infrastructure.Nexus.Repositories
             }
 
             return limits;
+        }
+
+        public async Task DeleteAsync(Customer customer, string? ip = null, CancellationToken cancellationToken = default)
+        {
+            var customerCodeExists = await _tokenServer.Customers.Exists(customer.CustomerCode);
+
+            if (!customerCodeExists)
+            {
+                throw new CustomErrorsException(NexusErrorCodes.CustomerNotFoundError.ToString(), customer.CustomerCode, Constants.NexusErrorMessages.CustomerNotFound);
+            }
+
+            // Check if the customer status is ACTIVE
+            if (customer.Status != CustomerStatus.ACTIVE.ToString())
+            {
+                throw new CustomErrorsException(NexusErrorCodes.InvalidStatus.ToString(), customer.Status.ToString(), "Invalid customer status");
+            }
+
+            // Get Customer accounts
+            var accounts = await _tokenServer.Accounts.Get(
+                new Dictionary<string, string>
+                {
+                    { "CustomerCode", customer.CustomerCode },
+                    { "Status", "ACTIVE" }
+                });
+
+            // Check if the customer has any accounts and balance
+            if (accounts.Records.Any())
+            {
+                foreach (var acc in accounts.Records)
+                {
+                    Account account = new()
+                    {
+                        AccountCode = acc.AccountCode,
+                        CustomerCode = acc.CustomerCode,
+                        PublicKey = acc.PublicKey
+                    };
+
+                    // Get the account balance
+                    var response = await _tokenServer.Accounts.GetBalances(account.AccountCode);
+
+                    var accountBalances = response.Balances;
+
+                    if (response.Balances.Any(balance => balance.Amount > 0))
+                    {
+                        throw new CustomErrorsException(NexusErrorCodes.NonZeroAccountBalance.ToString(), account.AccountCode, "Customer cannot be deleted due to non-zero balance");
+                    }
+
+                    if (accountBalances.Any())
+                    {
+                        // Get the token codes to be disabled
+                        var tokensToBeDisabled = accountBalances.Select(b => b.TokenCode).ToArray();
+
+                        await RemoveTrustlines(customer, account, tokensToBeDisabled);
+                    }
+                }
+            }
+
+            var deleteRequest = new DeleteCustomerRequest
+            {
+                CustomerCode = customer.CustomerCode
+            };
+
+            await _tokenServer.Customers.Delete(deleteRequest, ip);
+
+            // delete user from azure b2c
+            await _b2cGraphService.DeleteUserAsync(customer.CustomerCode);
+        }
+
+        private async Task RemoveTrustlines(Customer customer, Account account, string[]? tokensToBeDisabled = null)
+        {
+            var updateAccount = new UpdateTokenAccountRequest
+            {
+                Settings = new UpdateTokenAccountSettings
+                {
+                    AllowedTokens = new AllowedTokens
+                    {
+                        DisableTokens = tokensToBeDisabled
+                    }
+                }
+            };
+
+            var signableResponse = await _tokenServer.Accounts.Update(customer.CustomerCode, account.AccountCode, updateAccount);
+
+            switch (_tokenSettings.Blockchain)
+            {
+                case Blockchain.STELLAR:
+                    {
+                        var submitRequest = await _signingService.SignStellarTransactionEnvelopeAsync(account.PublicKey, signableResponse);
+                        await _tokenServer.Submit.OnStellarAsync(submitRequest);
+                        break;
+                    }
+                case Blockchain.ALGORAND:
+                    {
+                        var submitRequest = await _signingService.SignAlgorandTransactionAsync(account.PublicKey, signableResponse);
+                        await _tokenServer.Submit.OnAlgorandAsync(submitRequest);
+                        break;
+                    }
+            }
         }
 
         public Task SaveChangesAsync(CancellationToken cancellationToken = default)
