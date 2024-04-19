@@ -4,13 +4,18 @@
 
 using Core.Domain.Entities.CustomerAggregate;
 using Core.Domain.Exceptions;
+using Core.Infrastructure.AzureB2CGraphService;
+using Core.Infrastructure.Nexus;
 using Core.Infrastructure.Nexus.Repositories;
+using Core.Infrastructure.Nexus.SigningService;
 using Core.InfrastructureTests.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using Nexus.Sdk.Shared.Requests;
 using Nexus.Sdk.Shared.Responses;
 using Nexus.Sdk.Token;
+using Nexus.Sdk.Token.Requests;
+using Nexus.Sdk.Token.Responses;
 
 namespace Core.InfrastructureTests.Nexus.Repositories
 {
@@ -26,7 +31,10 @@ namespace Core.InfrastructureTests.Nexus.Repositories
             server.Setup(s => s.Customers.Create(It.IsAny<CreateCustomerRequest>(), It.IsAny<string>()))
                 .Returns(Task.FromResult(NexusSDKHelper.PrivateCustomer("TestCustomer")));
 
-            var repo = new NexusCustomerRepository(server.Object, DefaultOptions.TokenOptions);
+            var signingService = new Mock<ISigningService>().Object;
+            var b2cGraphService = new Mock<IB2CGraphService>().Object;
+
+            var repo = new NexusCustomerRepository(server.Object, DefaultOptions.TokenOptions, signingService, b2cGraphService);
 
             var customer = new Customer()
             {
@@ -74,6 +82,9 @@ namespace Core.InfrastructureTests.Nexus.Repositories
             server.Setup(s => s.Customers.Create(It.IsAny<CreateCustomerRequest>(), It.IsAny<string>()))
                 .Returns(Task.FromResult(NexusSDKHelper.PrivateCustomer("TestCustomer")));
 
+            var signingService = new Mock<ISigningService>().Object;
+            var b2cGraphService = new Mock<IB2CGraphService>().Object;
+
             var customer = new Customer()
             {
                 CustomerCode = "TestCustomer",
@@ -90,7 +101,7 @@ namespace Core.InfrastructureTests.Nexus.Repositories
                 }
             };
 
-            var repo = new NexusCustomerRepository(server.Object, DefaultOptions.TokenOptions);
+            var repo = new NexusCustomerRepository(server.Object, DefaultOptions.TokenOptions, signingService, b2cGraphService);
             await repo.CreateAsync(customer);
 
             var expected = new CreateCustomerRequest
@@ -119,7 +130,10 @@ namespace Core.InfrastructureTests.Nexus.Repositories
             server.Setup(s => s.Customers.Exists("TestCustomer"))
                 .Returns(Task.FromResult(true));
 
-            var repo = new NexusCustomerRepository(server.Object, DefaultOptions.TokenOptions);
+            var signingService = new Mock<ISigningService>().Object;
+            var b2cGraphService = new Mock<IB2CGraphService>().Object;
+
+            var repo = new NexusCustomerRepository(server.Object, DefaultOptions.TokenOptions, signingService, b2cGraphService);
 
             var customer = new Customer()
             {
@@ -157,7 +171,10 @@ namespace Core.InfrastructureTests.Nexus.Repositories
                     filteringParameters: new Dictionary<string, string>(),
                     records: [NexusSDKHelper.PrivateCustomer("TestCustomer123")])));
 
-            var repo = new NexusCustomerRepository(server.Object, DefaultOptions.TokenOptions);
+            var signingService = new Mock<ISigningService>().Object;
+            var b2cGraphService = new Mock<IB2CGraphService>().Object;
+
+            var repo = new NexusCustomerRepository(server.Object, DefaultOptions.TokenOptions, signingService, b2cGraphService);
 
             var customer = new Customer()
             {
@@ -196,7 +213,10 @@ namespace Core.InfrastructureTests.Nexus.Repositories
                     filteringParameters: new Dictionary<string, string>(),
                     records: [NexusSDKHelper.DeletedPrivateCustomer("TestCustomer")])));
 
-            var repo = new NexusCustomerRepository(server.Object, DefaultOptions.TokenOptions);
+            var signingService = new Mock<ISigningService>().Object;
+            var b2cGraphService = new Mock<IB2CGraphService>().Object;
+
+            var repo = new NexusCustomerRepository(server.Object, DefaultOptions.TokenOptions, signingService, b2cGraphService);
 
             var customer = new Customer()
             {
@@ -227,7 +247,10 @@ namespace Core.InfrastructureTests.Nexus.Repositories
             server.Setup(s => s.Customers.Get("TestCustomer"))
                 .Returns(Task.FromResult(NexusSDKHelper.PrivateCustomer("TestCustomer")));
 
-            var repo = new NexusCustomerRepository(server.Object, DefaultOptions.TokenOptions);
+            var signingService = new Mock<ISigningService>().Object;
+            var b2cGraphService = new Mock<IB2CGraphService>().Object;
+
+            var repo = new NexusCustomerRepository(server.Object, DefaultOptions.TokenOptions, signingService, b2cGraphService);
 
             var customer = await repo.GetAsync("TestCustomer");
 
