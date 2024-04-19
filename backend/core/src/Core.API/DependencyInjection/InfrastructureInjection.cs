@@ -4,6 +4,7 @@
 
 using Core.Domain.Abstractions;
 using Core.Domain.Repositories;
+using Core.Infrastructure.AzureB2CGraphService;
 using Core.Infrastructure.Compliance;
 using Core.Infrastructure.Compliance.IPLocator;
 using Core.Infrastructure.Compliance.Sanctionlist;
@@ -14,6 +15,7 @@ using Core.Infrastructure.Nexus;
 using Core.Infrastructure.Nexus.Repositories;
 using Core.Infrastructure.Nexus.SigningService;
 using Microsoft.Extensions.Options;
+using Microsoft.Graph;
 using Nexus.Sdk.Shared.Http;
 using Nexus.Sdk.Token.Extensions;
 using Quartz;
@@ -25,6 +27,7 @@ namespace Core.API.DependencyInjection
         public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
         {
             services
+                .AddB2CGraphService(configuration)
                 .AddNexus(configuration)
                 .AddIPLocator(configuration)
                 .AddSanctionlist(configuration)
@@ -79,6 +82,23 @@ namespace Core.API.DependencyInjection
 
                 client.BaseAddress = new Uri(baseUrl);
             });
+
+            return services;
+        }
+
+        public static IServiceCollection AddB2CGraphService(this IServiceCollection services, IConfiguration configuration)
+        {
+            services.AddOptions<B2CServiceOptions>()
+                .Bind(configuration.GetSection("B2CServiceOptions"))
+                .ValidateDataAnnotationsRecursively()
+                .ValidateOnStart();
+
+            services.AddSingleton(sp => sp.GetRequiredService<IOptions<B2CServiceOptions>>().Value);
+
+            services.AddHttpClient<IB2CGraphService, B2CGraphService>();
+
+            services.AddScoped<IB2CGraphService, B2CGraphService>();
+            services.AddScoped<GraphServiceClient>();
 
             return services;
         }

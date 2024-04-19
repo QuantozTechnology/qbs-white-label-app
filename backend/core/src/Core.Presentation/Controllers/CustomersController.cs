@@ -3,7 +3,6 @@
 // of this distribution or at http://www.apache.org/licenses/LICENSE-2.0
 
 using Asp.Versioning;
-using Core.Application.Commands;
 using Core.Application.Commands.CustomerCommands;
 using Core.Application.Queries.CustomerQueries;
 using Core.Presentation.Models;
@@ -93,12 +92,12 @@ namespace Core.Presentation.Controllers
         [ProducesResponseType(typeof(CustomErrorsResponse), 400)]
         [ProducesResponseType(typeof(CustomErrorsResponse), 404)]
         [ProducesResponseType(typeof(CustomErrorsResponse), 500)]
-        [RequiredScope("Customer.Create")]
+        [RequiredScope("Customer.Delete")]
         public async Task<IActionResult> DeleteCustomerAsync()
         {
             var command = new DeleteCustomerCommand(GetUserId(), GetIP());
             await _sender.Send(command);
-            return CreatedAtRoute("GetAccount", null, new EmptyCustomResponse());
+            return CreatedAtRoute("DeleteCustomer", null, new EmptyCustomResponse());
         }
 
         [HttpPost("devices", Name = "DeviceAuthentication")]

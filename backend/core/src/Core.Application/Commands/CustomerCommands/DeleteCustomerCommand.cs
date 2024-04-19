@@ -32,9 +32,8 @@ namespace Core.Application.Commands.CustomerCommands
 
         public async Task Handle(DeleteCustomerCommand request, CancellationToken cancellationToken)
         {
-            // get the customer
             var customer = await _customerRepository.GetAsync(request.CustomerCode, cancellationToken);
-            customer.CustomerCode = "5B2B5A2F-272A-4C79-9B4C-6BB51B5F25DF";
+
             await _customerRepository.DeleteAsync(customer, request.IP);
         }
     }

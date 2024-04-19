@@ -5,6 +5,7 @@
 using Core.Domain.Entities.CustomerAggregate;
 using Core.Domain.Exceptions;
 using Core.Domain.Repositories;
+using Core.Infrastructure.AzureB2CGraphService;
 using Core.Infrastructure.Nexus.SigningService;
 using Nexus.Sdk.Shared.Requests;
 using Nexus.Sdk.Token;
@@ -19,15 +20,18 @@ namespace Core.Infrastructure.Nexus.Repositories
         private readonly ITokenServer _tokenServer;
         private readonly TokenOptions _tokenSettings;
         private readonly ISigningService _signingService;
+        private readonly IB2CGraphService _b2cGraphService;
 
         public NexusCustomerRepository(
             ITokenServer tokenServer,
             TokenOptions tokenSettings,
-            ISigningService signingService)
+            ISigningService signingService,
+            IB2CGraphService b2CGraphService)
         {
             _tokenServer = tokenServer;
             _tokenSettings = tokenSettings;
             _signingService = signingService;
+            _b2cGraphService = b2CGraphService;
         }
 
         public async Task CreateAsync(Customer customer, string? ip = null, CancellationToken cancellationToken = default)
@@ -150,7 +154,6 @@ namespace Core.Infrastructure.Nexus.Repositories
 
         public async Task DeleteAsync(Customer customer, string? ip = null, CancellationToken cancellationToken = default)
         {
-            customer.CustomerCode = "5B2B5A2F-272A-4C79-9B4C-6BB51B5F25DF";
             var customerCodeExists = await _tokenServer.Customers.Exists(customer.CustomerCode);
 
             if (!customerCodeExists)
@@ -158,7 +161,7 @@ namespace Core.Infrastructure.Nexus.Repositories
                 throw new CustomErrorsException(NexusErrorCodes.CustomerNotFoundError.ToString(), customer.CustomerCode, Constants.NexusErrorMessages.CustomerNotFound);
             }
 
-            // Check if the status is ACTIVE
+            // Check if the customer status is ACTIVE
             if (customer.Status != CustomerStatus.ACTIVE.ToString())
             {
                 throw new CustomErrorsException(NexusErrorCodes.InvalidStatus.ToString(), customer.Status.ToString(), "Invalid customer status");
@@ -166,7 +169,11 @@ namespace Core.Infrastructure.Nexus.Repositories
 
             // Get Customer accounts
             var accounts = await _tokenServer.Accounts.Get(
-                new Dictionary<string, string> { { "CustomerCode", customer.CustomerCode } });
+                new Dictionary<string, string>
+                {
+                    { "CustomerCode", customer.CustomerCode },
+                    { "Status", "ACTIVE" }
+                });
 
             // Check if the customer has any accounts and balance
             if (accounts.Records.Any())
@@ -192,25 +199,26 @@ namespace Core.Infrastructure.Nexus.Repositories
 
                     if (accountBalances.Any())
                     {
-                        // Get the token codes to be removed
-                        var tokensToBeRemoved = accountBalances.Select(b => b.TokenCode).ToArray();
+                        // Get the token codes to be disabled
+                        var tokensToBeDisabled = accountBalances.Select(b => b.TokenCode).ToArray();
 
-                        // First call update account to remove the trustlines
-                        await RemoveTrustlines(customer, account, tokensToBeRemoved);
+                        await RemoveTrustlines(customer, account, tokensToBeDisabled);
                     }
                 }
             }
 
-            // then call delete customer
             var deleteRequest = new DeleteCustomerRequest
             {
                 CustomerCode = customer.CustomerCode
             };
 
             await _tokenServer.Customers.Delete(deleteRequest, ip);
+
+            // delete user from azure b2c
+            await _b2cGraphService.DeleteUserAsync(customer.CustomerCode);
         }
 
-        private async Task RemoveTrustlines(Customer customer, Account account, string[]? tokensToBeRemoved = null)
+        private async Task RemoveTrustlines(Customer customer, Account account, string[]? tokensToBeDisabled = null)
         {
             var updateAccount = new UpdateTokenAccountRequest
             {
@@ -218,8 +226,7 @@ namespace Core.Infrastructure.Nexus.Repositories
                 {
                     AllowedTokens = new AllowedTokens
                     {
-                        DisableTokens = tokensToBeRemoved
-                        //RemoveTokens = tokensToBeRemoved
+                        DisableTokens = tokensToBeDisabled
                     }
                 }
             };
