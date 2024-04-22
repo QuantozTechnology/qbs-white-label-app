@@ -13,15 +13,32 @@ import {
   theme,
 } from "native-base";
 import ScreenWrapper from "../components/ScreenWrapper";
+import { paymentsApi } from "../utils/axios";
+import { useAuth } from "../auth/AuthContext";
+import { useNotification } from "../context/NotificationContext";
 
 export function RemoveAccount() {
+  const auth = useAuth();
   const [email, setEmail] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
+  const { showErrorNotification, showSuccessNotification } = useNotification();
 
   const removeAccount = async () => {
     setIsLoading(true);
-    // Temporary solution to simulate the removal of the account until the API is implemented
-    await new Promise((resolve) => setTimeout(resolve, 3000));
+    try {
+      const response = await paymentsApi.delete("/api/customers");
+      if (response.status === 201) {
+        showSuccessNotification("Account removed successfully");
+      } else {
+        showErrorNotification(
+          "Account removal failed. please contact support."
+        );
+      }
+      auth?.logout();
+    } catch (error) {
+      showErrorNotification("Account removal failed. please contact support.");
+      auth?.logout();
+    }
     setIsLoading(false);
   };
 
