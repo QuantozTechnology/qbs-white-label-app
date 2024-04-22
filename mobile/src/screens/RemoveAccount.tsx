@@ -25,20 +25,21 @@ export function RemoveAccount() {
 
   const removeAccount = async () => {
     setIsLoading(true);
+
     try {
       const response = await paymentsApi.delete("/api/customers");
       if (response.status === 201) {
         showSuccessNotification("Account removed successfully");
       } else {
         showErrorNotification(
-          "Account removal failed. please contact support."
+          "Account removal failed. Please contact support."
         );
       }
-      auth?.logout();
     } catch (error) {
-      showErrorNotification("Account removal failed. please contact support.");
-      auth?.logout();
+      showErrorNotification("Account removal failed. Please contact support.");
     }
+
+    auth?.logout();
     setIsLoading(false);
   };
 
