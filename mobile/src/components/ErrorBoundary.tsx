@@ -5,7 +5,6 @@
 import { Heading, Image, Text, VStack } from "native-base";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import React, { Component, ErrorInfo, ReactNode } from "react";
-import * as Sentry from "sentry-expo";
 
 interface Props {
   children?: ReactNode;
@@ -28,7 +27,6 @@ class ErrorBoundary extends Component<Props, State> {
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     console.error("Uncaught error:", error, errorInfo);
-    Sentry.Native.captureException(error);
   }
 
   public render() {

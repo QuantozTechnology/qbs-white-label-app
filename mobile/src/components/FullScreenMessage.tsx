@@ -17,6 +17,8 @@ type IFullScreenMessage = {
     callback: () => void;
   };
   illustration?: ImageIdentifier;
+  backgroundColor?: string;
+  textColor?: string;
 };
 
 function FullScreenMessage({
@@ -34,6 +36,8 @@ function FullScreenMessage({
   noFullScreen = false,
   actionButton,
   illustration,
+  backgroundColor = "white",
+  textColor = "black",
 }: IFullScreenMessage) {
   return (
     <VStack
@@ -43,6 +47,7 @@ function FullScreenMessage({
       height={noFullScreen ? "auto" : "full"}
       accessibilityLabel="full screen message"
       space={3}
+      backgroundColor={backgroundColor}
     >
       {icon}
       <Box mx={2}>
@@ -62,6 +67,7 @@ function FullScreenMessage({
           size="xl"
           accessibilityLabel="full screen message title"
           textAlign="center"
+          color={textColor}
         >
           {title}
         </Heading>
@@ -69,6 +75,7 @@ function FullScreenMessage({
           textAlign="center"
           fontSize="lg"
           accessibilityLabel="full screen message description"
+          color={textColor}
         >
           {message}
         </Text>

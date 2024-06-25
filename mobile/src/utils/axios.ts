@@ -5,17 +5,18 @@
 import axios, { AxiosResponse, InternalAxiosRequestConfig } from "axios";
 import Constants from "expo-constants";
 import { authStorageService } from "../auth/authStorageService";
-import { AuthService } from "../auth/authService";
 import * as SecureStore from "expo-secure-store";
 import * as ed from "@noble/ed25519";
 import { sha512 } from "@noble/hashes/sha512";
 import { fromByteArray, toByteArray } from "react-native-quick-base64";
 import { Buffer } from "buffer";
+import { isNil } from "lodash";
+import { AuthService } from "../auth/authService";
+import { SECURE_STORE_KEYS } from "../auth/types";
 
 ed.etc.sha512Sync = (...m) => sha512(ed.etc.concatBytes(...m));
 
 export const backendApiUrl = Constants.expoConfig?.extra?.API_URL;
-
 export const mockApiUrl = Constants.expoConfig?.extra?.POSTMAN_MOCK_API_URL;
 export const mockPaymentsApi = axios.create({
   baseURL: mockApiUrl,
@@ -46,35 +47,50 @@ mockPaymentsApi.interceptors.response.use(
 );
 
 async function requestInterceptor(config: InternalAxiosRequestConfig) {
+  const oid = await SecureStore.getItemAsync(SECURE_STORE_KEYS.OID);
   const storage = authStorageService();
-  const accessToken = await storage.getAccessToken();
-  const authorizationHeader =
-    paymentsApi.defaults.headers.common["Authorization"];
+  let accessToken = await storage.getAccessToken();
 
-  const pubKeyFromStore = await SecureStore.getItemAsync("publicKey");
-  const privKeyFromStore = await SecureStore.getItemAsync("privateKey");
-
-  if (accessToken !== null || authorizationHeader == null) {
-    if (config.headers) {
-      config.headers["Authorization"] = `Bearer ${accessToken}`;
-
-      if (pubKeyFromStore !== null && privKeyFromStore != null) {
-        const sigData = getSignatureHeaders(new Date(), config.data, privKeyFromStore);
-        config.headers["x-public-key"] = pubKeyFromStore;
-        config.headers["x-timestamp"] = sigData.timestamp;
-        config.headers["x-signature"] = sigData.signature;
-        config.headers["x-algorithm"] = "ED25519";
-      }
-    }
+  if (isNil(accessToken)) {
+    accessToken = await getNewAccessToken();
   }
 
+  const pubKeyFromStore = await SecureStore.getItemAsync(
+    oid + SECURE_STORE_KEYS.PUBLIC_KEY
+  );
+  const privKeyFromStore = await SecureStore.getItemAsync(
+    oid + SECURE_STORE_KEYS.PRIVATE_KEY
+  );
+  if (
+    !isNil(pubKeyFromStore) &&
+    !isNil(privKeyFromStore) &&
+    !isNil(accessToken)
+  ) {
+    if (config.headers) {
+      config.headers["Authorization"] = `Bearer ${accessToken}`;
+    }
+
+    const sigData = getSignatureHeaders(
+      new Date(),
+      config?.data,
+      privKeyFromStore
+    );
+    config.headers["x-public-key"] = pubKeyFromStore;
+    config.headers["x-timestamp"] = sigData.timestamp;
+    config.headers["x-signature"] = sigData.signature;
+    config.headers["x-algorithm"] = "ED25519";
+  }
   return config;
 }
 
 // the date is supplied as a parameter to allow for testing
 // there were various issues with trying to mock it directly
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function getSignatureHeaders(date: Date, data: any, privKeyFromStore: string) {
+export function getSignatureHeaders(
+  date: Date,
+  data: unknown,
+  privKeyFromStore: string
+) {
   const timestampInSeconds = Math.floor(date.getTime() / 1000).toString(); // Convert current time to Unix timestamp in seconds
   const dataToSign = data
     ? timestampInSeconds + JSON.stringify(data)
@@ -95,6 +111,18 @@ export function getSignatureHeaders(date: Date, data: any, privKeyFromStore: str
   };
 }
 
+const getNewAccessToken = async () => {
+  const result = await AuthService().renew();
+  if (result.type === "error") {
+    await AuthService().logout();
+    return null;
+  } else if (result.type === "success" && "token" in result) {
+    return result.token;
+  } else {
+    return null;
+  }
+};
+
 async function responseInterceptor(response: AxiosResponse) {
   return response;
 }
@@ -102,14 +130,40 @@ async function responseInterceptor(response: AxiosResponse) {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function responseInterceptorError(error: any) {
   const originalRequest = error.config;
-
-  if (error.response.status === 401) {
-    const result = await AuthService().refresh();
-    if (result.type === "error") {
-      await AuthService().logout();
+  //console.warn("responseInterceptorError", error.response?.data?.Errors[0])
+  if (
+    error.response &&
+    error.response.status === 401 &&
+    error.response?.data?.Errors[0]?.Code === "Unauthorized"
+  ) {
+    // Check if the request has already been retried
+    if (!originalRequest._retry) {
+      originalRequest._retry = true;
+      originalRequest._retryCount = 0;
     }
-    return paymentsApi(originalRequest);
-  } else {
-    return Promise.reject(error);
+
+    // Check if the retry count is less than 2
+    if (originalRequest._retryCount < 2) {
+      originalRequest._retryCount++;
+
+      try {
+        const newToken = await getNewAccessToken();
+        originalRequest.headers["Authorization"] = `Bearer ${newToken}`;
+        return paymentsApi(originalRequest);
+      } catch (e) {
+        return Promise.reject({ ...error, originalError: error });
+      }
+    }
   }
+
+  if (
+    error.response &&
+    error.response.status === 400 &&
+    error.response?.data?.Errors[0]?.Code === "StellarHorizonFailure"
+  ) {
+    await AuthService().logout();
+    return Promise.reject({ ...error, originalError: error });
+  }
+
+  return Promise.reject({ ...error, originalError: error });
 }

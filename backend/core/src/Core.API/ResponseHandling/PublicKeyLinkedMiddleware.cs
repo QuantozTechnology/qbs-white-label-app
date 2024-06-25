@@ -17,21 +17,18 @@ namespace Core.API.ResponseHandling;
 /// </summary>
 public class PublicKeyLinkedMiddleware
 {
-    private readonly ICustomerDeviceRepository _customerDeviceRepository;
     private readonly RequestDelegate _next;
     private readonly ILogger<PublicKeyLinkedMiddleware> _logger;
 
     public PublicKeyLinkedMiddleware(
-        ICustomerDeviceRepository customerDeviceRepository,
         RequestDelegate next,
         ILogger<PublicKeyLinkedMiddleware> logger)
     {
-        _customerDeviceRepository = customerDeviceRepository;
         _next = next;
         _logger = logger;
     }
 
-    public async Task Invoke(HttpContext context)
+    public async Task Invoke(HttpContext context, ICustomerDeviceRepository customerDeviceRepository)
     {
         // skip the middleware for specific endpoints
         if (!SkipEndpoint(context))
@@ -40,7 +37,7 @@ public class PublicKeyLinkedMiddleware
             var pubKey = context.Request.Headers["x-public-key"];
 
             // get all public keys linked to the user
-            var customerDevices = await _customerDeviceRepository.GetAsync(userId, context.RequestAborted);
+            var customerDevices = await customerDeviceRepository.GetAsync(userId, context.RequestAborted);
 
             // if the user does not have any public keys or the public key is not linked to the user, return forbidden
             if (customerDevices is null
@@ -82,7 +79,7 @@ public class PublicKeyLinkedMiddleware
         var endpoint = context.GetEndpoint();
         var endpointName = endpoint?.Metadata.GetMetadata<EndpointNameMetadata>()?.EndpointName;
 
-        var excludeList = new[] { "DeviceAuthentication" };
+        var excludeList = new[] { "DeviceAuthentication", "SendOTPCodeEmail" };
 
         return context.Request.Path.StartsWithSegments("/health")
                || excludeList.Contains(endpointName);

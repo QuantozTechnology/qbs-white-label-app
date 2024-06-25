@@ -35,7 +35,7 @@ namespace Core.Infrastructure.Compliance.SendGridMailService
             }
 
             var from = new EmailAddress(_mailOptions.Sender);
-            var to = new EmailAddress(mail.Recipient?.Email) ?? throw new CustomErrorsException("MailService", "toAddress", "An error occured while sending mail.");
+            var to = new EmailAddress(mail.Recipient?.Email?.ToLower().Trim()) ?? throw new CustomErrorsException("MailService", "toAddress", "An error occured while sending mail.");
 
             var msg = new SendGridMessage();
 
@@ -69,6 +69,34 @@ namespace Core.Infrastructure.Compliance.SendGridMailService
                 //TODO: set payout amount when transaction details in nexus api would also return the net fiat amount
                 //templateData.PayoutAmount = transaction.NetFiatAmount.ToString()
             }
+
+            msg.SetTemplateData(templateData);
+
+            var response = await _sendGridClient.SendEmailAsync(msg);
+
+            if (response.StatusCode != HttpStatusCode.Accepted)
+            {
+                throw new CustomErrorsException("MailService", "mail", "An error occured while sending mail.");
+            }
+        }
+
+        public async Task SendOTPCodeMailAsync(Customer customer, string otpCode)
+        {
+            var from = new EmailAddress(_mailOptions.Sender);
+            var to = new EmailAddress(customer.Email?.ToLower().Trim());
+            var msg = new SendGridMessage();
+
+            msg.SetFrom(new EmailAddress(from.Email, from.Name));
+            msg.AddTo(new EmailAddress(to.Email, to.Name));
+
+            msg.SetTemplateId(_mailOptions.Templates.OTPCodeTemplateID);
+
+            // Fill in the dynamic template fields
+            var templateData = new OTPCodeMailTemplate()
+            {
+                CustomerFullName = customer?.GetName(),
+                OTPCode = otpCode
+            };
 
             msg.SetTemplateData(templateData);
 

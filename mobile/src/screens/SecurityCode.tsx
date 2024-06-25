@@ -10,14 +10,14 @@ import ScreenWrapper from "../components/ScreenWrapper";
 const totp: any = require("totp-generator");
 import * as SecureStore from "expo-secure-store";
 import FullScreenMessage from "../components/FullScreenMessage";
-import * as Sentry from "sentry-expo";
 import FullScreenLoadingSpinner from "../components/FullScreenLoadingSpinner";
+import { SECURE_STORE_KEYS } from "../auth/types";
 
 export function SecurityCode() {
   const [otp, setOtp] = useState<string>("");
   const [otpSeed, setOtpSeed] = useState<string | null>(null);
   const [otpGenerationError, setOtpGenerationError] = useState(false);
-  const period = 30;
+  const period = 120;
   const progressAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
@@ -99,25 +99,18 @@ Please try later or contact support.`}
   async function retrieveOTPKeyFromSecureStore() {
     try {
       const isSecureStoreAvailable = await SecureStore.isAvailableAsync();
-      const otpSeedFromSecureStore = await SecureStore.getItemAsync("otpSeed");
+      const oid = await SecureStore.getItemAsync(SECURE_STORE_KEYS.OID);
+      const otpSeedFromSecureStore = await SecureStore.getItemAsync(
+        oid + SECURE_STORE_KEYS.OTPSEED
+      );
 
       if (isSecureStoreAvailable && otpSeedFromSecureStore !== null) {
         setOtpSeed(otpSeedFromSecureStore);
       } else {
         setOtpGenerationError(true);
-
-        Sentry.Native.captureMessage(
-          "SecureStore is not available, or otpSeed is null",
-          {
-            level: "warning",
-            tags: { key: "SecureStoreNotAvailableOrOtpSeedNull" },
-            extra: { isSecureStoreAvailable, otpSeedFromSecureStore },
-          }
-        );
       }
     } catch (error) {
       setOtpGenerationError(true);
-      Sentry.Native.captureException(error);
     }
   }
   function updateOtpAndProgressBar() {

@@ -28,12 +28,13 @@ import ScreenWrapper from "../components/ScreenWrapper";
 import { Masks, useMaskedInputProps } from "react-native-mask-input";
 import { validationCheck } from "../utils/validation/errors";
 import * as Linking from "expo-linking";
-import { useCustomerState } from "../context/CustomerContext";
 import CustomCountrySelect from "../components/CustomSelect";
 import { defaultConfig } from "../config/config";
+import { useAppState } from "../context/AppStateContext";
 
 function ConsumerRegistration() {
   const auth = useAuth();
+  const { setIsRegistered } = useAppState();
 
   const [firstName, setFirstName] = useState<string>();
   const [lastName, setLastName] = useState<string>();
@@ -44,7 +45,6 @@ function ConsumerRegistration() {
   const [open, setOpen] = useState(false);
 
   const toast = useToast();
-  const customerContext = useCustomerState();
   const apiErrorToastId = "api-error-toast";
 
   // refs to jump between text fields
@@ -54,12 +54,13 @@ function ConsumerRegistration() {
   const { mutate: createNewCustomer, isLoading: isCreatingCustomer } =
     useMutation({
       mutationFn: createCustomer,
-      onSuccess() {
-        customerContext?.refresh();
+      async onSuccess(registrationSuccess) {
+        if (registrationSuccess) {
+          setIsRegistered(true);
+        }
       },
       onError(error) {
         const axiosError = error as AxiosError<APIError>;
-
         if (!toast.isActive(apiErrorToastId)) {
           toast.show({
             render: () => (
@@ -114,6 +115,13 @@ function ConsumerRegistration() {
     }
   };
 
+  function isValidNameInput(text: string): boolean {
+    if (text === "") return true;
+
+    const pattern = /^[^0-9!@#$%^*()_+=[\]{};':"\\|,<>/?]*$/;
+    return pattern.test(text);
+  }
+
   // passing props for masked input to NativeBase input
   const maskedInputProps = useMaskedInputProps({
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -136,7 +144,12 @@ function ConsumerRegistration() {
                 <Input
                   value={firstName}
                   accessibilityLabel="first name"
-                  onChangeText={setFirstName}
+                  aria-label="First name"
+                  onChangeText={(text) => {
+                    if (isValidNameInput(text)) {
+                      setFirstName(text);
+                    }
+                  }}
                   returnKeyType="next"
                   // @ts-ignore it works, but it complains about the current property possibly undefined
                   onSubmitEditing={() => lastNameInput.current.focus()}
@@ -153,7 +166,12 @@ function ConsumerRegistration() {
                 <Input
                   value={lastName}
                   accessibilityLabel="last name"
-                  onChangeText={setLastName}
+                  aria-label="Last name"
+                  onChangeText={(text) => {
+                    if (isValidNameInput(text)) {
+                      setLastName(text);
+                    }
+                  }}
                   ref={lastNameInput}
                   returnKeyType="next"
                   // @ts-ignore it works, but it complains about the current property possibly undefined
@@ -171,6 +189,7 @@ function ConsumerRegistration() {
                 ref={dateInput}
                 keyboardType="numeric"
                 accessibilityLabel="date of birth"
+                aria-label="Date of birth"
                 {...maskedInputProps}
               />
               <FormControl.ErrorMessage accessibilityLabel="date of birth error">
@@ -186,6 +205,7 @@ function ConsumerRegistration() {
                 setOpen={setOpen}
                 hasValidationError={"countryOfResidence" in errors}
                 accessibilityLabel="country of residence"
+                aria-label="Country of residence"
               />
               <FormControl.ErrorMessage accessibilityLabel="country error">
                 {errors["countryOfResidence"]}
@@ -200,6 +220,7 @@ function ConsumerRegistration() {
               isChecked={termsAccepted}
               onChange={handleCheckboxTermsPress}
               accessibilityLabel="terms checkbox"
+              aria-label="Terms checkbox"
             />
             <Text>
               I accept the{" "}
@@ -218,6 +239,12 @@ function ConsumerRegistration() {
           isLoadingText="Creating account..."
           onPress={onCreateAccountPress}
           accessibilityLabel="create account"
+          aria-label="Create account"
+          isDisabled={!termsAccepted}
+          _disabled={{
+            bg: "gray.400",
+            _text: { color: "gray.700" },
+          }}
         >
           Create account
         </Button>

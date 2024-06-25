@@ -14,7 +14,7 @@ import {
 import { getCustomer } from "../api/customer/customer";
 import { getAccount } from "../api/account/account";
 import { AxiosError } from "axios";
-import { APIError } from "../api/generic/error.interface";
+import { isNil } from "lodash";
 
 // We initialize the context with default values and override them later
 const CustomerContext = React.createContext<CustomerStateContext | null>(null);
@@ -51,6 +51,7 @@ export function CustomerProvider({
           isLoading: false,
           state: action.state,
           error: null,
+          isBusiness: null,
         };
       }
       default: {
@@ -90,37 +91,53 @@ export function CustomerProvider({
   }
 
   async function updateCustomerState() {
-    try {
-      const customerResponse = await getCustomer();
-
-      if (customerResponse.data.value.status === "UNDERREVIEW") {
+    const customerResponse = await getCustomer();
+    if (!isNil(customerResponse)) {
+      if (
+        customerResponse?.data.value.status ===
+        CustomerStateType.CUSTOMER_UNDER_REVIEW
+      ) {
         dispatch({
           type: CustomerStateActionType.UPDATE_STATE,
           state: CustomerStateType.CUSTOMER_UNDER_REVIEW,
+          isBusiness: customerResponse?.data.value.isBusiness,
+        });
+        return false;
+      }
+      if (
+        customerResponse?.data.value.status ===
+        CustomerStateType.CUSTOMER_BLOCKED
+      ) {
+        dispatch({
+          type: CustomerStateActionType.UPDATE_STATE,
+          state: CustomerStateType.CUSTOMER_UNDER_REVIEW,
+          isBusiness: customerResponse?.data.value.isBusiness,
+        });
+        return false;
+      }
+      if (
+        customerResponse?.data.value.status === CustomerStateType.CUSTOMER_NEW
+      ) {
+        dispatch({
+          type: CustomerStateActionType.UPDATE_STATE,
+          state: CustomerStateType.CUSTOMER_UNDER_REVIEW,
+          isBusiness: customerResponse?.data.value.isBusiness,
+        });
+        return false;
+      }
+      if (
+        customerResponse?.data.value.status ===
+        CustomerStateType.CUSTOMER_DELETED
+      ) {
+        dispatch({
+          type: CustomerStateActionType.UPDATE_STATE,
+          state: CustomerStateType.CUSTOMER_UNDER_REVIEW,
+          isBusiness: customerResponse?.data.value.isBusiness,
         });
         return false;
       }
       return true;
-    } catch (error) {
-      const axiosError = error as AxiosError<APIError>;
-
-      if (axiosError.response?.status === 404 ||
-        axiosError.response?.status === 401) {
-        dispatch({
-          type: CustomerStateActionType.UPDATE_STATE,
-          state: CustomerStateType.CUSTOMER_REQUIRED,
-        });
-        return false;
-      }
-
-      dispatch({
-        type: CustomerStateActionType.ERROR,
-        errorMessage:
-          error instanceof AxiosError && axiosError.response?.data.Errors[0]
-            ? axiosError.response.data.Errors[0].Message
-            : (error as Error).message,
-      });
-
+    } else {
       return false;
     }
   }
@@ -153,6 +170,13 @@ export function CustomerProvider({
     isUnderReview: state.state
       ? state.state === CustomerStateType.CUSTOMER_UNDER_REVIEW
       : null,
+    isBlocked: state.state
+      ? state.state === CustomerStateType.CUSTOMER_BLOCKED
+      : null,
+    isNew: state.state ? state.state === CustomerStateType.CUSTOMER_NEW : null,
+    isDeleted: state.state
+      ? state.state === CustomerStateType.CUSTOMER_DELETED
+      : null,
     requiresCustomer: state.state
       ? state.state === CustomerStateType.CUSTOMER_REQUIRED
       : null,
@@ -162,6 +186,7 @@ export function CustomerProvider({
     error: state.error,
     isLoading: state.isLoading,
     refresh: refresh,
+    isBusiness: state.isBusiness,
   };
 
   return (

@@ -5,7 +5,7 @@
 import { IAsyncAuthStorageService, Maybe } from "./types";
 import * as SecureStore from "expo-secure-store";
 
-enum QPA_TOKEN_KEY {
+export enum QPA_TOKEN_KEY {
   QPA_ACCESS_TOKEN = "QPA_ACCESS_TOKEN",
   QPA_REFRESH_TOKEN = "QPA_REFRESH_TOKEN",
   QPA_ID_TOKEN = "QPA_ID_TOKEN",

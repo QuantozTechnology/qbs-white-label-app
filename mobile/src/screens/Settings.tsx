@@ -17,7 +17,32 @@ type Props = NativeStackScreenProps<SettingsStackParamList, "SettingsHome">;
 
 function SettingsHome({ navigation }: Props) {
   const { data } = useCustomer();
+  async function handleSupportPress() {
+    const emailRecipient = defaultConfig.supportEmail;
+    const emailSubject = "Support request - Quantoz Blockchain Solutions";
+    const emailBody = `Please provide a detailed description of the issue you are experiencing. Be sure to leave the information below as it is.
+    
+    ---------------------
+    My account email: ${data?.data.value.email ?? "not available"}`;
 
+    await composeEmail({
+      recipients: [emailRecipient],
+      subject: emailSubject,
+      body: emailBody,
+    });
+  }
+
+  function handleTermsPress() {
+    Linking.openURL(defaultConfig.termsUrl);
+  }
+
+  function handleSecurityCodePress() {
+    navigation.navigate("SecurityCode");
+  }
+
+  const handleRemoveAccountPress = () => {
+    navigation.navigate("RemoveAccount");
+  };
   return (
     <ScreenWrapper flex={1} px={-4}>
       <DataDisplayField
@@ -51,6 +76,18 @@ function SettingsHome({ navigation }: Props) {
         }
       />
       <DataDisplayField
+        accessibilityLabel="remove account"
+        label="Remove account"
+        value="Remove my account"
+        action={
+          <IconButton
+            icon={<Icon as={Ionicons} name="ios-trash-outline" size="lg" />}
+            mr={2}
+            onPress={handleRemoveAccountPress}
+          />
+        }
+      />
+      <DataDisplayField
         accessibilityLabel="terms"
         label="How it works"
         value="Terms and conditions"
@@ -66,28 +103,5 @@ function SettingsHome({ navigation }: Props) {
       />
     </ScreenWrapper>
   );
-
-  async function handleSupportPress() {
-    const emailRecipient = defaultConfig.supportEmail;
-    const emailSubject = "Support request - Quantoz Blockchain Solutions";
-    const emailBody = `Please provide a detailed description of the issue you are experiencing. Be sure to leave the information below as it is.
-    
-    ---------------------
-    My account email: ${data?.data.value.email ?? "not available"}`;
-
-    await composeEmail({
-      recipients: [emailRecipient],
-      subject: emailSubject,
-      body: emailBody,
-    });
-  }
-
-  function handleTermsPress() {
-    Linking.openURL(defaultConfig.termsUrl);
-  }
-
-  function handleSecurityCodePress() {
-    navigation.navigate("SecurityCode");
-  }
 }
 export default SettingsHome;

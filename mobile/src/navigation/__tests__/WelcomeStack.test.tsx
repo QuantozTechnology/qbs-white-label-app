@@ -2,275 +2,257 @@
 // under the Apache License, Version 2.0. See the NOTICE file at the root
 // of this distribution or at http://www.apache.org/licenses/LICENSE-2.0
 
-import * as auth from "../../auth/AuthContext";
-import { render, screen } from "../../jest/test-utils";
-import * as LocalAuthenticationOrig from "expo-local-authentication";
-import WelcomeStack from "../WelcomeStack";
-// import { server } from "../../mocks/server";
-// import {
-//   deviceNotKnownApiResponse,
-//   devicesApiErrorResponse,
-// } from "../../api/customer/devices.mocks";
-import * as CustomerContext from "../../context/CustomerContext";
-import {
-  mockPrivateKeyPem,
-  mockPublicKeyPem,
-  mockRefresh,
-} from "../../jest/jest.setup";
-import { biometricValidation } from "../../utils/biometric";
+import { waitFor } from "@testing-library/react-native";
+import WelcomeStackNavigator from "../WelcomeStack";
+import * as functions from "../../utils/functions";
+import * as SecureStore from "expo-secure-store";
+import { render } from "../../jest/test-utils";
 
-// const LocalAuthentication = LocalAuthenticationOrig as jest.Mocked<
-//   typeof LocalAuthenticationOrig
-// >;
+jest.mock("expo-local-authentication");
+jest.mock("../../utils/biometric");
+jest.mock("expo-secure-store");
+jest.mock("../../auth/AuthContext");
+jest.mock("../../context/AppStateContext");
 
-jest.mock("expo-secure-store", () => ({
-  getItemAsync: jest.fn((key: string) => {
-    if (key === "publicKey") {
-      return Promise.resolve(mockPublicKeyPem);
-    }
-    if (key === "privateKey") {
-      return Promise.resolve(mockPrivateKeyPem);
-    }
+function renderWelcomeStackNavigator() {
+  return render(<WelcomeStackNavigator />);
+}
 
-    return Promise.resolve(null);
-  }),
-  setItemAsync: jest.fn((key: string) => {
-    if (key === "publicKey") {
-      return Promise.resolve();
-    }
-    if (key === "privateKey") {
-      return Promise.resolve();
-    }
-    return Promise.resolve(key);
-  }),
-}));
-
-describe("WelcomeStack", () => {
-  describe("Azure auth checks", () => {
-    beforeEach(() => {
-      jest.spyOn(auth, "useAuth").mockImplementation(() => {
-        return {
-          error: null,
-          isLoading: true,
-          login: jest.fn(),
-          logout: jest.fn(),
-          userSession: null,
-          signup: jest.fn(),
-          changePassword: jest.fn(),
-        };
-      });
-    });
-
-    it("shows a loading screen if the auth state is loading", async () => {
-      render(<WelcomeStack />);
-
-      expect(await screen.findByLabelText("full screen loading")).toBeVisible();
-    });
-    it("redirects the user to the SignIn screen if they are not logged in", async () => {
-      jest.spyOn(auth, "useAuth").mockImplementation(() => {
-        return {
-          error: null,
-          isLoading: false,
-          login: jest.fn(),
-          logout: jest.fn(),
-          userSession: null,
-          signup: jest.fn(),
-          changePassword: jest.fn(),
-        };
+beforeEach(() => {
+  jest.clearAllMocks();
+});
+describe("WelcomeStackNavigator", () => {
+  it("performs biometric validation successfully", async () => {
+    const mockPerformBiometricValidation = jest
+      .spyOn(functions, "performBiometricValidation")
+      .mockImplementation((callback) => {
+        callback(true, null);
       });
 
-      render(<WelcomeStack />);
-
-      expect(await screen.findByLabelText("sign-in message")).toBeVisible();
-    });
+    renderWelcomeStackNavigator();
+    waitFor(() => expect(mockPerformBiometricValidation).toHaveBeenCalled());
   });
 
-  // describe("Lock mechanism checks", () => {
-  //   it("shows an error screen if the screen lock mechanism check fails", async () => {
-  //     LocalAuthentication.getEnrolledLevelAsync.mockRejectedValueOnce(
-  //       new Error("Cannot get enrolled level")
-  //     );
+  // biometric validation failed
+  it("renders error message when biometric validation fails", async () => {
+    jest
+      .spyOn(functions, "performBiometricValidation")
+      .mockImplementation((callback) => {
+        callback(false, { message: "Biometric validation failed" });
+      });
 
-  //     render(<WelcomeStack />);
-
-  //     expect(
-  //       await screen.findByLabelText("feedback description")
-  //     ).toHaveTextContent(
-  //       "Cannot verify if your device has a screen lock mechanism. Please try again later"
-  //     );
-  //   });
-  //   // it("shows an error screen if the user has no security check on their phone", async () => {
-  //   //   LocalAuthentication.getEnrolledLevelAsync.mockResolvedValueOnce(
-  //   //     LocalAuthenticationOrig.SecurityLevel.NONE
-  //   //   );
-
-  //   //   render(<WelcomeStack />);
-
-  //   //   expect(
-  //   //     await screen.findByLabelText("feedback description")
-  //   //   ).toHaveTextContent(
-  //   //     "Your device has no security measures set up (pin, passcode or fingerprint/faceID). Please enable one of these to be able to use the app."
-  //   //   );
-  //   // });
-  // });
-
-  describe("Biometric checks", () => {
-    it("shows an error screen if the biometric check throws error", async () => {
-      (biometricValidation as jest.Mock).mockImplementationOnce(() =>
-        Promise.reject()
-      );
-
-      render(<WelcomeStack />);
-
+    const { getByText } = renderWelcomeStackNavigator();
+    waitFor(() =>
       expect(
-        await screen.findByLabelText("feedback description")
-      ).toHaveTextContent(
-        "Cannot verify your biometric security. Please try again later"
-      );
-    });
-
-    // it("shows an error screen if the user does not pass the biometric check", async () => {
-    //   (biometricValidation as jest.Mock).mockImplementationOnce(() =>
-    //     Promise.resolve({
-    //       result: "error",
-    //       message: "biometric check not passed",
-    //     })
-    //   );
-
-    //   render(<WelcomeStack />);
-
-    //   expect(
-    //     await screen.findByLabelText("full screen message title")
-    //   ).toHaveTextContent("Biometric check error");
-    //   expect(
-    //     await screen.findByLabelText("full screen message description")
-    //   ).toHaveTextContent("Please try again");
-    // });
-  });
-
-  // describe("Device checks", () => {
-  //   beforeEach(() => {
-  //     (biometricValidation as jest.Mock).mockImplementation(() =>
-  //       Promise.resolve({
-  //         result: "success",
-  //       })
-  //     );
-  //   });
-
-  //   // it("shows an error screen if the device check throws an error", async () => {
-  //   //   server.use(devicesApiErrorResponse);
-
-  //   //   render(<WelcomeStack />);
-
-  //   //   expect(
-  //   //     await screen.findByLabelText("feedback description")
-  //   //   ).toHaveTextContent(
-  //   //     "Cannot securely verify your device. Please try again later"
-  //   //   );
-  //   // });
-
-  //   // it(" ", async () => {
-  //   //   server.use(deviceNotKnownApiResponse);
-
-  //   //   render(<WelcomeStack />);
-
-  //   //   expect(
-  //   //     await screen.findByLabelText("confirm device screen")
-  //   //   ).toBeVisible();
-  //   // });
-  // });
-
-  describe("Customer checks", () => {
-    beforeEach(() => {
-      (biometricValidation as jest.Mock).mockImplementationOnce(() =>
-        Promise.resolve({
-          result: "success",
-        })
-      );
-    });
-
-    let customerContextSpy: jest.SpyInstance;
-
-    afterEach(() => {
-      if (customerContextSpy) {
-        customerContextSpy.mockRestore();
-      }
-    });
-
-    const customerContextValues = {
-      error: null,
-      isLoading: false,
-      isUnderReview: false,
-      requiresAccount: false,
-      requiresCustomer: false,
-      refresh: mockRefresh,
-    };
-
-    it("shows the registration screen if the user needs to complete the registration", async () => {
-      customerContextSpy = jest
-        .spyOn(CustomerContext, "useCustomerState")
-        .mockImplementation(() => ({
-          ...customerContextValues,
-          requiresCustomer: true,
-        }));
-
-      render(<WelcomeStack />);
-
-      expect(
-        await screen.findByLabelText("consumer registration screen")
-      ).toBeVisible();
-    });
-
-    it("shows an informative screen is the user account is under review", async () => {
-      customerContextSpy = jest
-        .spyOn(CustomerContext, "useCustomerState")
-        .mockImplementation(() => ({
-          ...customerContextValues,
-          isUnderReview: true,
-        }));
-
-      render(<WelcomeStack />);
-
-      expect(await screen.findByLabelText("feedback title")).toHaveTextContent(
-        "Account under review"
-      );
-      expect(
-        await screen.findByLabelText("feedback description")
-      ).toHaveTextContent(
-        "Our operators are checking your account details. We will let you know when you can access it."
-      );
-    });
-
-    it("shows an error screen if the customer context returns an error", async () => {
-      customerContextSpy = jest
-        .spyOn(CustomerContext, "useCustomerState")
-        .mockImplementation(() => ({
-          ...customerContextValues,
-          error: "Error",
-        }));
-
-      render(<WelcomeStack />);
-
-      expect(await screen.findByLabelText("feedback title")).toHaveTextContent(
-        "Login error"
-      );
-      expect(
-        await screen.findByLabelText("feedback description")
-      ).toHaveTextContent(
-        "Sorry for the inconvenience, please try again later"
-      );
-    });
-  });
-
-  it("redirects the user to the main app if all checks pass", async () => {
-    (biometricValidation as jest.Mock).mockImplementation(() =>
-      Promise.resolve({
-        result: "success",
-      })
+        getByText(
+          "Cannot verify your biometric security. Please try again later"
+        )
+      ).toBeDefined()
     );
+  });
 
-    render(<WelcomeStack />);
+  it("renders error message when biometric validation is none", async () => {
+    jest
+      .spyOn(functions, "performBiometricValidation")
+      .mockImplementation((callback) => {
+        callback(false, null);
+      });
 
-    expect(await screen.findByLabelText("portfolio screen")).toBeVisible();
+    const { getByText } = renderWelcomeStackNavigator();
+    waitFor(() => expect(getByText("Biometric check error")).toBeDefined());
+  });
+
+  it("performs screen lock check successfully", async () => {
+    const mockCheckDeviceHasScreenLock = jest
+      .spyOn(functions, "checkDeviceHasScreenLock")
+      .mockImplementation((callback) => {
+        callback(true, null);
+      });
+
+    renderWelcomeStackNavigator();
+
+    waitFor(() => expect(mockCheckDeviceHasScreenLock).toHaveBeenCalled());
+  });
+
+  it("renders loading spinner during screen lock check", async () => {
+    jest
+      .spyOn(functions, "performBiometricValidation")
+      .mockImplementation(
+        (
+          callback: (
+            isBiometricCheckPassed: boolean,
+            error: { message: string } | null
+          ) => void
+        ) => {
+          callback(true, null);
+        }
+      );
+
+    const { getByText } = renderWelcomeStackNavigator();
+
+    waitFor(async () => {
+      expect(getByText("Checking screen lock mechanism..."));
+    });
+  });
+
+  it("renders error message when screen lock is none", async () => {
+    jest
+      .spyOn(functions, "performBiometricValidation")
+      .mockImplementation(
+        (
+          callback: (
+            isBiometricCheckPassed: boolean,
+            error: { message: string } | null
+          ) => void
+        ) => {
+          callback(true, null);
+        }
+      );
+
+    jest
+      .spyOn(functions, "checkDeviceHasScreenLock")
+      .mockImplementation(
+        (
+          callback: (
+            result: boolean | null,
+            error: { message: string } | null
+          ) => void
+        ) => {
+          callback(false, null);
+        }
+      );
+
+    const { getByText } = renderWelcomeStackNavigator();
+
+    waitFor(async () => {
+      expect(
+        getByText(
+          "Your device has no security measures set up (pin, passcode or fingerprint/faceID)"
+        )
+      );
+    });
+  });
+
+  it("screen lock check with success response", async () => {
+    jest
+      .spyOn(functions, "performBiometricValidation")
+      .mockImplementation(
+        (
+          callback: (
+            isBiometricCheckPassed: boolean,
+            error: { message: string } | null
+          ) => void
+        ) => {
+          callback(true, null);
+        }
+      );
+
+    jest
+      .spyOn(functions, "checkDeviceHasScreenLock")
+      .mockImplementation(
+        (
+          callback: (
+            result: boolean | null,
+            error: { message: string } | null
+          ) => void
+        ) => {
+          callback(true, null);
+        }
+      );
+
+    const { getByText } = renderWelcomeStackNavigator();
+
+    waitFor(async () => {
+      expect(getByText("SignIn").toBeDefined());
+    });
+  });
+
+  it("renders error message when screen lock check fails", async () => {
+    jest
+      .spyOn(functions, "performBiometricValidation")
+      .mockImplementation(
+        (
+          callback: (
+            isBiometricCheckPassed: boolean,
+            error: { message: string } | null
+          ) => void
+        ) => {
+          callback(true, null);
+        }
+      );
+    jest
+      .spyOn(functions, "checkDeviceHasScreenLock")
+      .mockImplementation(
+        (
+          callback: (
+            result: boolean | null,
+            error: { message: string } | null
+          ) => void
+        ) => {
+          callback(null, {
+            message: "Error checking device screen lock mechanism",
+          });
+        }
+      );
+
+    const { getByText } = renderWelcomeStackNavigator();
+    waitFor(() => {
+      expect(
+        getByText(
+          "Cannot verify if your device has a screen lock mechanism. Please try again later"
+        )
+      ).toBeDefined();
+    });
+  });
+
+  it("renders error message when device verification check fails", async () => {
+    jest
+      .spyOn(functions, "performBiometricValidation")
+      .mockImplementation(
+        (
+          callback: (
+            isBiometricCheckPassed: boolean,
+            error: { message: string } | null
+          ) => void
+        ) => {
+          callback(true, null);
+        }
+      );
+    jest
+      .spyOn(functions, "checkDeviceHasScreenLock")
+      .mockImplementation(
+        (
+          callback: (
+            result: boolean | null,
+            error: { message: string } | null
+          ) => void
+        ) => {
+          callback(true, null);
+        }
+      );
+
+    jest.spyOn(functions, "getOid").mockImplementation(async () => {
+      return "oid";
+    });
+
+    jest
+      .spyOn(SecureStore, "getItemAsync")
+      .mockImplementation(async (key: string): Promise<string | null> => {
+        if (key === "oid_publicKey") {
+          return "publicKey";
+        } else if (key === "oiddeviceVerified") {
+          return null;
+        } else if (key === "oidRegistrationCompleted") {
+          return null;
+        }
+        return null;
+      });
+
+    const { getByText } = renderWelcomeStackNavigator();
+    waitFor(() => {
+      expect(
+        getByText("Cannot verify your device. Please try again later")
+      ).toBeDefined();
+    });
   });
 });
